@@ -1,0 +1,6 @@
+## IDF Component Manager Manifest File
+dependencies:
+  ## Required IDF version
+  idf: ">=5.3"
+
+  waveshare/esp32_p4_platform: "*"
