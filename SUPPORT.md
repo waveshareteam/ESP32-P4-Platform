@@ -7,7 +7,7 @@ Use the channel that best matches your request:
 - For feature requests or documentation improvements, open a GitHub issue or
   pull request.
 - For order-specific or hardware warranty support, contact Waveshare support:
-  <https://www.waveshare.com/contact-us>
+  <https://service.waveshare.com>
 - For general ESP-IDF questions, see Espressif documentation and community
   forums.
 
