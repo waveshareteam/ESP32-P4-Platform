@@ -21,10 +21,6 @@ camera、video streaming 和 ESP-Brookesia UI 工作流。
 | ESP32-P4-WIFI6-POE-ETH | <a href="https://www.waveshare.net/shop/ESP32-P4-WIFI6-POE-ETH.htm"><img src="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/e/s/esp32-p4-wifi6-poe-eth-1_2.jpg" width="150"></a> |
 | ESP32-P4-Core-DEV-KIT | <a href="https://www.waveshare.net/shop/ESP32-P4-Core-DEV-KIT.htm"><img src="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/e/s/esp32-p4-core-dev-kit-1.jpg" width="150"></a> |
 
-ESP32-P4-Core-DEV-KIT 是一块最小核心开发板。该板板上没有无线模块、
-RJ45 网口、SD 卡槽或 audio codec，因此需要这些板载外设的示例在下方矩阵
-中标记为不支持，除非用户额外接入并配置等效外部硬件。
-
 ## 仓库结构
 
 ```text

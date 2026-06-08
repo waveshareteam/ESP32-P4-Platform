@@ -23,11 +23,6 @@ workflows.
 | ESP32-P4-WIFI6-POE-ETH | <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/e/s/esp32-p4-wifi6-poe-eth-1_2.jpg" width="150"></a> |
 | ESP32-P4-Core-DEV-KIT | <a href="https://www.waveshare.com/product/arduino/boards-kits/esp32-p4/esp32-p4-core-dev-kit.htm"><img src="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/e/s/esp32-p4-core-dev-kit-1.jpg" width="150"></a> |
 
-ESP32-P4-Core-DEV-KIT is a minimal core development board. It has no onboard
-wireless module, RJ45 Ethernet port, SD card slot, or audio codec, so
-examples that require those onboard peripherals are marked unsupported below
-unless equivalent external hardware is added and configured.
-
 ## Repository Layout
 
 ```text
