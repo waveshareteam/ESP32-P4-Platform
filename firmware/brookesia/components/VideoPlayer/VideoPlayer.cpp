@@ -14,6 +14,9 @@
 #include "esp_lcd_mipi_dsi.h"
 #include "esp_log.h"
 #include "esp_lv_adapter.h"
+#include "driver/sdmmc_host.h"
+#include "esp_vfs_fat.h"
+#include "sd_pwr_ctrl_by_on_chip_ldo.h"
 #ifdef ESP_UTILS_LOG_TAG
 #undef ESP_UTILS_LOG_TAG
 #endif
@@ -36,6 +39,80 @@ LV_IMG_DECLARE(img_app_vedioplayer);
 #else
 #error "Unsupported BSP LCD color format"
 #endif
+
+namespace {
+// ESP32-P4 has a SINGLE SDMMC controller shared by its two slots. esp_hosted
+// uses slot 1 for the ESP32-C5 Wi-Fi co-processor and creates that one
+// controller via sdmmc_host_init(). The SD card lives on slot 0 of the SAME
+// controller, so it must NOT create a second controller -- doing so returns
+// ESP_ERR_NOT_FOUND ("no available sd host controller", 0x105). This wrapper
+// reuses the controller esp_hosted already created; the SD mount then only
+// adds slot 0 via sdmmc_host_init_slot().
+esp_err_t sdmmc_host_init_reuse(void)
+{
+    // This probe call is EXPECTED to fail when esp_hosted has already created
+    // the single SDMMC controller. IDF's SD driver logs that failed create at
+    // ERROR level internally (before returning the code we check), which looks
+    // alarming but is normal here. Silence those two tags just for the probe,
+    // then restore their previous levels.
+    esp_log_level_t prev_sd_host = esp_log_level_get("SD_HOST");
+    esp_log_level_t prev_periph  = esp_log_level_get("sdmmc_periph");
+    esp_log_level_set("SD_HOST", ESP_LOG_NONE);
+    esp_log_level_set("sdmmc_periph", ESP_LOG_NONE);
+
+    esp_err_t ret = sdmmc_host_init();
+
+    esp_log_level_set("SD_HOST", prev_sd_host);
+    esp_log_level_set("sdmmc_periph", prev_periph);
+
+    if (ret == ESP_ERR_NOT_FOUND) {
+        ESP_LOGI(ESP_UTILS_LOG_TAG,
+                 "SDMMC controller already created (esp_hosted/Wi-Fi); reusing it for SD slot 0");
+        return ESP_OK;
+    }
+    return ret;
+}
+
+// Mount the SD card on slot 0 while sharing the single SDMMC controller with
+// esp_hosted. Mirrors bsp_sdcard_mount() but overrides host.init so it does not
+// try to create a second controller. SDMMC_HOST_DEFAULT() sets deinit_p =
+// sdmmc_host_deinit_slot, so unmount/cleanup only tears down slot 0 and leaves
+// the controller (and thus Wi-Fi) intact.
+esp_err_t mount_sdcard_shared(sdmmc_card_t **out_card)
+{
+    const esp_vfs_fat_sdmmc_mount_config_t mount_config = {
+        .format_if_mount_failed = false,
+        .max_files = 5,
+        .allocation_unit_size = 64 * 1024,
+    };
+
+    sdmmc_host_t host = SDMMC_HOST_DEFAULT();
+    host.slot = SDMMC_HOST_SLOT_0;
+    host.max_freq_khz = SDMMC_FREQ_HIGHSPEED;
+    host.init = &sdmmc_host_init_reuse;
+
+    sd_pwr_ctrl_ldo_config_t ldo_config = {
+        .ldo_chan_id = 4,
+    };
+    sd_pwr_ctrl_handle_t pwr_ctrl_handle = nullptr;
+    esp_err_t ret = sd_pwr_ctrl_new_on_chip_ldo(&ldo_config, &pwr_ctrl_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(ESP_UTILS_LOG_TAG, "Failed to create on-chip LDO power control: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    host.pwr_ctrl_handle = pwr_ctrl_handle;
+
+    const sdmmc_slot_config_t slot_config = {
+        /* SD card is on Slot 0 (IO MUX), so the pin fields are left unset. */
+        .cd = SDMMC_SLOT_NO_CD,
+        .wp = SDMMC_SLOT_NO_WP,
+        .width = 4,
+        .flags = 0,
+    };
+
+    return esp_vfs_fat_sdmmc_mount(BSP_SD_MOUNT_POINT, &host, &slot_config, &mount_config, out_card);
+}
+} // namespace
 
 namespace esp_brookesia::apps
 {
@@ -188,7 +265,10 @@ namespace esp_brookesia::apps
     bool VideoPlayer::init()
     {
         ESP_UTILS_LOGD("Init");
-        if (bsp_sdcard_mount() == ESP_OK)
+        // Share the single ESP32-P4 SDMMC controller with esp_hosted (Wi-Fi on
+        // slot 1) instead of bsp_sdcard_mount(), which would fail trying to
+        // create a second controller. See mount_sdcard_shared() above.
+        if (mount_sdcard_shared(&bsp_sdcard) == ESP_OK)
         {
             sd_mounted = true;
             ESP_UTILS_LOGD("SD card mounted successfully");

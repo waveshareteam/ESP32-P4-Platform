@@ -3,14 +3,14 @@ dependencies:
     version: '>=5.3.0'
 
   waveshare/esp32_p4_platform:
-    version: "*"
+    version: "2.0.0"
 
   espressif/esp_codec_dev:
     version: "*"
     public: true
 
   chmorgan/esp-audio-player:
-    version: "1.0.*"
+    version: "1.1.*"
     public: true
 
   chmorgan/esp-file-iterator:

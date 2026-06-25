@@ -254,8 +254,8 @@ namespace esp_brookesia::apps
                     .i2c_handle = bsp_i2c_get_handle(),
                     .freq = CONFIG_BSP_I2C_CLK_SPEED_HZ,
                 },
-                .reset_pin = -1,
-                .pwdn_pin = -1,
+                .reset_pin = GPIO_NUM_NC,
+                .pwdn_pin = GPIO_NUM_NC,
             },
         };
 
