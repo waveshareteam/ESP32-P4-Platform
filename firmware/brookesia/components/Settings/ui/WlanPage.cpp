@@ -567,23 +567,25 @@ namespace esp_brookesia::apps
         lv_obj_remove_state(self->status_btn, LV_STATE_DISABLED);
         lv_obj_add_flag(self->spinner, LV_OBJ_FLAG_HIDDEN); 
 
-        wifi_ap_record_t ap_info;
-        if (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK) {
-            ESP_LOGI("WIFI", "Connected to SSID: %s, RSSI: %d", ap_info.ssid, ap_info.rssi);
+        static wifi_config_t wifi_config;
+        esp_err_t ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
+        if (ret != ESP_OK) {
+            ESP_UTILS_LOGW("esp_wifi_get_config failed: %s", esp_err_to_name(ret));
+            return;
+        }
+
+        ESP_UTILS_LOGI("SSID stored in NVS: %s", wifi_config.sta.ssid);
+        const bool has_stored_ssid = wifi_config.sta.ssid[0] != '\0';
+        if (self->Wifi_state == CONNECTED && has_stored_ssid) {
+            ESP_LOGI("WIFI", "Connected to SSID: %s", wifi_config.sta.ssid);
+            self->wifi_ssid = wifi_config.sta.ssid;
             lv_obj_remove_flag(self->connected_text, LV_OBJ_FLAG_HIDDEN);
-            lv_list_set_button_text(self->list1, self->conn_btn, (const char*)ap_info.ssid);
+            lv_list_set_button_text(self->list1, self->conn_btn, (const char*)wifi_config.sta.ssid);
             lv_obj_remove_flag(self->conn_btn, LV_OBJ_FLAG_HIDDEN);
             lv_label_set_text(self->wifi_icon, LV_SYMBOL_OK);
         } else {
             ESP_LOGI("WIFI", "Not connected");
-            static wifi_config_t wifi_config;
-            esp_err_t ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-            if (ret != ESP_OK) {
-                ESP_UTILS_LOGW("esp_wifi_get_config failed: %s", esp_err_to_name(ret));
-                return;
-            }
-            ESP_UTILS_LOGI("SSID stored in NVS: %s", wifi_config.sta.ssid);
-            if (wifi_config.sta.ssid[0] != '\0' && self->_nvs_param_map[NVS_KEY_WIFI_ENABLE]) {
+            if (has_stored_ssid && self->_nvs_param_map[NVS_KEY_WIFI_ENABLE]) {
                 printf("Wi-Fi ssid exists\n");
                 self->wifi_ssid = wifi_config.sta.ssid;
 

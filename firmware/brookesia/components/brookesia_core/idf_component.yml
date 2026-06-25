@@ -16,9 +16,10 @@ dependencies:
     public: true
 
   espressif/esp-boost:
-    version: "0.3.*"
+    version: "*"
     public: true
 
+  espressif/cjson: "^1.7.19"
   # GUI - LVGL
   lvgl/lvgl:
     version: "9.4.*"
