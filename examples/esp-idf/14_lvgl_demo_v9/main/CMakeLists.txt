@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.5)
 set(LV_DEMO_DIR ../managed_components/lvgl__lvgl/demos)
 file(GLOB_RECURSE LV_DEMOS_SOURCES ${LV_DEMO_DIR}/*.c)
 
