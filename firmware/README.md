@@ -1,5 +1,7 @@
 # Firmware
 
+[中文版本](README_CN.md)
+
 This directory contains ESP32-P4 Platform factory firmware sources and prebuilt factory firmware packages.
 
 ## Layout
@@ -26,3 +28,13 @@ idf.py build
 ```
 
 The firmware project resolves LVGL and `waveshare/esp32_p4_platform` from the ESP-IDF Component Registry.
+
+The example CI workflows do not build this maintained firmware project or
+regenerate prebuilt factory packages. Treat existing BIN and ZIP files as
+release artifacts; update them only through an explicit firmware release and
+checksum review.
+
+The separate firmware/Brookesia product jobs build rev1_3 and rev3_x and publish
+temporary 32 MiB CI artifacts. Those profile-specific artifacts are not factory
+firmware and do not change the immutable rev3.x-or-later 16 MiB packages checked
+into factory_firmware/.

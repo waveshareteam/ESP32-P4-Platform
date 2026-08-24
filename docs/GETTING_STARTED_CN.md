@@ -16,7 +16,8 @@
 
 ## 第一次运行 ESP-IDF
 
-1. 安装 ESP-IDF。除非某个示例 README 另有说明，这些示例主要面向 ESP-IDF release/v5.4 或更新版本。
+1. 安装 [CI 说明](CI_CN.md)中列出的 ESP-IDF 版本。CI 当前检查 `v5.5.5`
+   和 `v6.0.2`；个别示例 README 可能声明额外约束。
 2. 打开 ESP-IDF terminal。
 3. 克隆本仓库。
 4. 构建 board check 示例：
@@ -27,7 +28,10 @@ idf.py set-target esp32p4
 idf.py build
 ```
 
-5. 如果你的开发板使用早于 rev v3.0 的早期 ESP32-P4 工程样片，请使用 [ESP32-P4 版本配置](ESP32P4_REVISION_CONFIG_CN.md) 中记录的 pre-v3 overlay 构建。量产 v3.x 开发板可以使用常规构建流程；当你需要锁定量产 profile 时，也可以显式选择 v3.0/v3.1 overlay。
+5. 默认 profile 是用于 v3.x silicon 的 `rev3_x`/`MIN_300`。包括 v1.3 在内的
+   pre-v3 silicon 请显式选择 legacy `rev1_3`，它使用 `MIN_100` 和
+   `SELECTS_REV_LESS_V3`。参阅 [ESP32-P4 版本配置](ESP32P4_REVISION_CONFIG_CN.md)；
+   两个 profile 的生成 `sdkconfig` 和二进制不可复用。
 6. 烧录并打开 monitor：
 
 ```bash
@@ -41,20 +45,27 @@ idf.py -p PORT flash monitor
 ## 第一次运行 Arduino
 
 1. 安装 Arduino IDE 或 arduino-cli。
-2. 安装兼容的 Arduino-ESP32 core。参见 [examples/arduino/README.md](../examples/arduino/README.md)。
-3. 在 Arduino board settings 中启用 PSRAM。
+2. 安装兼容的 Arduino-ESP32 core。参见
+   [examples/arduino/README_CN.md](../examples/arduino/README_CN.md)。
+3. 在 Arduino board settings 中启用 PSRAM，并选择 `ChipVariant=postv3`
+   （v3.00+、400 MHz）。只有 legacy pre-v3 开发板才选择
+   `ChipVariant=prev3`（360 MHz）；两种构建输出不可互换。
 4. 打开 `examples/arduino/examples/HelloWorld/HelloWorld.ino`。
 5. 选择匹配的开发板和 upload port。
 6. 上传 sketch。
 
-本仓库中的大多数 Arduino 示例都偏向显示应用。它们需要兼容的 DSI display 配置和 PSRAM。
+本仓库中的大多数 Arduino 示例都偏向显示应用。它们需要兼容的 DSI display 配置和
+PSRAM。同一份 [Arduino 指南](../examples/arduino/README_CN.md)还说明分段 CI
+artifact、分段烧录，以及关闭串口监视器时必须执行的冷启动测试。打开 monitor
+绝不是 sketch 启动的前提。
 
 ## 初学者检查清单
 
 - 使用支持数据传输的 USB 线，而不是仅充电线。
 - 确认开发板连接后串口会出现。
 - 在运行需要 Wi-Fi、Ethernet、SD card、display、touch、audio 或 camera 硬件的示例之前，先从 `00_board_check` 开始。
-- 确认你的 ESP32-P4 芯片是量产 v3.x 芯片，还是更早的工程样片。构建 profile 必须匹配该版本系列。
+- v3.x 芯片使用默认 `rev3_x`/`MIN_300`；包括 v1.3 在内的 v1.x 芯片显式使用
+  legacy `rev1_3`/`MIN_100`。
 - 阅读所选示例目录中的 README。
 - 如果示例有 `menuconfig` 设置，请在构建前完成配置。
 

@@ -1,5 +1,7 @@
 # LVGL v9 Arduino
 
+[简体中文](README_CN.md)
+
 LVGL v9 demo for Arduino on supported ESP32-P4 display and touch hardware.
 
 ## Difficulty
@@ -29,4 +31,3 @@ The display initializes and runs an LVGL demo with touch input.
 - Run Arduino `HelloWorld` first to verify the display path.
 - Run `Drawing_board` first to verify touch input.
 - Check LVGL memory and draw buffer settings if the board resets.
-

@@ -1,5 +1,7 @@
 # Drawing Board
 
+[简体中文](README_CN.md)
+
 Arduino drawing example using a DSI display and GT911 touch input.
 
 ## Difficulty
@@ -28,4 +30,3 @@ The display shows a drawing surface. Touch input draws on the screen.
 
 - If the display works but touch does not, check the GT911 I2C path.
 - Confirm the selected display configuration matches the physical screen.
-

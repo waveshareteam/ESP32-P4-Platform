@@ -17,7 +17,7 @@
 - SDMMC 卡示例。
 - I2S codec 示例。
 - Display、LVGL、camera、video server 和 ESP-Brookesia 示例。
-- 带有内置库、偏向显示应用的 Arduino 示例。
+- Arduino display、touch、camera、SD 卡和 ES8311 播放示例；在需要时随附依赖库。
 
 ## 高优先级新增项
 

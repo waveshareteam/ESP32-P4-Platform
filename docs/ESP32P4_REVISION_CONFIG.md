@@ -2,73 +2,53 @@
 
 [中文版本](./ESP32P4_REVISION_CONFIG_CN.md)
 
-ESP32-P4 chips earlier than rev v3.0 and chips at rev v3.0 or later are not
-binary compatible in ESP-IDF. A firmware image must be built for one side of
-that boundary.
+This repository maintains two mutually incompatible ESP32-P4 product profiles.
+They are selected by the revision configuration supplied to a product build; do
+not reuse generated output from one profile for the other.
 
-The examples in this repository do not hard-code the early engineering-sample
-revision in their base `sdkconfig.defaults` files. Use one of the repository
-overlays below when you need to pin the build to a specific chip revision
-family.
+## Product Profiles
 
-## Which Profile Should I Use?
+| Profile | Chip-revision settings | Intended silicon | Notes |
+| --- | --- | --- | --- |
+| `rev3_x` (default) | `CONFIG_ESP32P4_SELECTS_REV_LESS_V3=n`; `CONFIG_ESP32P4_REV_MIN_300=y` | ESP32-P4 rev v3.0 and later | Default for production v3.x silicon. |
+| `rev1_3` (legacy, pre-v3) | `CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y`; `CONFIG_ESP32P4_REV_MIN_100=y` | ESP32-P4 revisions below v3.0, including v1.3 | ESP-IDF has no official `v1.3`-specific Kconfig; `MIN_100` covers the v1.x family. |
 
-| Chip on your board | Recommended overlay | Notes |
-| --- | --- | --- |
-| ESP32-P4 rev v3.1 or later | `../../../config/esp32p4_rev_v3_1.defaults` | Matches the ESP-IDF v5.5 default minimum revision. |
-| ESP32-P4 rev v3.0 or later | `../../../config/esp32p4_rev_v3_0.defaults` | Use this when production hardware includes v3.0 chips. |
-| ESP32-P4 rev v0.x or v1.x engineering sample | `../../../config/esp32p4_rev_pre_v3.defaults` | Supports pre-v3 chips only. It will not support v3.x chips. |
+The default profile is `rev3_x`. `rev1_3` remains an explicit legacy/pre-v3
+compatibility profile; it is not a claim that ESP-IDF Kconfig can identify an
+individual v1.3 stepping.
 
-If you do not pass a revision overlay, ESP-IDF chooses its own default. In
-ESP-IDF v5.5, that default is rev v3.1 or later for normal builds.
+## Separate Build Outputs
 
-## Build Commands
+The two profiles have separate build directories, generated `sdkconfig` files,
+binaries, and CI artifacts. They are not interchangeable. When changing a
+profile in a local checkout, use a separate build directory or remove the old
+generated configuration before rebuilding; an existing `sdkconfig` can override
+the defaults you intended to select.
 
-Run commands from the selected ESP-IDF example directory.
+Choose the profile that matches the silicon: `rev3_x` for v3.0 and later, or
+explicit `rev1_3` for pre-v3 silicon including v1.3. The product flasher probes
+the silicon revision and rejects a selected-profile mismatch. That silicon
+check does not establish PCB, display, power, peripheral, or other electrical
+compatibility for a particular board.
 
-Build for production chips at rev v3.1 or later:
+For Arduino-ESP32 `3.3.11`, the matching default is
+`ChipVariant=postv3` (v3.00+, 400 MHz). The explicit legacy choice is
+`ChipVariant=prev3` (pre-v3, 360 MHz). Do not mix either Arduino build output
+with the other ChipVariant, or with an ESP-IDF `sdkconfig`/binary from the
+other revision profile.
 
-```bash
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev_v3_1.defaults" set-target esp32p4 build
-```
+## Example Coverage Boundary
 
-Build for production chips at rev v3.0 or later:
+The ESP-IDF example matrix is one default-profile matrix: 20 direct projects
+on ESP-IDF `v5.5.5` and `v6.0.2`, using `rev3_x`. The Arduino matrix is nine
+sketches on Arduino-ESP32 `3.3.11`, using `ChipVariant=postv3`; its segmented
+diagnostic packages are candidates for that v3.00+ profile only. Examples are
+not doubled by revision. The maintained firmware/Brookesia product jobs keep
+both `rev1_3` and `rev3_x` profiles available.
 
-```bash
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev_v3_0.defaults" set-target esp32p4 build
-```
+## Evidence Boundary
 
-Build for earlier engineering samples:
-
-```bash
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev_pre_v3.defaults" set-target esp32p4 build
-```
-
-ESP-IDF automatically appends target-specific defaults such as
-`sdkconfig.defaults.esp32p4` when the base `sdkconfig.defaults` file is listed.
-This keeps examples such as `17_simple_video_server` working with the same
-command shape.
-
-When switching an existing example directory from one revision family to
-another, remove the local generated `sdkconfig` first or use a separate
-`SDKCONFIG` file for each profile. Existing `sdkconfig` choices take precedence
-over defaults and can otherwise hide the overlay you intended to test.
-
-## Why This Matters
-
-`CONFIG_ESP32P4_SELECTS_REV_LESS_V3=y` selects ESP32-P4 revisions earlier than
-v3.0 and excludes v3.x chips. In ESP-IDF, that choice affects low-level SoC
-support such as eFuse layout, PMU and power settings, sleep support, PSRAM,
-flash timing, and other hardware-dependent code paths.
-
-For mass production, choose the minimum revision that matches the oldest chip
-you will ship. For development boards or samples, confirm the actual chip
-revision first with serial logs from `examples/esp-idf/00_board_check` or
-ESP-IDF boot output.
-
-## Maintaining Example Defaults
-
-Do not add `CONFIG_ESP32P4_SELECTS_REV_LESS_V3` or `CONFIG_ESP32P4_REV_MIN_*`
-directly to example `sdkconfig.defaults` files unless an example truly requires
-one chip family. Prefer the shared overlays in `config/` so beginners and
-advanced users can switch hardware revisions without editing every example.
+Successful compilation or a passing CI job proves only the selected software
+configuration compiled. It does not prove flashing, boot, display, touch,
+camera, audio, network, or other hardware-in-the-loop behavior. Test the exact
+board and connected hardware before treating a profile as hardware accepted.

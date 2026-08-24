@@ -32,14 +32,11 @@ mutually exclusive build targets. If an image builds but does not boot on a
 different P4 revision family, rebuild with the correct overlay from
 [ESP32-P4 Revision Config](ESP32P4_REVISION_CONFIG.md).
 
-For early engineering samples:
-
-```bash
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev_pre_v3.defaults" set-target esp32p4 build
-```
-
-For production chips, prefer the documented v3.0 or v3.1 overlay, or let
-ESP-IDF use its default production revision profile.
+The default profile is rev3_x (`MIN_300`) for v3.0 and later; explicit legacy
+rev1_3 (`MIN_100` and `SELECTS_REV_LESS_V3`) is for pre-v3 silicon including
+v1.3. Their generated sdkconfig files, build directories, and binaries are
+separate. See
+[ESP32-P4 Revision Config](ESP32P4_REVISION_CONFIG.md) before rebuilding.
 
 ### Managed component download fails
 
@@ -79,6 +76,13 @@ Check the monitor baud rate. ESP-IDF defaults are usually correct when using:
 idf.py -p PORT flash monitor
 ```
 
+For the repository's Arduino profile, `USB CDC On Boot` is disabled and
+`Serial` maps to UART0. The application must cold-start normally with every
+monitor closed; open the board's UART0 monitor at `115200` only after startup.
+If the display or other primary behavior waits for a monitor, report it as a
+startup defect and include the exact FQBN and board options. See the
+[Arduino HIL checklist](../examples/arduino/README.md#serial-startup-and-hardware-in-the-loop-check).
+
 ## Runtime Problems
 
 ### PSRAM is not initialized
@@ -116,8 +120,11 @@ settings.
 ### Touch does not respond
 
 - Confirm the touch controller model and I2C pins.
-- Use an I2C scan to check whether the touch controller appears on the bus.
-- Verify reset and interrupt pins when the touch driver requires them.
+- The Platform GT911 path is polling-only: INT and RST are not assigned.
+- Probe the shared I2C bus at `0x5D`, then `0x14`, before creating the touch
+  driver; initialize with the responding address.
+- If neither address responds, retain the safe no-touch path rather than
+  assuming a fixed address or copying LCD-5 wiring.
 
 ## Asking for Help
 

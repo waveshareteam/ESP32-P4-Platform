@@ -26,13 +26,10 @@ idf.py set-target esp32p4
 
 早于 rev v3.0 的 ESP32-P4 芯片与 rev v3.0 或之后的芯片是互斥构建目标。如果镜像可以构建但无法在另一个 P4 版本系列上启动，请使用 [ESP32-P4 版本配置](ESP32P4_REVISION_CONFIG_CN.md) 中正确的 overlay 重新构建。
 
-对于早期工程样片：
-
-```bash
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev_pre_v3.defaults" set-target esp32p4 build
-```
-
-对于量产芯片，优先使用文档中的 v3.0 或 v3.1 overlay，也可以让 ESP-IDF 使用默认量产版本 profile。
+默认 profile 是面向 v3.0 及以后的 rev3_x（`MIN_300`）；包括 v1.3 在内的 pre-v3
+silicon 使用显式 legacy rev1_3（`MIN_100` 和 `SELECTS_REV_LESS_V3`）。它们生成的
+sdkconfig、build 目录和二进制文件彼此独立。重新构建前请参阅
+[ESP32-P4 版本配置](ESP32P4_REVISION_CONFIG_CN.md)。
 
 ### 托管组件下载失败
 
@@ -67,6 +64,12 @@ idf.py build
 ```bash
 idf.py -p PORT flash monitor
 ```
+
+仓库 Arduino profile 禁用了 `USB CDC On Boot`，`Serial` 会映射到 UART0。关闭
+所有 monitor 时，应用也必须能正常冷启动；只在启动完成后再以 `115200` 打开开发板
+的 UART0 monitor。如果显示或其他主要功能会等待 monitor，请把它作为启动缺陷报告，
+并附上精确 FQBN 和 board options。参阅
+[Arduino HIL 清单](../examples/arduino/README_CN.md#串口启动与硬件在环检查)。
 
 ## 运行时问题
 
@@ -103,8 +106,10 @@ idf.py -p PORT flash monitor
 ### 触摸无响应
 
 - 确认 touch controller model 和 I2C pins。
-- 使用 I2C scan 检查 touch controller 是否出现在总线上。
-- 当 touch driver 需要 reset 和 interrupt pins 时，确认这些引脚。
+- Platform GT911 路径只使用轮询，不指定 INT 或 RST。
+- 创建 touch driver 前，在共用 I2C bus 上先探测 `0x5D`、再探测 `0x14`，并以响应
+  地址初始化。
+- 两个地址都未响应时，保留安全的无触摸路径，不要假定固定地址或复制 LCD-5 接线。
 
 ## 寻求帮助
 

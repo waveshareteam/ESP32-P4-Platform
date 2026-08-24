@@ -16,7 +16,7 @@ monolithic firmware application.
 | `.github/` | Issue and pull request templates |
 | `CONTRIBUTING.md` | Contribution workflow |
 | `SUPPORT.md` | Support channels |
-| `SECURITY.md` | Vulnerability reporting policy |
+| `SECURITY.md` | Actionable private vulnerability reporting policy |
 | `THIRD_PARTY.md` | Third-party code inventory |
 | `LICENSE.txt` | Apache-2.0 license |
 
@@ -51,7 +51,7 @@ with fewer manual dependency steps.
 When adding Arduino content:
 
 - Add the sketch under `examples/arduino/examples/<ExampleName>/`.
-- Update `examples/README.md`.
+- Update `examples/README.md` and `examples/README_CN.md`.
 - Update `examples/arduino/README.md` when the required Arduino core or
   bundled library version changes.
 - Keep board pin assumptions documented in the sketch README or comments.

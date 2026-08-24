@@ -1,5 +1,7 @@
 # Code of Conduct
 
+[简体中文](CODE_OF_CONDUCT_CN.md)
+
 ## Our Pledge
 
 We want this project to be a friendly, practical place for people building on

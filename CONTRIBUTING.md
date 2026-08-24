@@ -1,5 +1,7 @@
 # Contributing
 
+[中文版本](CONTRIBUTING_CN.md)
+
 Thanks for helping improve the ESP32-P4 Platform examples.
 
 ## Before You Start
@@ -13,9 +15,10 @@ Thanks for helping improve the ESP32-P4 Platform examples.
 
 ### ESP-IDF
 
-Use an ESP-IDF version that matches the example you are changing. Most
-examples are prepared for ESP-IDF release/v5.4 or later, while some UI
-examples also document release/v5.3 compatibility in their own README files.
+Use an ESP-IDF version that matches the example you are changing. CI builds all
+first-party ESP32-P4 examples with ESP-IDF `v5.5.5` and `v6.0.2`; an individual
+example may declare a different minimum or an additional target-specific
+configuration in its README and `idf_component.yml`.
 
 Typical workflow:
 
@@ -73,7 +76,8 @@ When opening an issue, include:
 - Example path.
 - ESP-IDF or Arduino-ESP32 version.
 - Host operating system.
-- Full build error or serial log.
+- Full build error or sanitized serial log. Remove credentials, tokens, private
+  network details, unique device identifiers, and local paths before posting.
 - Photos or wiring notes when hardware setup matters.
 
 ## Code of Conduct
