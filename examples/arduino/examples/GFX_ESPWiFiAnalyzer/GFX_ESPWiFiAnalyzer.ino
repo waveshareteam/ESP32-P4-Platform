@@ -4,6 +4,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include "WiFi.h"
+#include "../../common/serial_log.h"
 
 int16_t w, h, text_size, banner_height, graph_baseline, graph_height, channel_width, signal_width;
 
@@ -18,6 +19,11 @@ uint16_t channel_color[] = {
 };
 
 uint8_t scan_count = 0;
+bool wifi_sta_ready = false;
+
+static constexpr uint8_t WIFI_STA_INIT_ATTEMPTS = 3;
+static constexpr uint32_t WIFI_STA_RETRY_DELAY_MS = 1500;
+static constexpr uint32_t WIFI_SCAN_RETRY_DELAY_MS = 1000;
 
 // SCREEN_10_1_DSI_TOUCH_A for 10.1-DSI-Touch-A
 // SCREEN_8_DSI_TOUCH_A for 8-DSI-Touch-A
@@ -46,21 +52,33 @@ Arduino_DSI_Display *gfx = new Arduino_DSI_Display(
   display_cfg.init_cmds,
   display_cfg.init_cmds_size);
 
+bool startWiFiStation() {
+  for (uint8_t attempt = 1; attempt <= WIFI_STA_INIT_ATTEMPTS; attempt++) {
+    Serial.printf("Starting WiFi STA (%u/%u)...\n", attempt, WIFI_STA_INIT_ATTEMPTS);
+    if (WiFi.mode(WIFI_STA)) {
+      WiFi.disconnect();
+      delay(100);
+      Serial.println("WiFi STA ready");
+      return true;
+    }
+
+    Serial.println("WiFi STA initialization failed");
+    delay(WIFI_STA_RETRY_DELAY_MS);
+  }
+
+  Serial.println("WiFi STA unavailable; the analyzer will keep retrying");
+  return false;
+}
+
 void setup(void) {
 
-  Serial.begin(115200);
+  waveshare::logging::beginSerialLog();
   // Serial.setDebugOutput(true);
-  // while(!Serial);
   Serial.println("Arduino_GFX Hello World example");
 
   DEV_I2C_Port port = DEV_I2C_Init();
 
   display_init(port);
-
-  // Init Display
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
 
 #ifdef GFX_EXTRA_PRE_INIT
   GFX_EXTRA_PRE_INIT();
@@ -89,6 +107,11 @@ void setup(void) {
   gfx->print("ESP");
   gfx->setTextColor(WHITE);
   gfx->print(" WiFi Analyzer");
+
+  // Initialize the display first. This gives the ESP32-C6 coprocessor time to
+  // boot and lets us show a useful error instead of continuing after a failed
+  // ESP-Hosted/WiFi initialization.
+  wifi_sta_ready = startWiFiStation();
 }
 
 bool matchBssidPrefix(uint8_t *a, uint8_t *b) {
@@ -113,6 +136,19 @@ void loop() {
   uint16_t color;
   int16_t height, offset, text_width;
 
+  if (!wifi_sta_ready) {
+    gfx->fillRect(0, banner_height, w, h - banner_height, BLACK);
+    gfx->setTextSize(2);
+    gfx->setTextColor(RED);
+    gfx->setCursor(0, banner_height);
+    gfx->println("WiFi STA initialization failed");
+    gfx->setTextColor(WHITE);
+    gfx->println("Retrying ESP-Hosted...");
+    wifi_sta_ready = startWiFiStation();
+    delay(WIFI_STA_RETRY_DELAY_MS);
+    return;
+  }
+
   // WiFi.scanNetworks will return the number of networks found
 #if defined(ESP32)
   int n = WiFi.scanNetworks(false /* async */, true /* show_hidden */, true /* passive */, 500 /* max_ms_per_chan */);
@@ -124,13 +160,24 @@ void loop() {
   gfx->fillRect(0, banner_height, w, h - banner_height, BLACK);
   gfx->setTextSize(1);
 
-  if (n == 0) {
+  if (n < 0) {
+    Serial.printf("WiFi scan failed with error %d\n", n);
+    gfx->setTextColor(RED);
+    gfx->setCursor(0, banner_height);
+    gfx->printf("WiFi scan failed (%d)\n", n);
+    gfx->setTextColor(WHITE);
+    gfx->println("Retrying WiFi scan...");
+  } else if (n == 0) {
     gfx->setTextColor(WHITE);
     gfx->setCursor(0, banner_height);
     gfx->println("no networks found");
   } else {
     for (int i = 0; i < n; i++) {
       channel = WiFi.channel(i);
+      if ((channel < 1) || (channel > 14)) {
+        Serial.printf("Ignoring AP on unsupported channel %ld\n", (long)channel);
+        continue;
+      }
       idx = channel - 1;
       rssi = WiFi.RSSI(i);
       bssid = WiFi.BSSID(i);
@@ -187,6 +234,9 @@ void loop() {
     // plot found WiFi info
     for (int i = 0; i < n; i++) {
       channel = WiFi.channel(i);
+      if ((channel < 1) || (channel > 14)) {
+        continue;
+      }
       idx = channel - 1;
       rssi = WiFi.RSSI(i);
       color = channel_color[idx];
@@ -238,33 +288,35 @@ void loop() {
     }
   }
 
-  // print WiFi stat
-  gfx->setTextColor(WHITE);
-  gfx->setCursor(0, banner_height);
-  gfx->print(n);
-  gfx->print(" networks found, lesser noise channels: ");
-  bool listed_first_channel = false;
-  int32_t min_noise = noise_list[0];           // init with channel 1 value
-  for (channel = 2; channel <= 11; channel++)  // channels 12-14 may not available
-  {
-    idx = channel - 1;
-    log_i("min_noise: %d, noise_list[%d]: %d", min_noise, idx, noise_list[idx]);
-    if (noise_list[idx] < min_noise) {
-      min_noise = noise_list[idx];
-    }
-  }
-
-  for (channel = 1; channel <= 11; channel++)  // channels 12-14 may not available
-  {
-    idx = channel - 1;
-    // check channel with min noise
-    if (noise_list[idx] == min_noise) {
-      if (!listed_first_channel) {
-        listed_first_channel = true;
-      } else {
-        gfx->print(", ");
+  if (n >= 0) {
+    // print WiFi stat
+    gfx->setTextColor(WHITE);
+    gfx->setCursor(0, banner_height);
+    gfx->print(n);
+    gfx->print(" networks found, lesser noise channels: ");
+    bool listed_first_channel = false;
+    int32_t min_noise = noise_list[0];           // init with channel 1 value
+    for (channel = 2; channel <= 11; channel++)  // channels 12-14 may not available
+    {
+      idx = channel - 1;
+      log_i("min_noise: %d, noise_list[%d]: %d", min_noise, idx, noise_list[idx]);
+      if (noise_list[idx] < min_noise) {
+        min_noise = noise_list[idx];
       }
-      gfx->print(channel);
+    }
+
+    for (channel = 1; channel <= 11; channel++)  // channels 12-14 may not available
+    {
+      idx = channel - 1;
+      // check channel with min noise
+      if (noise_list[idx] == min_noise) {
+        if (!listed_first_channel) {
+          listed_first_channel = true;
+        } else {
+          gfx->print(", ");
+        }
+        gfx->print(channel);
+      }
     }
   }
 
@@ -285,7 +337,9 @@ void loop() {
   }
 
   // Wait a bit before scanning again
-  // delay(SCAN_INTERVAL);
+  if (n < 0) {
+    delay(WIFI_SCAN_RETRY_DELAY_MS);
+  }
 
 #if defined(SCAN_COUNT_SLEEP)
   // POWER SAVING

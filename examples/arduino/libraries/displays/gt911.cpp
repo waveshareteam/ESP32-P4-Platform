@@ -67,7 +67,7 @@ esp_err_t esp_lcd_touch_new_i2c_gt911(const esp_lcd_panel_io_handle_t io, const 
     }
 
     // Dynamically allocate memory for the touch controller handle
-    esp_lcd_touch_handle_t esp_lcd_touch_gt911 = 
+    esp_lcd_touch_handle_t esp_lcd_touch_gt911 =
         (esp_lcd_touch_handle_t)heap_caps_calloc(1, sizeof(esp_lcd_touch_t), MALLOC_CAP_DEFAULT);
     if (!esp_lcd_touch_gt911) {
         ESP_LOGE(TAG, "Memory allocation failed for GT911 controller");
@@ -344,18 +344,35 @@ static esp_err_t esp_lcd_touch_gt911_del(esp_lcd_touch_handle_t tp)
 // Function to initialize the GT911 touch controller
 esp_lcd_touch_handle_t touch_gt911_init(DEV_I2C_Port port)
 {
-    esp_lcd_panel_io_handle_t tp_io_handle = NULL;  // Declare a handle for touch panel I/O
-    // Configure the I2C communication settings for the GT911 touch controller
-    const esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG();
+    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
+    if (port.bus == NULL) {
+        ESP_LOGE(TAG, "GT911 initialization skipped: I2C bus is unavailable");
+        return NULL;
+    }
 
-    // Reset the touch screen before usage
-    delay(10);
-    // DEV_GPIO_Mode(EXAMPLE_PIN_NUM_TOUCH_INT, GPIO_MODE_INPUT_OUTPUT);  // Set GPIO pin mode for interrupt
-    delay(200);  // Wait for 200ms to ensure the touch controller is ready
+    // INT and RST are not connected on this product. The GT911 can therefore
+    // answer on either legal address; probe both before creating panel IO.
+    delay(200);
+    uint8_t address = 0;
+    if (i2c_master_probe(port.bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS, 100) == ESP_OK) {
+        address = ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS;
+    } else if (i2c_master_probe(port.bus, ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP, 100) == ESP_OK) {
+        address = ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP;
+    } else {
+        ESP_LOGE(TAG, "GT911 not found at 0x%02X or 0x%02X",
+                 ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS,
+                 ESP_LCD_TOUCH_IO_I2C_GT911_ADDRESS_BACKUP);
+        return NULL;
+    }
 
-    ESP_LOGI(TAG, "Initialize I2C panel IO");  // Log I2C panel I/O initialization
-    // Create a new I2C panel I/O handle for the touch controller
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c(port.bus, &tp_io_config, &tp_io_handle));
+    const esp_lcd_panel_io_i2c_config_t tp_io_config =
+        ESP_LCD_TOUCH_IO_I2C_GT911_CONFIG_WITH_ADDRESS(address);
+    ESP_LOGI(TAG, "Initialize I2C panel IO at 0x%02X", address);
+    esp_err_t ret = esp_lcd_new_panel_io_i2c(port.bus, &tp_io_config, &tp_io_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Create GT911 panel IO failed: %s", esp_err_to_name(ret));
+        return NULL;
+    }
 
     ESP_LOGI(TAG, "Initialize touch controller GT911");  // Log touch controller initialization
     // Configure the touch controller with necessary settings (coordinates, GPIO pins, etc.)
@@ -375,8 +392,14 @@ esp_lcd_touch_handle_t touch_gt911_init(DEV_I2C_Port port)
         },
     };
 
-    // Create a new touch controller instance using the configured I2C and settings
-    ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &tp_handle));
+    // The product reads touch data by polling; no GPIO interrupt is registered.
+    ret = esp_lcd_touch_new_i2c_gt911(tp_io_handle, &tp_cfg, &tp_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Initialize GT911 failed: %s", esp_err_to_name(ret));
+        esp_lcd_panel_io_del(tp_io_handle);
+        tp_handle = NULL;
+        return NULL;
+    }
 
     return tp_handle;  // Return the touch controller handle
 }
@@ -384,7 +407,11 @@ esp_lcd_touch_handle_t touch_gt911_init(DEV_I2C_Port port)
 // Function to read touch points from the GT911 touch controller
 touch_gt911_point_t touch_gt911_read_point(uint8_t max_touch_cnt)
 {
-    touch_gt911_point_t data;  // Declare a structure to hold touch point data
+    touch_gt911_point_t data = {};
+
+    if (tp_handle == NULL || max_touch_cnt == 0) {
+        return data;
+    }
 
     /* Read touch data from the touch controller */
     esp_lcd_touch_read_data(tp_handle);  // Read raw data from the touch controller
