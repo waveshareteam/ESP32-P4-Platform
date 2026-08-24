@@ -1,0 +1,346 @@
+name: Arduino examples
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      sketch:
+        description: "Arduino sketch directory name, path, or all"
+        required: false
+        default: "all"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  ARDUINO_CLI_VERSION: "1.5.1"
+  ARDUINO_CLI_LINUX_X64_SHA256: "28a8e119c498a25607821c36cb2dc49e8463941b261a0d99091baa7bc692dd2b"
+  ARDUINO_CORE_VERSION: "3.3.11"
+  ARDUINO_ESPTOOL_VERSION: "5.3.1"
+  ARDUINO_FQBN: "esp32:esp32:esp32p4"
+  ARDUINO_BOARD_OPTIONS: "PSRAM=enabled,USBMode=default,ChipVariant=postv3,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
+  ARDUINO_UPLOAD_SPEED: "921600"
+  REGISTRY_BSP_COMPONENT: "waveshare/esp32_p4_platform"
+  REGISTRY_BSP_VERSION: "2.0.1"
+  REGISTRY_BSP_COMPONENT_HASH: "b1be590dd7170ea417a3b950b81c7892ff266d6514070ecdd568faeb654b0149"
+  REGISTRY_BSP_REPOSITORY_COMMIT: "bfeb6e6d5737178cdde78b630c8118074da0a657"
+  ESP32_PACKAGE_INDEX: "https://espressif.github.io/arduino-esp32/package_esp32_index.json"
+
+jobs:
+  discover:
+    name: Discover sketches
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.sketches.outputs.matrix }}
+      has_sketches: ${{ steps.sketches.outputs.has_sketches }}
+      sketches: ${{ steps.sketches.outputs.sketches }}
+      docs_only: ${{ steps.sketches.outputs.docs_only }}
+      changed_path_count: ${{ steps.sketches.outputs.changed_path_count }}
+      firmware_paths: ${{ steps.sketches.outputs.firmware_paths }}
+      unknown_paths: ${{ steps.sketches.outputs.unknown_paths }}
+      removed_sketches: ${{ steps.sketches.outputs.removed_sketches }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Test CI discovery helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile .github/scripts/*.py .github/scripts/tests/*.py
+          python -m unittest discover \
+            -s .github/scripts/tests \
+            -p 'test_*.py' \
+            -v
+
+      - name: Discover changed Arduino sketches
+        id: sketches
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_SKETCH: ${{ inputs.sketch }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            python .github/scripts/discover_arduino_examples.py \
+              --sketch "$REQUESTED_SKETCH"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            changed="$RUNNER_TEMP/arduino-changed-files.txt"
+            canonical_base="refs/remotes/canonical/${PR_BASE_REF}"
+            git fetch --no-tags --force --no-recurse-submodules \
+              "https://github.com/${GITHUB_REPOSITORY}.git" \
+              "+refs/heads/${PR_BASE_REF}:${canonical_base}"
+            if ! git cat-file -e "${PR_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PR_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PR_BASE_SHA}^{commit}"
+            git cat-file -e "${PR_HEAD_SHA}^{commit}"
+            git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" >/dev/null
+            git diff --name-status --find-renames \
+              "$PR_BASE_SHA...$PR_HEAD_SHA" > "$changed"
+            python .github/scripts/discover_arduino_examples.py \
+              --changed-files-from "$changed"
+          elif [[ "$PUSH_BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            # A new branch has no trustworthy before SHA, so select explicitly.
+            python .github/scripts/discover_arduino_examples.py --sketch all
+          else
+            changed="$RUNNER_TEMP/arduino-changed-files.txt"
+            if ! git cat-file -e "${PUSH_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PUSH_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PUSH_BASE_SHA}^{commit}"
+            git cat-file -e "${GITHUB_SHA}^{commit}"
+            git diff --name-status --find-renames \
+              "$PUSH_BASE_SHA..$GITHUB_SHA" > "$changed"
+            python .github/scripts/discover_arduino_examples.py \
+              --changed-files-from "$changed"
+          fi
+
+      - name: Summary
+        shell: bash
+        env:
+          SELECTED_SKETCHES: ${{ steps.sketches.outputs.sketches }}
+          HAS_SKETCHES: ${{ steps.sketches.outputs.has_sketches }}
+          DOCS_ONLY: ${{ steps.sketches.outputs.docs_only }}
+          CHANGED_PATH_COUNT: ${{ steps.sketches.outputs.changed_path_count }}
+          FIRMWARE_PATHS: ${{ steps.sketches.outputs.firmware_paths }}
+          UNKNOWN_PATHS: ${{ steps.sketches.outputs.unknown_paths }}
+          REMOVED_SKETCHES: ${{ steps.sketches.outputs.removed_sketches }}
+        run: |
+          set -euo pipefail
+          {
+            echo "### Arduino change routing"
+            echo
+            echo "Changed paths: ${CHANGED_PATH_COUNT}"
+            echo "Documentation only: \`${DOCS_ONLY}\`"
+            echo "Firmware paths (outside this matrix): \`${FIRMWARE_PATHS}\`"
+            echo "Unknown paths (conservative full matrix): \`${UNKNOWN_PATHS}\`"
+            echo "Removed sketch roots: \`${REMOVED_SKETCHES}\`"
+            echo
+            if [[ "$HAS_SKETCHES" == "true" ]]; then
+              echo "#### Sketches selected"
+              echo
+              printf '%s\n' "$SELECTED_SKETCHES" \
+                | tr ',' '\n' \
+                | sed '/^$/d' \
+                | sed 's/^/- /'
+              echo
+              echo "Arduino-ESP32: \`${ARDUINO_CORE_VERSION}\`"
+              echo "FQBN: \`${ARDUINO_FQBN}\`"
+              echo "Board options: \`${ARDUINO_BOARD_OPTIONS}\`"
+            else
+              echo "No Arduino builds are required for this change."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  compile:
+    name: Compile ${{ matrix.sketch }} (Arduino-ESP32 3.3.11)
+    needs: discover
+    if: needs.discover.outputs.has_sketches == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sketch: ${{ fromJson(needs.discover.outputs.matrix).sketch }}
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install pinned Arduino CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          archive="$RUNNER_TEMP/arduino-cli.tar.gz"
+          install_dir="$RUNNER_TEMP/arduino-cli-${ARDUINO_CLI_VERSION}"
+          url="https://github.com/arduino/arduino-cli/releases/download/v${ARDUINO_CLI_VERSION}/arduino-cli_${ARDUINO_CLI_VERSION}_Linux_64bit.tar.gz"
+
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-all-errors \
+            --output "$archive" "$url"
+          printf '%s  %s\n' "$ARDUINO_CLI_LINUX_X64_SHA256" "$archive" \
+            | sha256sum --check --strict
+          mkdir -p "$install_dir"
+          tar -xzf "$archive" -C "$install_dir" arduino-cli
+          test -x "$install_dir/arduino-cli"
+          printf '%s\n' "$install_dir" >> "$GITHUB_PATH"
+          "$install_dir/arduino-cli" version
+
+      - name: Cache ESP32 Arduino core
+        uses: actions/cache@v6
+        with:
+          path: ~/.arduino15
+          key: arduino-esp32-${{ runner.os }}-${{ env.ARDUINO_CORE_VERSION }}
+
+      - name: Install ESP32 Arduino core
+        shell: bash
+        run: |
+          set -euo pipefail
+          arduino-cli config init --overwrite
+          arduino-cli core update-index \
+            --additional-urls "$ESP32_PACKAGE_INDEX"
+          arduino-cli core install "esp32:esp32@${ARDUINO_CORE_VERSION}" \
+            --additional-urls "$ESP32_PACKAGE_INDEX"
+          arduino-cli core list
+
+      - name: Compile sketch
+        shell: bash
+        env:
+          SKETCH_PATH: ${{ matrix.sketch }}
+        run: |
+          set -euo pipefail
+          sketch_name="$(basename "$SKETCH_PATH")"
+          build_path="${RUNNER_TEMP}/arduino-build/${sketch_name}"
+          compile_log="${RUNNER_TEMP}/arduino-build/${sketch_name}.compile.log"
+          mkdir -p "$(dirname "$build_path")" "$(dirname "$compile_log")"
+          arduino_data_dir="${HOME}/.arduino15"
+          prefix_flags="-ffile-prefix-map=${HOME}=host -fmacro-prefix-map=${HOME}=host"
+          prefix_flags+=" -ffile-prefix-map=${GITHUB_WORKSPACE}=product"
+          prefix_flags+=" -fmacro-prefix-map=${GITHUB_WORKSPACE}=product"
+          prefix_flags+=" -ffile-prefix-map=${arduino_data_dir}=arduino-data"
+          prefix_flags+=" -fmacro-prefix-map=${arduino_data_dir}=arduino-data"
+          prefix_flags+=" -ffile-prefix-map=${build_path}=build"
+          prefix_flags+=" -fmacro-prefix-map=${build_path}=build"
+
+          arduino-cli compile \
+            --fqbn "$ARDUINO_FQBN" \
+            --board-options "$ARDUINO_BOARD_OPTIONS" \
+            --libraries "$GITHUB_WORKSPACE/examples/arduino/libraries" \
+            --warnings all \
+            --verbose \
+            --build-property "compiler.c.extra_flags=${prefix_flags}" \
+            --build-property "compiler.cpp.extra_flags=${prefix_flags}" \
+            --build-property "compiler.S.extra_flags=${prefix_flags}" \
+            --build-path "$build_path" \
+            "$SKETCH_PATH" 2>&1 | tee "$compile_log"
+          test -s "$compile_log"
+
+      - name: Package segmented flash archive
+        id: package
+        shell: bash
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          SKETCH_PATH: ${{ matrix.sketch }}
+        run: |
+          set -euo pipefail
+
+          sketch_name="$(basename "$SKETCH_PATH")"
+          build_path="${RUNNER_TEMP}/arduino-build/${sketch_name}"
+          compile_log="${RUNNER_TEMP}/arduino-build/${sketch_name}.compile.log"
+          metadata_dir="${RUNNER_TEMP}/arduino-metadata/${sketch_name}"
+          package_dir="${RUNNER_TEMP}/arduino-package/${sketch_name}"
+          board_properties="${metadata_dir}/board.properties.expanded.txt"
+          source_sha="$(git rev-parse HEAD)"
+
+          [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$source_sha" == "$EXPECTED_SOURCE_SHA" ]]
+          test -d "$build_path"
+          test -s "$compile_log"
+          mkdir -p "$metadata_dir"
+
+          arduino-cli board details \
+            --fqbn "$ARDUINO_FQBN" \
+            --board-options "$ARDUINO_BOARD_OPTIONS" \
+            --show-properties=expanded > "$board_properties"
+          test -s "$board_properties"
+
+          python .github/scripts/package_arduino_firmware.py \
+            --build-dir "$build_path" \
+            --board-properties "$board_properties" \
+            --compile-log "$compile_log" \
+            --output-dir "$package_dir" \
+            --sketch-path "$SKETCH_PATH" \
+            --framework-version "$ARDUINO_CORE_VERSION" \
+            --arduino-cli-version "$ARDUINO_CLI_VERSION" \
+            --esptool-version "$ARDUINO_ESPTOOL_VERSION" \
+            --fqbn "$ARDUINO_FQBN" \
+            --board-options "$ARDUINO_BOARD_OPTIONS" \
+            --git-sha "$source_sha" \
+            --baud "$ARDUINO_UPLOAD_SPEED" \
+            --bsp-component "$REGISTRY_BSP_COMPONENT" \
+            --bsp-version "$REGISTRY_BSP_VERSION" \
+            --bsp-component-hash "$REGISTRY_BSP_COMPONENT_HASH" \
+            --bsp-repository-commit "$REGISTRY_BSP_REPOSITORY_COMMIT"
+
+          manifest_path="$package_dir/manifest.json"
+          [[ -f "$manifest_path" && ! -L "$manifest_path" ]]
+          mapfile -d '' archives < <(
+            find "$package_dir" -mindepth 1 -maxdepth 1 \
+              -type f ! -xtype l -name '*.zip' -print0
+          )
+          [[ "${#archives[@]}" -eq 1 ]]
+          archive_path="${archives[0]}"
+          unexpected_path="$(
+            find "$package_dir" -mindepth 1 \
+              ! -path "$manifest_path" \
+              ! -path "$archive_path" \
+              -print -quit
+          )"
+          if [[ -n "$unexpected_path" ]]; then
+            echo "Unexpected package output escaped the exact two-file boundary" >&2
+            exit 1
+          fi
+          if find "$package_dir" -type f \
+            \( -name '*.merged.bin' -o -name '*.bin' \) -print -quit \
+            | grep -q .; then
+            echo "Unsafe whole-flash or raw binary output escaped the archive" >&2
+            exit 1
+          fi
+
+          echo "artifact_name=esp32-p4-platform-arduino-${sketch_name}-${source_sha}" \
+            >> "$GITHUB_OUTPUT"
+          echo "manifest_path=${manifest_path}" >> "$GITHUB_OUTPUT"
+          echo "archive_path=${archive_path}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload segmented flash archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: |
+            ${{ steps.package.outputs.manifest_path }}
+            ${{ steps.package.outputs.archive_path }}
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  result:
+    name: Arduino examples / result
+    needs:
+      - discover
+      - compile
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful discovery and compilation
+        shell: bash
+        env:
+          DISCOVER_RESULT: ${{ needs.discover.result }}
+          COMPILE_RESULT: ${{ needs.compile.result }}
+        run: |
+          set -euo pipefail
+          [[ "$DISCOVER_RESULT" == "success" ]]
+          [[ "$COMPILE_RESULT" == "success" || "$COMPILE_RESULT" == "skipped" ]]

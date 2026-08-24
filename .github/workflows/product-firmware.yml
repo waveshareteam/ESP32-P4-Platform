@@ -1,0 +1,174 @@
+name: Product firmware
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Firmware revision profile"
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - rev1_3
+          - rev3_x
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Discover firmware profiles
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.profiles.outputs.matrix }}
+      has_profiles: ${{ steps.profiles.outputs.has_profiles }}
+      profiles: ${{ steps.profiles.outputs.profiles }}
+      docs_only: ${{ steps.profiles.outputs.docs_only }}
+      changed_path_count: ${{ steps.profiles.outputs.changed_path_count }}
+      firmware_paths: ${{ steps.profiles.outputs.firmware_paths }}
+      release_paths: ${{ steps.profiles.outputs.release_paths }}
+      unknown_paths: ${{ steps.profiles.outputs.unknown_paths }}
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Test firmware routing helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile .github/scripts/*.py .github/scripts/tests/*.py
+          python -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
+
+      - name: Discover changed firmware profiles
+        id: profiles
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_PROFILE: ${{ inputs.profile }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            python .github/scripts/discover_firmware_profiles.py --profile "$REQUESTED_PROFILE"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            changed="$RUNNER_TEMP/product-firmware-changed-files.txt"
+            canonical_base="refs/remotes/canonical/${PR_BASE_REF}"
+            git fetch --no-tags --force --no-recurse-submodules \
+              "https://github.com/${GITHUB_REPOSITORY}.git" \
+              "+refs/heads/${PR_BASE_REF}:${canonical_base}"
+            if ! git cat-file -e "${PR_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PR_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PR_BASE_SHA}^{commit}"
+            git cat-file -e "${PR_HEAD_SHA}^{commit}"
+            git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" >/dev/null
+            git diff --name-status --find-renames "$PR_BASE_SHA...$PR_HEAD_SHA" > "$changed"
+            python .github/scripts/discover_firmware_profiles.py --changed-files-from "$changed"
+          elif [[ "$PUSH_BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            python .github/scripts/discover_firmware_profiles.py --profile all
+          else
+            changed="$RUNNER_TEMP/product-firmware-changed-files.txt"
+            if ! git cat-file -e "${PUSH_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PUSH_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PUSH_BASE_SHA}^{commit}"
+            git cat-file -e "${GITHUB_SHA}^{commit}"
+            git diff --name-status --find-renames "$PUSH_BASE_SHA..$GITHUB_SHA" > "$changed"
+            python .github/scripts/discover_firmware_profiles.py --changed-files-from "$changed"
+          fi
+
+  build:
+    name: Build firmware (${{ matrix.profile }}, ESP-IDF v5.5.5)
+    needs: discover
+    if: needs.discover.outputs.has_profiles == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Build product firmware
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.5
+          target: esp32p4
+          path: firmware/brookesia
+          command: >-
+            idf.py -B ../../.ci-build/firmware/${{ matrix.profile }}/build
+            -D SDKCONFIG=../../.ci-build/firmware/${{ matrix.profile }}/sdkconfig
+            -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.${{ matrix.profile }}.defaults" build
+
+      - name: Package product firmware
+        shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          IDF_VERSION: v5.5.5
+        run: |
+          set -euo pipefail
+          SOURCE_SHA="$(git rev-parse HEAD)"
+          python .github/scripts/package_product_firmware.py \
+            --project firmware/brookesia \
+            --profile "${{ matrix.profile }}" \
+            --build-dir ".ci-build/firmware/${{ matrix.profile }}/build" \
+            --sdkconfig ".ci-build/firmware/${{ matrix.profile }}/sdkconfig" \
+            --output-dir ".ci-artifacts/firmware/${{ matrix.profile }}" \
+            --source-sha "$SOURCE_SHA" \
+            --pr-head-sha "$PR_HEAD_SHA" \
+            --event "$EVENT_NAME" \
+            --run-id "$RUN_ID" \
+            --run-attempt "$RUN_ATTEMPT" \
+            --idf-version "$IDF_VERSION"
+
+      - name: Upload product firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: esp32-p4-platform-firmware-${{ matrix.profile }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .ci-artifacts/firmware/${{ matrix.profile }}
+          retention-days: 14
+          compression-level: 0
+
+  result:
+    name: Product firmware / result
+    needs:
+      - discover
+      - build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful discovery and builds
+        shell: bash
+        env:
+          DISCOVER_RESULT: ${{ needs.discover.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          set -euo pipefail
+          [[ "$DISCOVER_RESULT" == "success" || "$DISCOVER_RESULT" == "skipped" ]]
+          [[ "$BUILD_RESULT" == "success" || "$BUILD_RESULT" == "skipped" ]]

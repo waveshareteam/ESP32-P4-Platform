@@ -1,0 +1,91 @@
+name: Repository policy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  result:
+    name: Repository policy / result
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Check policy helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            .github/scripts/ci_change_routing.py \
+            .github/scripts/audit_markdown.py \
+            .github/scripts/run_markdown_audit.py \
+            .github/scripts/tests/test_markdown_audit.py
+          python .github/scripts/tests/test_markdown_audit.py -v
+          mapfile -d '' -t python_files < <(find .github/scripts -type f -name '*.py' -print0)
+          python -m py_compile "${python_files[@]}"
+          python -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
+          pwsh -NoProfile -File scripts/Flash-CI-Firmware.ps1 -SelfTest
+          pwsh -NoProfile -File scripts/Flash-CI-Firmware.ps1 -ListOnly -Profile auto
+
+      - name: Audit repository policy
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          config=config/markdown-audit.json
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" || "$PUSH_BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            python .github/scripts/run_markdown_audit.py \
+              --repo . --all --config "$config" --strict --format json
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            changed="$RUNNER_TEMP/repository-policy-changed-files.txt"
+            canonical_base="refs/remotes/canonical/${PR_BASE_REF}"
+            git fetch --no-tags --force --no-recurse-submodules \
+              "https://github.com/${GITHUB_REPOSITORY}.git" \
+              "+refs/heads/${PR_BASE_REF}:${canonical_base}"
+            if ! git cat-file -e "${PR_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PR_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PR_BASE_SHA}^{commit}"
+            git cat-file -e "${PR_HEAD_SHA}^{commit}"
+            git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" >/dev/null
+            git diff --name-status --find-renames \
+              "$PR_BASE_SHA...$PR_HEAD_SHA" > "$changed"
+            python .github/scripts/run_markdown_audit.py \
+              --repo . --changed-files-from "$changed" --config "$config" --strict --format json
+          else
+            changed="$RUNNER_TEMP/repository-policy-changed-files.txt"
+            if ! git cat-file -e "${PUSH_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PUSH_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PUSH_BASE_SHA}^{commit}"
+            git cat-file -e "${GITHUB_SHA}^{commit}"
+            git diff --name-status --find-renames \
+              "$PUSH_BASE_SHA..$GITHUB_SHA" > "$changed"
+            python .github/scripts/run_markdown_audit.py \
+              --repo . --changed-files-from "$changed" --config "$config" --strict --format json
+          fi

@@ -1,35 +1,44 @@
-name: Feature request
-description: Suggest a new example, board note, or improvement
-title: "[Feature]: "
+name: Feature request / 功能建议
+description: Suggest a focused example, board-support, CI, or documentation improvement / 建议聚焦的示例、板级支持、CI 或文档改进
+title: "[Feature] "
 labels:
   - enhancement
 body:
-  - type: textarea
-    id: summary
+  - type: input
+    id: scope
     attributes:
-      label: Summary
-      description: What would you like to add or improve?
+      label: Proposed scope / 建议范围
+      placeholder: examples/esp-idf, Arduino, documentation, CI, board configuration
     validations:
       required: true
-  - type: input
-    id: board
-    attributes:
-      label: Target board
-      placeholder: ESP32-P4-WIFI6-DEV-KIT
-  - type: input
-    id: area
-    attributes:
-      label: Area
-      placeholder: display, camera, Ethernet, LVGL, Arduino, documentation
+
   - type: textarea
-    id: value
+    id: problem
     attributes:
-      label: Why this is useful
-      description: Explain the user problem or hardware workflow this would help.
+      label: Problem to solve / 要解决的问题
+      description: Describe the user need rather than only the proposed implementation.
     validations:
       required: true
+
   - type: textarea
-    id: details
+    id: proposal
     attributes:
-      label: Additional details
-      description: Add links, logs, screenshots, or implementation ideas.
+      label: Proposed behavior / 建议行为
+    validations:
+      required: true
+
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware and compatibility impact / 硬件与兼容性影响
+      description: Identify affected boards, revisions, peripherals, framework versions, and firmware boundaries.
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation / 确认
+      options:
+        - label: I searched existing issues and pull requests. / 我已搜索现有 issue 和 pull request。
+          required: true
+        - label: The request does not include credentials or private data. / 本建议不包含凭据或私密数据。
+          required: true

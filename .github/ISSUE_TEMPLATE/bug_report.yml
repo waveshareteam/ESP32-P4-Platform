@@ -1,66 +1,95 @@
-name: Bug report
-description: Report a build, flash, runtime, or documentation issue
-title: "[Bug]: "
+name: Bug report / 问题报告
+description: Report a reproducible repository example or documentation problem / 报告可复现的示例或文档问题
+title: "[Bug] "
 labels:
   - bug
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the repository. Search existing issues first.
+        请先搜索现有 issue，避免重复报告。
+
   - type: input
     id: board
     attributes:
-      label: Board
-      description: Include the exact Waveshare board name and revision if known.
-      placeholder: ESP32-P4-NANO
+      label: Board and revision / 开发板与版本
+      description: Include the exact product name and PCB/chip revision when known.
+      placeholder: ESP32-P4-WIFI6-DEV-KIT, ESP32-P4 rev v3.1
     validations:
       required: true
+
   - type: input
     id: example
     attributes:
-      label: Example path
-      placeholder: examples/esp-idf/02_HelloWorld
+      label: Example path / 示例路径
+      placeholder: examples/esp-idf/10_wifistation
     validations:
       required: true
+
   - type: dropdown
     id: framework
     attributes:
-      label: Framework
+      label: Framework / 框架
       options:
         - ESP-IDF
-        - Arduino
-        - Other
+        - Arduino-ESP32
+        - Source-built firmware (`firmware/brookesia`) / 源码构建固件
+        - Documentation / 文档
+        - Checked-in factory/recovery firmware / 已提交的出厂或恢复固件
+        - Other / 其他
     validations:
       required: true
+
   - type: input
     id: version
     attributes:
-      label: Framework version
-      placeholder: ESP-IDF v5.4.0 or Arduino-ESP32 v3.2.0
+      label: Framework and component versions / 框架与组件版本
+      description: Include ESP-IDF or Arduino-ESP32 and relevant managed component versions.
+      placeholder: ESP-IDF v6.0.2, waveshare/esp32_p4_platform 2.0.1
     validations:
       required: true
+
   - type: textarea
-    id: problem
+    id: reproduction
     attributes:
-      label: Problem
-      description: What happened? What did you expect to happen?
-    validations:
-      required: true
-  - type: textarea
-    id: reproduce
-    attributes:
-      label: Steps to reproduce
+      label: Reproduction steps / 复现步骤
+      description: Include configuration changes and the smallest repeatable sequence.
       placeholder: |
-        1. Run ...
-        2. Configure ...
-        3. Build or flash ...
+        1. ...
+        2. ...
+        3. ...
     validations:
       required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior / 预期与实际行为
+    validations:
+      required: true
+
   - type: textarea
     id: logs
     attributes:
-      label: Logs
-      description: Paste build errors, serial output, or relevant command output.
-      render: text
+      label: Sanitized logs / 已脱敏日志
+      description: Remove credentials, tokens, private network details, unique device identifiers, and local filesystem paths.
+      render: shell
+
   - type: textarea
     id: hardware
     attributes:
-      label: Hardware setup
-      description: Include wiring, modules, display/camera model, power supply, or photos when relevant.
+      label: Hardware setup / 硬件环境
+      description: List displays, cameras, C6 firmware, PHYs, cables, wiring, and power supplies that affect reproduction.
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation / 确认
+      options:
+        - label: I searched existing issues and pull requests. / 我已搜索现有 issue 和 pull request。
+          required: true
+        - label: I removed credentials and identifying/private data from public logs. / 我已从公开日志中删除凭据及可识别或私密数据。
+          required: true
+        - label: I understand that a successful CI build does not prove hardware runtime behavior. / 我了解 CI 构建成功不能证明硬件运行时行为。
+          required: true

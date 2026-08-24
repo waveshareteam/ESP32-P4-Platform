@@ -24,6 +24,8 @@ sdkconfig.old
 **/sdkconfig.old
 sdkconfig.ci.tmp
 **/sdkconfig.ci.tmp
+.ci-build/
+.ci-artifacts/
 
 # ESP-IDF tooling caches
 .cache/

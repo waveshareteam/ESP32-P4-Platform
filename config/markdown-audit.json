@@ -1,0 +1,270 @@
+{
+  "classification_rules": [
+    {
+      "category": "embedded_upstream",
+      "patterns": [
+        "examples/esp-idf/18_esp_brookesia_phone/components/brookesia_core/**",
+        "firmware/brookesia/components/brookesia_core/**"
+      ]
+    },
+    {
+      "category": "first_party_wrapper",
+      "patterns": [
+        "examples/esp-idf/09_sdmmc/components/sd_card/**",
+        "examples/esp-idf/11_ethernetbasic/components/ethernet_init/**",
+        "examples/esp-idf/14_lvgl_demo_v9/components/lvgl_demo_support/**",
+        "examples/esp-idf/17_simple_video_server/components/example_video_common/**",
+        "examples/esp-idf/18_esp_brookesia_phone/components/**"
+      ]
+    }
+  ],
+  "docs_only_allowed_patterns": [
+    "assets/products/*.jpg"
+  ],
+  "pair_exempt_patterns": [
+    ".github/PULL_REQUEST_TEMPLATE.md"
+  ],
+  "bilingual_pairs": [
+    {
+      "english": "CHANGELOG.md",
+      "chinese": "CHANGELOG_CN.md"
+    },
+    {
+      "english": "CODE_OF_CONDUCT.md",
+      "chinese": "CODE_OF_CONDUCT_CN.md"
+    },
+    {
+      "english": "THIRD_PARTY.md",
+      "chinese": "THIRD_PARTY_CN.md"
+    },
+    {
+      "english": "CONTRIBUTING.md",
+      "chinese": "CONTRIBUTING_CN.md"
+    },
+    {
+      "english": "SECURITY.md",
+      "chinese": "SECURITY_CN.md"
+    },
+    {
+      "english": "SUPPORT.md",
+      "chinese": "SUPPORT_CN.md"
+    },
+    {
+      "english": "docs/CI.md",
+      "chinese": "docs/CI_CN.md"
+    },
+    {
+      "english": "docs/COMPONENTS.md",
+      "chinese": "docs/COMPONENTS_CN.md"
+    },
+    {
+      "english": "docs/GETTING_STARTED.md",
+      "chinese": "docs/GETTING_STARTED_CN.md"
+    },
+    {
+      "english": "docs/ESP32P4_REVISION_CONFIG.md",
+      "chinese": "docs/ESP32P4_REVISION_CONFIG_CN.md"
+    },
+    {
+      "english": "docs/EXAMPLES_GUIDE.md",
+      "chinese": "docs/EXAMPLES_GUIDE_CN.md"
+    },
+    {
+      "english": "docs/EXAMPLE_ROADMAP.md",
+      "chinese": "docs/EXAMPLE_ROADMAP_CN.md"
+    },
+    {
+      "english": "docs/P4_C6_HOSTED_WIFI.md",
+      "chinese": "docs/P4_C6_HOSTED_WIFI_CN.md"
+    },
+    {
+      "english": "docs/PROJECT_STRUCTURE.md",
+      "chinese": "docs/PROJECT_STRUCTURE_CN.md"
+    },
+    {
+      "english": "docs/TROUBLESHOOTING.md",
+      "chinese": "docs/TROUBLESHOOTING_CN.md"
+    },
+    {
+      "english": "examples/README.md",
+      "chinese": "examples/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/README.md",
+      "chinese": "examples/arduino/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/AsciiTable/README.md",
+      "chinese": "examples/arduino/examples/AsciiTable/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/Audio_Playback/README.md",
+      "chinese": "examples/arduino/examples/Audio_Playback/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/Camera_ISP_Tuning/README.md",
+      "chinese": "examples/arduino/examples/Camera_ISP_Tuning/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/Camera_Preview/README.md",
+      "chinese": "examples/arduino/examples/Camera_Preview/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/Drawing_board/README.md",
+      "chinese": "examples/arduino/examples/Drawing_board/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/GFX_ESPWiFiAnalyzer/README.md",
+      "chinese": "examples/arduino/examples/GFX_ESPWiFiAnalyzer/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/HelloWorld/README.md",
+      "chinese": "examples/arduino/examples/HelloWorld/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/LVGLV9_Arduino/README.md",
+      "chinese": "examples/arduino/examples/LVGLV9_Arduino/README_CN.md"
+    },
+    {
+      "english": "examples/arduino/examples/SD_Card/README.md",
+      "chinese": "examples/arduino/examples/SD_Card/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/00_board_check/README.md",
+      "chinese": "examples/esp-idf/00_board_check/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/01_HowToCreateProject/README.md",
+      "chinese": "examples/esp-idf/01_HowToCreateProject/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/02_HelloWorld/README.md",
+      "chinese": "examples/esp-idf/02_HelloWorld/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/03_nvs_counter/README.md",
+      "chinese": "examples/esp-idf/03_nvs_counter/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/04_freertos_tasks/README.md",
+      "chinese": "examples/esp-idf/04_freertos_tasks/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/05_gpio_io/README.md",
+      "chinese": "examples/esp-idf/05_gpio_io/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/06_gpio_interrupt/README.md",
+      "chinese": "examples/esp-idf/06_gpio_interrupt/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/07_uart_loopback/README.md",
+      "chinese": "examples/esp-idf/07_uart_loopback/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/08_i2c_tools/README.md",
+      "chinese": "examples/esp-idf/08_i2c_tools/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/09_sdmmc/README.md",
+      "chinese": "examples/esp-idf/09_sdmmc/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/10_wifistation/README.md",
+      "chinese": "examples/esp-idf/10_wifistation/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/11_ethernetbasic/README.md",
+      "chinese": "examples/esp-idf/11_ethernetbasic/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/12_I2SCodec/README.md",
+      "chinese": "examples/esp-idf/12_I2SCodec/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/13_Displaycolorbar/README.md",
+      "chinese": "examples/esp-idf/13_Displaycolorbar/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/14_lvgl_demo_v9/README.md",
+      "chinese": "examples/esp-idf/14_lvgl_demo_v9/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/15_eth2ap/README.md",
+      "chinese": "examples/esp-idf/15_eth2ap/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/16_video_lcd_display/README.md",
+      "chinese": "examples/esp-idf/16_video_lcd_display/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/17_simple_video_server/README.md",
+      "chinese": "examples/esp-idf/17_simple_video_server/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/17_simple_video_server/components/example_video_common/README.md",
+      "chinese": "examples/esp-idf/17_simple_video_server/components/example_video_common/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/17_simple_video_server/frontend/README.md",
+      "chinese": "examples/esp-idf/17_simple_video_server/frontend/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/18_esp_brookesia_phone/README.md",
+      "chinese": "examples/esp-idf/18_esp_brookesia_phone/README_CN.md"
+    },
+    {
+      "english": "examples/esp-idf/19_system_monitor/README.md",
+      "chinese": "examples/esp-idf/19_system_monitor/README_CN.md"
+    },
+    {
+      "english": "firmware/README.md",
+      "chinese": "firmware/README_CN.md"
+    },
+    {
+      "english": "firmware/factory_firmware/README.md",
+      "chinese": "firmware/factory_firmware/README_CN.md"
+    }
+  ],
+  "homepage_pairs": [
+    {
+      "english": "README.md",
+      "chinese": "README_CN.md",
+      "profile": "multi-product-hub",
+      "required_components": [
+        "centered_header",
+        "html_h1",
+        "subtitle",
+        "badges",
+        "language_switch",
+        "quick_links",
+        "separator",
+        "h2"
+      ],
+      "required_quick_links": [
+        "product",
+        "documentation",
+        "esp_idf",
+        "arduino"
+      ],
+      "required_badges": [
+        "build",
+        "license"
+      ],
+      "required_h2_icons": [
+        "✨",
+        "🤝",
+        "🗂️",
+        "📚",
+        "🚀",
+        "🛠️",
+        "🧪",
+        "✅",
+        "🤝",
+        "🔒",
+        "📦",
+        "📄"
+      ]
+    }
+  ]
+}

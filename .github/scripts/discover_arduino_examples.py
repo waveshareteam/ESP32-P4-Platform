@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Discover ESP-IDF examples that should be built by CI."""
+"""Discover first-party Arduino sketches that should be compiled by CI."""
 
 from __future__ import annotations
 
@@ -19,23 +19,24 @@ from ci_change_routing import (
 )
 
 
-EXAMPLES_ROOT = Path("examples/esp-idf")
-GLOBAL_EXAMPLE_PATTERNS = (
-    ".github/workflows/esp-idf-examples.yml",
-    ".github/scripts/discover_esp_idf_examples.py",
-    ".github/scripts/ci_change_routing.py",
-    ".github/scripts/tests/test_ci_discovery.py",
-    "config/esp32p4_local_defaults.cmake",
-    "config/esp32p4_rev1_3.defaults",
-    "config/esp32p4_rev3_x.defaults",
-)
-ARDUINO_ONLY_PATTERNS = (
+SKETCHES_ROOT = PurePosixPath("examples/arduino/examples")
+GLOBAL_SKETCH_PATTERNS = (
     ".github/workflows/arduino-examples.yml",
     ".github/scripts/discover_arduino_examples.py",
     ".github/scripts/package_arduino_firmware.py",
+    ".github/scripts/ci_change_routing.py",
     ".github/scripts/tests/test_arduino_serial_readiness.py",
+    ".github/scripts/tests/test_ci_discovery.py",
     ".github/scripts/tests/test_package_arduino_firmware.py",
     "examples/arduino/common/**",
+    "examples/arduino/libraries/**",
+)
+ESP_IDF_ONLY_PATTERNS = (
+    ".github/workflows/esp-idf-examples.yml",
+    ".github/scripts/discover_esp_idf_examples.py",
+    "config/esp32p4_local_defaults.cmake",
+    "config/esp32p4_rev1_3.defaults",
+    "config/esp32p4_rev3_x.defaults",
 )
 
 
@@ -49,31 +50,41 @@ def run_git(args: list[str]) -> list[str]:
     return result.stdout.splitlines()
 
 
-def list_examples() -> list[str]:
-    if not EXAMPLES_ROOT.exists():
+def normalize_path(value: str) -> str:
+    return value.replace("\\", "/").strip().strip("/")
+
+
+def list_sketches() -> list[str]:
+    root = Path(SKETCHES_ROOT.as_posix())
+    if not root.exists():
         return []
 
-    examples = []
-    for path in EXAMPLES_ROOT.iterdir():
-        if (path / "CMakeLists.txt").is_file() and (path / "main").is_dir():
-            examples.append(path.as_posix())
-    return sorted(examples)
+    sketches = []
+    for path in root.iterdir():
+        if path.is_dir() and (path / f"{path.name}.ino").is_file():
+            sketches.append(path.as_posix())
+    return sorted(sketches)
 
 
-def normalize_example(value: str) -> str:
-    value = value.strip().strip("/")
-    if not value:
+def normalize_sketch(value: str) -> str:
+    value = normalize_path(value)
+    if not value or value == "all":
         return value
-    if value == "all":
-        return value
-    if value.startswith(EXAMPLES_ROOT.as_posix() + "/"):
-        return value
-    return (EXAMPLES_ROOT / value).as_posix()
+
+    path = PurePosixPath(value)
+    if path.suffix.lower() == ".ino":
+        path = path.parent
+
+    root = SKETCHES_ROOT.as_posix()
+    normalized = path.as_posix()
+    if normalized.startswith(root + "/"):
+        return normalized
+    return (SKETCHES_ROOT / normalized).as_posix()
 
 
-def route_changed_examples(
+def route_changed_sketches(
     *,
-    known_examples: set[str],
+    known_sketches: set[str],
     changed_files_from: Path | None = None,
     base_ref: str | None = None,
     head_ref: str = "HEAD",
@@ -96,11 +107,11 @@ def route_changed_examples(
 
     return route_changes(
         changes,
-        known_entries=known_examples,
-        root=PurePosixPath(EXAMPLES_ROOT.as_posix()),
-        other_framework_root=PurePosixPath("examples/arduino"),
-        global_patterns=GLOBAL_EXAMPLE_PATTERNS,
-        other_framework_patterns=ARDUINO_ONLY_PATTERNS,
+        known_entries=known_sketches,
+        root=SKETCHES_ROOT,
+        other_framework_root=PurePosixPath("examples/esp-idf"),
+        global_patterns=GLOBAL_SKETCH_PATTERNS,
+        other_framework_patterns=ESP_IDF_ONLY_PATTERNS,
     )
 
 
@@ -116,17 +127,17 @@ def main() -> int:
     parser.add_argument("--base-ref")
     parser.add_argument("--head-ref", default="HEAD")
     parser.add_argument("--changed-files-from", type=Path)
-    parser.add_argument("--example", default="")
+    parser.add_argument("--sketch", default="")
     args = parser.parse_args()
 
-    known_examples = set(list_examples())
-    if not known_examples:
-        print("No first-party ESP-IDF examples were discovered.", file=sys.stderr)
+    known_sketches = set(list_sketches())
+    if not known_sketches:
+        print("No first-party Arduino sketches were discovered.", file=sys.stderr)
         return 2
-    requested_example = normalize_example(args.example)
-    if requested_example and (args.changed_files_from or args.base_ref):
+    requested_sketch = normalize_sketch(args.sketch)
+    if requested_sketch and (args.changed_files_from or args.base_ref):
         print(
-            "--example cannot be combined with changed-file selection",
+            "--sketch cannot be combined with changed-file selection",
             file=sys.stderr,
         )
         return 2
@@ -139,20 +150,20 @@ def main() -> int:
 
     routing = RoutingResult((), False, (), (), (), 0)
 
-    if requested_example == "all":
-        selected = sorted(known_examples)
-    elif requested_example:
-        if requested_example not in known_examples:
-            print(f"Unknown ESP-IDF example: {args.example}", file=sys.stderr)
-            print("Known examples:", file=sys.stderr)
-            for example in sorted(known_examples):
-                print(f"  {example}", file=sys.stderr)
+    if requested_sketch == "all":
+        selected = sorted(known_sketches)
+    elif requested_sketch:
+        if requested_sketch not in known_sketches:
+            print(f"Unknown Arduino sketch: {args.sketch}", file=sys.stderr)
+            print("Known sketches:", file=sys.stderr)
+            for sketch in sorted(known_sketches):
+                print(f"  {sketch}", file=sys.stderr)
             return 1
-        selected = [requested_example]
+        selected = [requested_sketch]
     else:
         try:
-            routing = route_changed_examples(
-                known_examples=known_examples,
+            routing = route_changed_sketches(
+                known_sketches=known_sketches,
                 changed_files_from=args.changed_files_from,
                 base_ref=args.base_ref,
                 head_ref=args.head_ref,
@@ -162,18 +173,18 @@ def main() -> int:
             return 2
         selected = list(routing.selected)
 
-    matrix = {"example": selected}
+    matrix = {"sketch": selected}
     matrix_json = json.dumps(matrix, separators=(",", ":"))
-    has_examples = "true" if selected else "false"
+    has_sketches = "true" if selected else "false"
 
     github_output("matrix", matrix_json)
-    github_output("has_examples", has_examples)
-    github_output("examples", ",".join(selected))
+    github_output("has_sketches", has_sketches)
+    github_output("sketches", ",".join(selected))
     github_output("docs_only", "true" if routing.docs_only else "false")
     github_output("changed_path_count", str(routing.changed_path_count))
     github_output("firmware_paths", json.dumps(routing.firmware_paths))
     github_output("unknown_paths", json.dumps(routing.unknown_paths))
-    github_output("removed_examples", json.dumps(routing.removed_entries))
+    github_output("removed_sketches", json.dumps(routing.removed_entries))
 
     print(matrix_json)
     return 0
