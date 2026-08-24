@@ -6,7 +6,7 @@ file(GLOB_RECURSE PROJ_SRCS_CPP ${PROJ_SRC}/*.cpp)
 idf_component_register(
     SRCS  ${PROJ_SRCS_C} ${PROJ_SRCS_CPP}
     INCLUDE_DIRS ${PROJ_SRC}
-    REQUIRES esp32_p4_platform driver esp_wifi esp_wifi_remote esp_hosted lwip bsp_extra
+    REQUIRES esp32_p4_platform driver esp_wifi esp_wifi_remote esp_hosted lwip product_support
 )
 
 set_source_files_properties(

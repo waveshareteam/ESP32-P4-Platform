@@ -116,7 +116,7 @@ namespace esp_brookesia::apps
         lv_obj_set_width(volume_slider, lv_pct(94));
         lv_obj_set_height(volume_slider, 18);
         lv_obj_align(volume_slider, LV_ALIGN_CENTER, 0, 0);
-        uint32_t value = bsp_extra_codec_volume_get();
+        uint32_t value = product_codec_volume_get();
         lv_slider_set_value(volume_slider, value, LV_ANIM_OFF);
 
         lv_obj_set_style_bg_color(volume_slider, lv_color_hex(0x505050), LV_PART_MAIN);
@@ -141,7 +141,7 @@ namespace esp_brookesia::apps
             {
                 uint32_t value = lv_slider_get_value(slider);
                 if (value > 95) value = 95;
-                bsp_extra_codec_volume_set(value, NULL);
+                product_codec_volume_set(value, NULL);
             }
         }
     }

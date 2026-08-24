@@ -1,0 +1,3 @@
+# Keep the P4 bootloader within the default 0x8000 partition-table boundary.
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+CONFIG_BOOTLOADER_LOG_LEVEL=2

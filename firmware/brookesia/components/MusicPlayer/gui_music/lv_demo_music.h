@@ -14,7 +14,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 #include "lvgl.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 
 #define APP_DEMO_MUSIC_ENABLE       1
 #define APP_DEMO_MUSIC_LARGE        0

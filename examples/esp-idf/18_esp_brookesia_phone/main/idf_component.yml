@@ -3,4 +3,4 @@ dependencies:
   ## Required IDF version
   idf: ">=5.3"
 
-  waveshare/esp32_p4_platform: "*"
+  waveshare/esp32_p4_platform: "2.0.1"

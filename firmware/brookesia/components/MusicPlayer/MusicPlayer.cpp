@@ -13,7 +13,7 @@
 #include "esp_lib_utils.h"
 #include "sdkconfig.h"
 #include "bsp/esp-bsp.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 #include "gui_music/lv_demo_music.h"
 #include "gui_music/lv_demo_music_main.h"
 
@@ -50,15 +50,15 @@ namespace esp_brookesia::apps
     {
         ESP_UTILS_LOGD("Run");
 
-        if (bsp_extra_player_init() != ESP_OK)
+        if (product_player_init() != ESP_OK)
         {
             ESP_LOGE(TAG, "Play init with SPIFFS failed");
             return false;
         }
 
-        if (bsp_extra_file_instance_init(MUSIC_DIR, &_file_iterator) != ESP_OK)
+        if (product_file_instance_init(MUSIC_DIR, &_file_iterator) != ESP_OK)
         {
-            ESP_LOGE(TAG, "bsp_extra_file_instance_init failed");
+            ESP_LOGE(TAG, "product_file_instance_init failed");
             return false;
         }
 
@@ -82,7 +82,7 @@ namespace esp_brookesia::apps
             ESP_LOGE(TAG, "audio_player_pause failed");
             return false;
         }
-        if (bsp_extra_player_del() != ESP_OK)
+        if (product_player_del() != ESP_OK)
         {
             ESP_LOGE(TAG, "DEL Play init with SPIFFS failed");
             return false;

@@ -204,7 +204,7 @@ void SpecAnalyzer::audio_fft_task(void *pvParameters)
     size_t bytes_read;
     
     while (app->_audio_task_running) {
-        esp_err_t ret = bsp_extra_i2s_read(
+        esp_err_t ret = product_i2s_read(
             app->_raw_data, 
             N_SAMPLES * I2S_CHANNELS * sizeof(int16_t), 
             &bytes_read, 

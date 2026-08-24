@@ -3,7 +3,7 @@
 #include "systems/phone/esp_brookesia_phone_app.hpp"
 #include "bsp/esp-bsp.h"
 #include "bsp/display.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 #include "driver/ppa.h"
 #include "esp_lcd_touch.h"
 #include "esp_lcd_types.h"

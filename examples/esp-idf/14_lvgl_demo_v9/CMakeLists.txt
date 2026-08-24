@@ -2,10 +2,11 @@
 # CMakeLists in this exact order for cmake to work correctly
 cmake_minimum_required(VERSION 3.5)
 
+include(${CMAKE_CURRENT_LIST_DIR}/../../../config/esp32p4_local_defaults.cmake)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 set(EXTRA_COMPONENT_DIRS
-    ./components/bsp_extra
+    ./components/lvgl_demo_support
     )
 
 add_compile_options(-Wno-format)

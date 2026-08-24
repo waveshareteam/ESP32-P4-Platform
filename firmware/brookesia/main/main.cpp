@@ -17,7 +17,7 @@
 #include "nvs_flash.h"
 #include "esp_wifi.h"
 
-#include "bsp_board_extra.h"
+#include "product_support.h"
 
 #include "Drawpanel.hpp"
 #include "SpecAnalyzer.hpp"
@@ -59,9 +59,9 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(bsp_spiffs_mount());
     ESP_LOGI(ESP_UTILS_LOG_TAG, "SPIFFS mount successfully");
 
-    ESP_ERROR_CHECK(bsp_extra_codec_init());
+    ESP_ERROR_CHECK(product_codec_init());
 
-    ESP_ERROR_CHECK(bsp_extra_codec_volume_set(CODEC_DEFAULT_VOLUME, NULL));
+    ESP_ERROR_CHECK(product_codec_volume_set(PRODUCT_CODEC_DEFAULT_VOLUME, NULL));
 
     ESP_UTILS_LOGI("Display ESP-Brookesia phone demo");
 

@@ -4,7 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#pragma once
+#ifndef PRODUCT_SUPPORT_H
+#define PRODUCT_SUPPORT_H
 
 #include <sys/cdefs.h>
 #include <stdbool.h>
@@ -19,19 +20,14 @@
 extern "C" {
 #endif
 
-#define CODEC_DEFAULT_SAMPLE_RATE           (16000)
-#define CODEC_DEFAULT_BIT_WIDTH             (16)
-#define CODEC_DEFAULT_ADC_VOLUME            (24.0)
-#define CODEC_DEFAULT_CHANNEL               (2)
-#define CODEC_DEFAULT_VOLUME                (80)
-
-#define BSP_LCD_BACKLIGHT_BRIGHTNESS_MAX    (95)
-#define BSP_LCD_BACKLIGHT_BRIGHTNESS_MIN    (0)
-#define LCD_LEDC_CH                         (CONFIG_BSP_DISPLAY_BRIGHTNESS_LEDC_CH)
+#define PRODUCT_CODEC_DEFAULT_SAMPLE_RATE    (16000)
+#define PRODUCT_CODEC_DEFAULT_BIT_WIDTH      (16)
+#define PRODUCT_CODEC_DEFAULT_ADC_VOLUME     (24.0)
+#define PRODUCT_CODEC_DEFAULT_CHANNEL        (2)
+#define PRODUCT_CODEC_DEFAULT_VOLUME         (80)
 
 /**************************************************************************************************
- * BSP Extra interface
- * Mainly provided some I2S Codec interfaces.
+ * Product support interface.
  **************************************************************************************************/
 /**
  * @brief Get display brightness.
@@ -39,7 +35,7 @@ extern "C" {
  * @return
  *   - brightness in percent
  */
-int bsp_display_brightness_get(void);
+int product_display_brightness_get(void);
 
 /**
  * @brief Player set mute.
@@ -50,7 +46,7 @@ int bsp_display_brightness_get(void);
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_codec_mute_set(bool enable);
+esp_err_t product_codec_mute_set(bool enable);
 
 /**
  * @brief Player set volume.
@@ -62,15 +58,15 @@ esp_err_t bsp_extra_codec_mute_set(bool enable);
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_codec_volume_set(int volume, int *volume_set);
+esp_err_t product_codec_volume_set(int volume, int *volume_set);
 
-/** 
+/**
  * @brief Player get volume.
- * 
+ *
  * @return
  *   - volume: volume get
  */
-int bsp_extra_codec_volume_get(void);
+int product_codec_volume_get(void);
 
 /**
  * @brief Stop I2S function.
@@ -79,7 +75,7 @@ int bsp_extra_codec_volume_get(void);
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_codec_dev_stop(void);
+esp_err_t product_codec_dev_stop(void);
 
 /**
  * @brief Resume I2S function.
@@ -88,7 +84,7 @@ esp_err_t bsp_extra_codec_dev_stop(void);
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_codec_dev_resume(void);
+esp_err_t product_codec_dev_resume(void);
 
 /**
  * @brief Set I2S format to codec.
@@ -101,7 +97,7 @@ esp_err_t bsp_extra_codec_dev_resume(void);
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch);
+esp_err_t product_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch);
 
 /**
  * @brief Read data from recoder.
@@ -115,7 +111,7 @@ esp_err_t bsp_extra_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read, uint32_t timeout_ms);
+esp_err_t product_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read, uint32_t timeout_ms);
 
 /**
  * @brief Write data to player.
@@ -129,7 +125,7 @@ esp_err_t bsp_extra_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read,
  *    - ESP_OK: Success
  *    - Others: Fail
  */
-esp_err_t bsp_extra_i2s_write(void *audio_buffer, size_t len, size_t *bytes_written, uint32_t timeout_ms);
+esp_err_t product_i2s_write(void *audio_buffer, size_t len, size_t *bytes_written, uint32_t timeout_ms);
 
 
 /**
@@ -139,7 +135,7 @@ esp_err_t bsp_extra_i2s_write(void *audio_buffer, size_t len, size_t *bytes_writ
  *      - ESP_OK: Success
  *      - Others: Fail
  */
-esp_err_t bsp_extra_codec_init();
+esp_err_t product_codec_init(void);
 
 /**
  * @brief Initialize audio player task.
@@ -150,7 +146,7 @@ esp_err_t bsp_extra_codec_init();
  *      - ESP_OK: Success
  *      - Others: Fail
  */
-esp_err_t bsp_extra_player_init(void);
+esp_err_t product_player_init(void);
 
 /**
  * @brief Delete audio player task.
@@ -159,7 +155,7 @@ esp_err_t bsp_extra_player_init(void);
  *      - ESP_OK: Success
  *      - Others: Fail
  */
-esp_err_t bsp_extra_player_del(void);
+esp_err_t product_player_del(void);
 
 /**
  * @brief Initialize a file iterator instance
@@ -170,7 +166,7 @@ esp_err_t bsp_extra_player_del(void);
  *     - ESP_OK: Successfully initialized the file iterator instance.
  *     - ESP_FAIL: Failed to initialize the file iterator instance due to invalid parameters or memory allocation failure.
  */
-esp_err_t bsp_extra_file_instance_init(const char *path, file_iterator_instance_t **ret_instance);
+esp_err_t product_file_instance_init(const char *path, file_iterator_instance_t **ret_instance);
 
 /**
  * @brief Play the audio file at the specified index in the file iterator
@@ -181,7 +177,7 @@ esp_err_t bsp_extra_file_instance_init(const char *path, file_iterator_instance_
  *     - ESP_OK: Successfully started playing the audio file.
  *     - ESP_FAIL: Failed to play the audio file due to invalid parameters or file access issues.
  */
-esp_err_t bsp_extra_player_play_index(file_iterator_instance_t *instance, int index);
+esp_err_t product_player_play_index(file_iterator_instance_t *instance, int index);
 
 /**
  * @brief Play the audio file specified by the file path
@@ -191,7 +187,7 @@ esp_err_t bsp_extra_player_play_index(file_iterator_instance_t *instance, int in
  *     - ESP_OK: Successfully started playing the audio file.
  *     - ESP_FAIL: Failed to play the audio file due to file access issues.
  */
-esp_err_t bsp_extra_player_play_file(const char *file_path);
+esp_err_t product_player_play_file(const char *file_path);
 
 /**
  * @brief Register a callback function for the audio player
@@ -199,7 +195,7 @@ esp_err_t bsp_extra_player_play_file(const char *file_path);
  * @param cb The callback function to be registered.
  * @param user_data User data to be passed to the callback function.
  */
-void bsp_extra_player_register_callback(audio_player_cb_t cb, void *user_data);
+void product_player_register_callback(audio_player_cb_t cb, void *user_data);
 
 /**
  * @brief Check if the specified audio file is currently playing
@@ -209,7 +205,7 @@ void bsp_extra_player_register_callback(audio_player_cb_t cb, void *user_data);
  *     - true: The specified audio file is currently playing.
  *     - false: The specified audio file is not currently playing.
  */
-bool bsp_extra_player_is_playing_by_path(const char *file_path);
+bool product_player_is_playing_by_path(const char *file_path);
 
 /**
  * @brief Check if the audio file at the specified index is currently playing
@@ -220,8 +216,10 @@ bool bsp_extra_player_is_playing_by_path(const char *file_path);
  *     - true: The audio file at the specified index is currently playing.
  *     - false: The audio file at the specified index is not currently playing.
  */
-bool bsp_extra_player_is_playing_by_index(file_iterator_instance_t *instance, int index);
+bool product_player_is_playing_by_index(file_iterator_instance_t *instance, int index);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

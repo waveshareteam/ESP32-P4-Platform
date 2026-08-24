@@ -11,7 +11,7 @@ dependencies:
       - if: "idf_version >= 6.0"
         version: ">=1.6,<2.0"
       - if: "idf_version < 6.0"
-        version: "*"
+        version: "0.14.*"
   espressif/cjson:
     version: "^1.7.15"
     rules:

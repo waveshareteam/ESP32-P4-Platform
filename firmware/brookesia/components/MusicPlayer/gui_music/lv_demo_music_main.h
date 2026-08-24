@@ -14,7 +14,7 @@ extern "C" {
  *      INCLUDES
  *********************/
 #include "lv_demo_music.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 #if APP_DEMO_MUSIC_ENABLE
 
 /*********************

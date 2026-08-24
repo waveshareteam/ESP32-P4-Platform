@@ -5,6 +5,8 @@ managed_components/
 dependencies.lock
 sdkconfig
 sdkconfig.old
+.ci-build/
+.ci-artifacts/
 
 # Flash and binary artifacts
 *.bin

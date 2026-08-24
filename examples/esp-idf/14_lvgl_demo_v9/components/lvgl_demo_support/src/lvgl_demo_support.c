@@ -19,16 +19,16 @@
 #include "driver/ledc.h"
 
 #include "bsp/esp-bsp.h"
-#include "bsp_board_extra.h"
+#include "lvgl_demo_support.h"
 
-static const char *TAG = "bsp_extra_board";
+static const char *TAG = "lvgl_demo_support";
 
 static esp_codec_dev_handle_t play_dev_handle;
 static esp_codec_dev_handle_t record_dev_handle;
 
 static bool _is_audio_init = false;
 static bool _is_player_init = false;
-static int _vloume_intensity = CODEC_DEFAULT_VOLUME;
+static int _vloume_intensity = LVGL_DEMO_CODEC_DEFAULT_VOLUME;
 
 static audio_player_cb_t audio_idle_callback = NULL;
 static void *audio_idle_cb_user_data = NULL;
@@ -45,7 +45,7 @@ static esp_err_t audio_mute_function(AUDIO_PLAYER_MUTE_SETTING setting)
     // Volume saved when muting and restored when unmuting. Restoring volume is necessary
     // as es8311_set_voice_mute(true) results in voice volume (REG32) being set to zero.
 
-    bsp_extra_codec_mute_set(setting == AUDIO_PLAYER_MUTE ? true : false);
+    lvgl_demo_codec_mute_set(setting == AUDIO_PLAYER_MUTE ? true : false);
 
     // restore the voice volume upon unmuting
     if (setting == AUDIO_PLAYER_UNMUTE) {
@@ -63,7 +63,7 @@ static void audio_callback(audio_player_cb_ctx_t *ctx)
     }
 }
 
-esp_err_t bsp_extra_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read, uint32_t timeout_ms)
+esp_err_t lvgl_demo_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read, uint32_t timeout_ms)
 {
     esp_err_t ret = ESP_OK;
     ret = esp_codec_dev_read(record_dev_handle, audio_buffer, len);
@@ -71,7 +71,7 @@ esp_err_t bsp_extra_i2s_read(void *audio_buffer, size_t len, size_t *bytes_read,
     return ret;
 }
 
-esp_err_t bsp_extra_i2s_write(void *audio_buffer, size_t len, size_t *bytes_written, uint32_t timeout_ms)
+esp_err_t lvgl_demo_i2s_write(void *audio_buffer, size_t len, size_t *bytes_written, uint32_t timeout_ms)
 {
     esp_err_t ret = ESP_OK;
     ret = esp_codec_dev_write(play_dev_handle, audio_buffer, len);
@@ -79,7 +79,7 @@ esp_err_t bsp_extra_i2s_write(void *audio_buffer, size_t len, size_t *bytes_writ
     return ret;
 }
 
-esp_err_t bsp_extra_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch)
+esp_err_t lvgl_demo_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch)
 {
     esp_err_t ret = ESP_OK;
 
@@ -94,7 +94,7 @@ esp_err_t bsp_extra_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode
     }
     if (record_dev_handle) {
         ret |= esp_codec_dev_close(record_dev_handle);
-        ret |= esp_codec_dev_set_in_gain(record_dev_handle, CODEC_DEFAULT_ADC_VOLUME);
+        ret |= esp_codec_dev_set_in_gain(record_dev_handle, LVGL_DEMO_CODEC_DEFAULT_ADC_VOLUME);
     }
 
     if (play_dev_handle) {
@@ -106,7 +106,7 @@ esp_err_t bsp_extra_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode
     return ret;
 }
 
-esp_err_t bsp_extra_codec_volume_set(int volume, int *volume_set)
+esp_err_t lvgl_demo_codec_volume_set(int volume, int *volume_set)
 {
     ESP_RETURN_ON_ERROR(esp_codec_dev_set_out_vol(play_dev_handle, volume), TAG, "Set Codec volume failed");
     _vloume_intensity = volume;
@@ -116,19 +116,19 @@ esp_err_t bsp_extra_codec_volume_set(int volume, int *volume_set)
     return ESP_OK;
 }
 
-int bsp_extra_codec_volume_get(void)
+int lvgl_demo_codec_volume_get(void)
 {
     return _vloume_intensity;
 }
 
-esp_err_t bsp_extra_codec_mute_set(bool enable)
+esp_err_t lvgl_demo_codec_mute_set(bool enable)
 {
     esp_err_t ret = ESP_OK;
     ret = esp_codec_dev_set_out_mute(play_dev_handle, enable);
     return ret;
 }
 
-esp_err_t bsp_extra_codec_dev_stop(void)
+esp_err_t lvgl_demo_codec_dev_stop(void)
 {
     esp_err_t ret = ESP_OK;
 
@@ -142,12 +142,12 @@ esp_err_t bsp_extra_codec_dev_stop(void)
     return ret;
 }
 
-esp_err_t bsp_extra_codec_dev_resume(void)
+esp_err_t lvgl_demo_codec_dev_resume(void)
 {
-    return bsp_extra_codec_set_fs(CODEC_DEFAULT_SAMPLE_RATE, CODEC_DEFAULT_BIT_WIDTH, CODEC_DEFAULT_CHANNEL);
+    return lvgl_demo_codec_set_fs(LVGL_DEMO_CODEC_DEFAULT_SAMPLE_RATE, LVGL_DEMO_CODEC_DEFAULT_BIT_WIDTH, LVGL_DEMO_CODEC_DEFAULT_CHANNEL);
 }
 
-esp_err_t bsp_extra_codec_init()
+esp_err_t lvgl_demo_codec_init(void)
 {
     if (_is_audio_init) {
         return ESP_OK;
@@ -159,22 +159,22 @@ esp_err_t bsp_extra_codec_init()
     record_dev_handle = bsp_audio_codec_microphone_init();
     assert((record_dev_handle) && "record_dev_handle not initialized");
 
-    bsp_extra_codec_set_fs(CODEC_DEFAULT_SAMPLE_RATE, CODEC_DEFAULT_BIT_WIDTH, CODEC_DEFAULT_CHANNEL);
+    lvgl_demo_codec_set_fs(LVGL_DEMO_CODEC_DEFAULT_SAMPLE_RATE, LVGL_DEMO_CODEC_DEFAULT_BIT_WIDTH, LVGL_DEMO_CODEC_DEFAULT_CHANNEL);
 
     _is_audio_init = true;
 
     return ESP_OK;
 }
 
-esp_err_t bsp_extra_player_init(void)
+esp_err_t lvgl_demo_player_init(void)
 {
     if (_is_player_init) {
         return ESP_OK;
     }
 
     audio_player_config_t config = { .mute_fn = audio_mute_function,
-                                     .write_fn = bsp_extra_i2s_write,
-                                     .clk_set_fn = bsp_extra_codec_set_fs,
+                                     .write_fn = lvgl_demo_i2s_write,
+                                     .clk_set_fn = lvgl_demo_codec_set_fs,
                                      .priority = 5
                                    };
     ESP_RETURN_ON_ERROR(audio_player_new(config), TAG, "audio_player_init failed");
@@ -185,7 +185,7 @@ esp_err_t bsp_extra_player_init(void)
     return ESP_OK;
 }
 
-esp_err_t bsp_extra_player_del(void)
+esp_err_t lvgl_demo_player_del(void)
 {
     _is_player_init = false;
 
@@ -194,7 +194,7 @@ esp_err_t bsp_extra_player_del(void)
     return ESP_OK;
 }
 
-esp_err_t bsp_extra_file_instance_init(const char *path, file_iterator_instance_t **ret_instance)
+esp_err_t lvgl_demo_file_instance_init(const char *path, file_iterator_instance_t **ret_instance)
 {
     ESP_RETURN_ON_FALSE(path, ESP_FAIL, TAG, "path is NULL");
     ESP_RETURN_ON_FALSE(ret_instance, ESP_FAIL, TAG, "ret_instance is NULL");
@@ -207,7 +207,7 @@ esp_err_t bsp_extra_file_instance_init(const char *path, file_iterator_instance_
     return ESP_OK;
 }
 
-esp_err_t bsp_extra_player_play_index(file_iterator_instance_t *instance, int index)
+esp_err_t lvgl_demo_player_play_index(file_iterator_instance_t *instance, int index)
 {
     ESP_RETURN_ON_FALSE(instance, ESP_FAIL, TAG, "instance is NULL");
 
@@ -228,7 +228,7 @@ esp_err_t bsp_extra_player_play_index(file_iterator_instance_t *instance, int in
     return ESP_OK;
 }
 
-esp_err_t bsp_extra_player_play_file(const char *file_path)
+esp_err_t lvgl_demo_player_play_file(const char *file_path)
 {
     ESP_LOGI(TAG, "opening file '%s'", file_path);
     FILE *fp = fopen(file_path, "rb");
@@ -242,18 +242,18 @@ esp_err_t bsp_extra_player_play_file(const char *file_path)
     return ESP_OK;
 }
 
-void bsp_extra_player_register_callback(audio_player_cb_t cb, void *user_data)
+void lvgl_demo_player_register_callback(audio_player_cb_t cb, void *user_data)
 {
     audio_idle_callback = cb;
     audio_idle_cb_user_data = user_data;
 }
 
-bool bsp_extra_player_is_playing_by_path(const char *file_path)
+bool lvgl_demo_player_is_playing_by_path(const char *file_path)
 {
     return (strcmp(audio_file_path, file_path) == 0);
 }
 
-bool bsp_extra_player_is_playing_by_index(file_iterator_instance_t *instance, int index)
+bool lvgl_demo_player_is_playing_by_index(file_iterator_instance_t *instance, int index)
 {
     return (index == file_iterator_get_index(instance));
 }

@@ -1,6 +1,6 @@
 set(SRCS "")
 list(APPEND SRCS
-    "src/bsp_board_extra.c"
+    "src/product_support.c"
 )
 
 set(INCLUDE_DIRS "")
@@ -15,8 +15,8 @@ endforeach()
 idf_component_register(
     SRCS ${SRCS}
     INCLUDE_DIRS ${INCLUDE_DIRS}
-    REQUIRES driver esp_codec_dev
-    PRIV_REQUIRES esp32_p4_platform esp_timer fatfs esp_psram esp_mm
+    REQUIRES driver esp_codec_dev esp32_p4_platform esp-audio-player esp-file-iterator
+    PRIV_REQUIRES esp_timer fatfs esp_psram esp_mm
 )
 
 target_compile_options(
