@@ -10,7 +10,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include <ESP_Video.h>
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 #ifndef CURRENT_SCREEN
 #define CURRENT_SCREEN SCREEN_10_1_DSI_TOUCH_A

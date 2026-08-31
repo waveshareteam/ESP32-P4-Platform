@@ -303,7 +303,7 @@ class RoutingTests(unittest.TestCase):
             ".github/scripts/package_arduino_firmware.py",
             ".github/scripts/tests/test_package_arduino_firmware.py",
             ".github/scripts/tests/test_arduino_serial_readiness.py",
-            "examples/arduino/common/serial_log.h",
+            "examples/arduino/libraries/Waveshare_Arduino_Logging/src/Waveshare_Arduino_Logging.h",
         )
         for path in paths:
             with self.subTest(path=path):
@@ -450,7 +450,7 @@ class CommandLineTests(unittest.TestCase):
             ".github/scripts/package_arduino_firmware.py",
             ".github/scripts/tests/test_package_arduino_firmware.py",
             ".github/scripts/tests/test_arduino_serial_readiness.py",
-            "examples/arduino/common/serial_log.h",
+            "examples/arduino/libraries/Waveshare_Arduino_Logging/src/Waveshare_Arduino_Logging.h",
         )
         idf_only = (
             ".github/workflows/esp-idf-examples.yml",

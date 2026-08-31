@@ -3,7 +3,7 @@
 #endif
 
 #include <Arduino_GFX_Library.h>
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 // SCREEN_10_1_DSI_TOUCH_A for 10.1-DSI-Touch-A
 // SCREEN_8_DSI_TOUCH_A for 8-DSI-Touch-A

@@ -4,7 +4,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include "gt911.h"
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 static esp_lcd_touch_handle_t tp_handle = NULL;
 #define MAX_TOUCH_POINTS 5

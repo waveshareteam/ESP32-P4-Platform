@@ -28,7 +28,6 @@ GLOBAL_SKETCH_PATTERNS = (
     ".github/scripts/tests/test_arduino_serial_readiness.py",
     ".github/scripts/tests/test_ci_discovery.py",
     ".github/scripts/tests/test_package_arduino_firmware.py",
-    "examples/arduino/common/**",
     "examples/arduino/libraries/**",
 )
 ESP_IDF_ONLY_PATTERNS = (
