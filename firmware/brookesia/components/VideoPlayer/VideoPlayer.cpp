@@ -538,17 +538,17 @@ namespace esp_brookesia::apps
         if (!data || data->type != FRAME_TYPE_AUDIO)
             return;
         size_t bytes_written = 0;
-        bsp_extra_i2s_write(data->data, data->data_bytes, &bytes_written, portMAX_DELAY);
+        product_i2s_write(data->data, data->data_bytes, &bytes_written, portMAX_DELAY);
     }
 
     void VideoPlayer::audioSetClockCallback(uint32_t rate, uint32_t bits, uint32_t ch, void *arg)
     {
         if (rate == 0)
-            rate = CODEC_DEFAULT_SAMPLE_RATE;
+            rate = PRODUCT_CODEC_DEFAULT_SAMPLE_RATE;
         if (bits == 0)
-            bits = CODEC_DEFAULT_BIT_WIDTH;
+            bits = PRODUCT_CODEC_DEFAULT_BIT_WIDTH;
         i2s_slot_mode_t mode = (ch == 2) ? I2S_SLOT_MODE_STEREO : I2S_SLOT_MODE_MONO;
-        bsp_extra_codec_set_fs(rate, bits, mode);
+        product_codec_set_fs(rate, bits, mode);
     }
 
     void VideoPlayer::playEndCallback(void *arg)

@@ -62,6 +62,10 @@ mutually exclusive build targets in ESP-IDF. See
 | `Drawing_board` | Intermediate | DSI display and touch | Touch drawing demo |
 | `GFX_ESPWiFiAnalyzer` | Intermediate | DSI display and Wi-Fi | Wi-Fi scan visualization |
 | `LVGLV9_Arduino` | Advanced | DSI display, touch, PSRAM | LVGL v9 demo on Arduino |
+| `Camera_Preview` | Intermediate | OV5647, DSI display, PSRAM | MIPI-CSI preview using the shared Platform I2C bus |
+| `Camera_ISP_Tuning` | Advanced | OV5647, DSI display, PSRAM | Non-blocking serial controls for camera ISP tuning |
+| `SD_Card` | Intermediate | Inserted SD card | Four-bit SDMMC write/read check |
+| `Audio_Playback` | Intermediate | ES8311 and on-board speaker | I2S tone playback; not the LCD-5 ES7210 microphone path |
 
 ## Gaps Worth Filling
 

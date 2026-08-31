@@ -8,7 +8,7 @@
 #include "systems/phone/esp_brookesia_phone_app.hpp"
 #include "lvgl.h"
 #include "bsp/esp-bsp.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 #include "./ui/AboutPage.hpp"
 #include "./ui/DisplayPage.hpp"
 #include "./ui/SoundPage.hpp"

@@ -6,7 +6,7 @@
 
 它不需要外接模块、显示屏、摄像头、SD 卡、网络或音频 codec。示例只会通过串口监视器打印开发板和运行时信息，然后持续运行，方便初学者确认工具链、烧录流程和串口监视器都工作正常。
 
-如果你的开发板使用早于 rev v3.0 的 ESP32-P4 早期工程样片，或者需要把量产构建固定到 rev v3.0/v3.1，请在烧录前阅读 [../../../docs/ESP32P4_REVISION_CONFIG.md](../../../docs/ESP32P4_REVISION_CONFIG.md)。
+默认 profile 是面向 v3.x silicon 的 `rev3_x`/`MIN_300`。包括 v1.3 在内的 pre-v3 silicon 请显式选择 legacy `rev1_3`（`MIN_100` 和 `SELECTS_REV_LESS_V3`）；两个 profile 的生成 `sdkconfig` 和二进制不可互换。烧录前请阅读 [../../../docs/ESP32P4_REVISION_CONFIG_CN.md](../../../docs/ESP32P4_REVISION_CONFIG_CN.md)。
 
 ## 你将学到什么
 
@@ -32,7 +32,7 @@ idf.py build
 idf.py -p PORT flash monitor
 ```
 
-将 `PORT` 替换为你的串口，例如 Windows 上的 `COM7` 或 Linux 上的 `/dev/ttyACM0`。
+将 `PORT` 替换为你的串口，例如 Windows 上的 `COMx` 或 Linux 上的 `/dev/ttyACMx`。
 
 ## 预期输出
 
@@ -55,4 +55,4 @@ Board check is running. Open the serial monitor and confirm this output.
 
 - 运行 [02_HelloWorld](../02_HelloWorld/)，查看经典 ESP-IDF hello world。
 - 如果想扫描 I2C 设备，运行 [08_i2c_tools](../08_i2c_tools/)。
-- 阅读 [../../../docs/EXAMPLES_GUIDE.md](../../../docs/EXAMPLES_GUIDE.md)，为你的开发板选择下一个示例。
+- 阅读 [../../../docs/EXAMPLES_GUIDE_CN.md](../../../docs/EXAMPLES_GUIDE_CN.md)，为你的开发板选择下一个示例。

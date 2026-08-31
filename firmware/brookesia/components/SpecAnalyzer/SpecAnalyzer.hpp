@@ -3,7 +3,7 @@
 #include "systems/phone/esp_brookesia_phone_app.hpp"
 #include "esp_dsp.h"
 #include "bsp/esp-bsp.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 
 namespace esp_brookesia::apps
 {

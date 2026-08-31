@@ -58,10 +58,22 @@ bool Arduino_ESP32SPIDMA::begin(int32_t speed, int8_t dataMode)
   _speed = (speed == GFX_NOT_DEFINED) ? SPI_DEFAULT_FREQ : speed;
   _dataMode = (dataMode == GFX_NOT_DEFINED) ? SPI_MODE0 : dataMode;
 
+  // Arduino-ESP32 3.3.6 changed spiFrequencyToClockDiv() to require a
+  // spi_t pointer. DMA mode passes _speed directly to the ESP-IDF driver, so
+  // _div is unused and the legacy conversion can be skipped on newer cores.
+#if defined(ESP_ARDUINO_VERSION) && defined(ESP_ARDUINO_VERSION_VAL)
+#if ESP_ARDUINO_VERSION < ESP_ARDUINO_VERSION_VAL(3, 3, 6)
   if (!_div)
   {
     _div = spiFrequencyToClockDiv(_speed);
   }
+#endif
+#else
+  if (!_div)
+  {
+    _div = spiFrequencyToClockDiv(_speed);
+  }
+#endif
 
   // set pin mode
   if (_dc != GFX_NOT_DEFINED)

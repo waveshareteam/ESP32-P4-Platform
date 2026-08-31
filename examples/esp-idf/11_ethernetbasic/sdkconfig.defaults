@@ -2,6 +2,9 @@
 # Espressif IoT Development Framework (ESP-IDF) 5.4.0 Project Minimal Configuration
 #
 CONFIG_IDF_TARGET="esp32p4"
+# Keep the P4 bootloader within the default 0x8000 partition-table boundary.
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+CONFIG_BOOTLOADER_LOG_LEVEL=2
 CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
 CONFIG_COMPILER_OPTIMIZATION_PERF=y

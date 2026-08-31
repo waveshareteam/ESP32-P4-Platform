@@ -3,6 +3,7 @@
 #endif
 
 #include <Arduino_GFX_Library.h>
+#include "../../common/serial_log.h"
 
 // SCREEN_10_1_DSI_TOUCH_A for 10.1-DSI-Touch-A
 // SCREEN_8_DSI_TOUCH_A for 8-DSI-Touch-A
@@ -33,7 +34,7 @@ Arduino_DSI_Display *gfx = new Arduino_DSI_Display(
 
 void setup(void) {
 
-  Serial.begin(115200);
+  waveshare::logging::beginSerialLog();
   Serial.println("Arduino_GFX Hello World example");
 
   DEV_I2C_Port port = DEV_I2C_Init();

@@ -2,25 +2,19 @@ name: ESP-IDF examples
 
 on:
   pull_request:
-    paths:
-      - "examples/esp-idf/**"
-      - "config/esp32p4_rev_*.defaults"
-      - ".github/workflows/esp-idf-examples.yml"
-      - ".github/scripts/discover_esp_idf_examples.py"
   push:
     branches:
       - main
-    paths:
-      - "examples/esp-idf/**"
-      - "config/esp32p4_rev_*.defaults"
-      - ".github/workflows/esp-idf-examples.yml"
-      - ".github/scripts/discover_esp_idf_examples.py"
   workflow_dispatch:
     inputs:
       example:
         description: "ESP-IDF example directory name, path, or all"
         required: false
         default: "all"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -33,52 +27,116 @@ jobs:
       matrix: ${{ steps.examples.outputs.matrix }}
       has_examples: ${{ steps.examples.outputs.has_examples }}
       examples: ${{ steps.examples.outputs.examples }}
+      docs_only: ${{ steps.examples.outputs.docs_only }}
+      changed_path_count: ${{ steps.examples.outputs.changed_path_count }}
+      firmware_paths: ${{ steps.examples.outputs.firmware_paths }}
+      unknown_paths: ${{ steps.examples.outputs.unknown_paths }}
+      removed_examples: ${{ steps.examples.outputs.removed_examples }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout PR head
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Test CI discovery helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile .github/scripts/*.py .github/scripts/tests/*.py
+          python -m unittest discover \
+            -s .github/scripts/tests \
+            -p 'test_*.py' \
+            -v
 
       - name: Discover changed ESP-IDF examples
         id: examples
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_EXAMPLE: ${{ inputs.example }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
         run: |
           set -euo pipefail
 
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             python .github/scripts/discover_esp_idf_examples.py \
-              --example "${{ inputs.example }}"
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            python .github/scripts/discover_esp_idf_examples.py \
-              --base-ref "${{ github.event.pull_request.base.sha }}" \
-              --head-ref "${{ github.sha }}" \
-              --fallback-all
-          else
-            before="${{ github.event.before }}"
-            if [[ "$before" == "0000000000000000000000000000000000000000" ]]; then
-              before=""
+              --example "$REQUESTED_EXAMPLE"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            changed="$RUNNER_TEMP/esp-idf-changed-files.txt"
+            canonical_base="refs/remotes/canonical/${PR_BASE_REF}"
+            git fetch --no-tags --force --no-recurse-submodules \
+              "https://github.com/${GITHUB_REPOSITORY}.git" \
+              "+refs/heads/${PR_BASE_REF}:${canonical_base}"
+            if ! git cat-file -e "${PR_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PR_BASE_SHA"
             fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PR_BASE_SHA}^{commit}"
+            git cat-file -e "${PR_HEAD_SHA}^{commit}"
+            git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" >/dev/null
+            git diff --name-status --find-renames \
+              "$PR_BASE_SHA...$PR_HEAD_SHA" > "$changed"
             python .github/scripts/discover_esp_idf_examples.py \
-              --base-ref "$before" \
-              --head-ref "${{ github.sha }}" \
-              --fallback-all
+              --changed-files-from "$changed"
+          elif [[ "$PUSH_BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            # A new branch has no trustworthy before SHA, so select explicitly.
+            python .github/scripts/discover_esp_idf_examples.py --example all
+          else
+            changed="$RUNNER_TEMP/esp-idf-changed-files.txt"
+            if ! git cat-file -e "${PUSH_BASE_SHA}^{commit}"; then
+              git fetch --no-tags --force --no-recurse-submodules \
+                "https://github.com/${GITHUB_REPOSITORY}.git" "$PUSH_BASE_SHA"
+            fi
+            [[ "$(git rev-parse --is-shallow-repository)" == "false" ]]
+            git cat-file -e "${PUSH_BASE_SHA}^{commit}"
+            git cat-file -e "${GITHUB_SHA}^{commit}"
+            git diff --name-status --find-renames \
+              "$PUSH_BASE_SHA..$GITHUB_SHA" > "$changed"
+            python .github/scripts/discover_esp_idf_examples.py \
+              --changed-files-from "$changed"
           fi
 
       - name: Summary
         shell: bash
+        env:
+          SELECTED_EXAMPLES: ${{ steps.examples.outputs.examples }}
+          HAS_EXAMPLES: ${{ steps.examples.outputs.has_examples }}
+          DOCS_ONLY: ${{ steps.examples.outputs.docs_only }}
+          CHANGED_PATH_COUNT: ${{ steps.examples.outputs.changed_path_count }}
+          FIRMWARE_PATHS: ${{ steps.examples.outputs.firmware_paths }}
+          UNKNOWN_PATHS: ${{ steps.examples.outputs.unknown_paths }}
+          REMOVED_EXAMPLES: ${{ steps.examples.outputs.removed_examples }}
         run: |
-          if [[ "${{ steps.examples.outputs.has_examples }}" == "true" ]]; then
-            {
-              echo "### ESP-IDF examples selected"
+          set -euo pipefail
+          {
+            echo "### ESP-IDF change routing"
+            echo
+            echo "Changed paths: ${CHANGED_PATH_COUNT}"
+            echo "Documentation only: \`${DOCS_ONLY}\`"
+            echo "Firmware paths (outside this matrix): \`${FIRMWARE_PATHS}\`"
+            echo "Unknown paths (conservative full matrix): \`${UNKNOWN_PATHS}\`"
+            echo "Removed example roots: \`${REMOVED_EXAMPLES}\`"
+            echo
+            if [[ "$HAS_EXAMPLES" == "true" ]]; then
+              echo "#### Examples selected"
               echo
-              echo '${{ steps.examples.outputs.examples }}' | tr ',' '\n' | sed '/^$/d' | sed 's/^/- /'
-            } >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "No ESP-IDF example changes detected." >> "$GITHUB_STEP_SUMMARY"
-          fi
+              printf '%s\n' "$SELECTED_EXAMPLES" \
+                | tr ',' '\n' \
+                | sed '/^$/d' \
+                | sed 's/^/- /'
+            else
+              echo "No ESP-IDF builds are required for this change."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   build:
-    name: Build ${{ matrix.example }} (${{ matrix.idf_version }})
+    name: Build ${{ matrix.example }} (${{ matrix.idf_version }}, rev3_x default)
     needs: discover
     if: needs.discover.outputs.has_examples == 'true'
     runs-on: ubuntu-latest
@@ -87,11 +145,14 @@ jobs:
       matrix:
         example: ${{ fromJson(needs.discover.outputs.matrix).example }}
         idf_version:
-          - v5.5.4
-          - v6.0.1
+          - v5.5.5
+          - v6.0.2
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Build with ESP-IDF
         uses: espressif/esp-idf-ci-action@v1
@@ -99,3 +160,23 @@ jobs:
           esp_idf_version: ${{ matrix.idf_version }}
           target: esp32p4
           path: ${{ matrix.example }}
+          command: >-
+            idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;../../../config/esp32p4_rev3_x.defaults" build
+
+  result:
+    name: ESP-IDF examples / result
+    needs:
+      - discover
+      - build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful discovery and builds
+        shell: bash
+        env:
+          DISCOVER_RESULT: ${{ needs.discover.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: |
+          set -euo pipefail
+          [[ "$DISCOVER_RESULT" == "success" ]]
+          [[ "$BUILD_RESULT" == "success" || "$BUILD_RESULT" == "skipped" ]]

@@ -1,27 +1,37 @@
 # Security Policy
 
-## Reporting a Vulnerability
+[中文版本](SECURITY_CN.md)
 
-Please do not report security vulnerabilities in public GitHub issues.
+## Private Reporting Channel
 
-If you believe you found a vulnerability affecting code in this repository,
-contact the maintainers through the project owner's published security or
-support channel. Include:
+Do not publish vulnerability details in a GitHub issue, discussion, pull
+request, log, or screenshot.
 
-- Affected example or component path.
-- A clear description of the issue.
-- Reproduction steps or proof-of-concept details.
-- Impact and affected board or configuration, if known.
-- Whether the issue is already public.
+Submit a private ticket to the Waveshare Support Team through the official
+support portal: <https://service.waveshare.com>. Identify the repository as
+`waveshareteam/ESP32-P4-Platform` and mark the request as a security report.
+This repository does not currently accept GitHub private vulnerability reports,
+so use the support portal rather than the public issue tracker.
 
-## Scope
+Include only the information needed to investigate:
 
-This policy covers code and configuration maintained in this repository.
-Third-party libraries and managed components should also be reported upstream
-to their maintainers when the issue originates there.
+- Affected example, component, firmware package, or configuration path.
+- A clear description, impact, and affected board/revision.
+- Reproduction steps or a minimal proof of concept.
+- Relevant version and commit SHA.
+- Whether the issue or exploit is already public.
 
-## Supported Versions
+Remove unrelated credentials, tokens, personal data, private network details,
+unique device identifiers, and local paths. If a secret is essential to explain
+the issue, first ask the support team how to transfer it safely.
 
-The default branch receives documentation and example updates. Older snapshots
-or downstream forks may not receive security fixes unless explicitly stated by
-their maintainers.
+## Scope and Support
+
+This policy covers first-party code and configuration maintained in this
+repository. Vulnerabilities originating in a bundled library or managed
+component may also need coordinated reporting to that upstream maintainer.
+
+The default branch receives current fixes. Historical snapshots, release
+artifacts, and downstream forks are supported only when explicitly stated.
+No public response-time or remediation-time commitment is made by this file;
+keep the private ticket reference for follow-up.

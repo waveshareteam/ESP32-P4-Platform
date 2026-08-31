@@ -1,5 +1,7 @@
 # Arduino Hello World
 
+[简体中文](README_CN.md)
+
 Minimal Arduino display test for supported ESP32-P4 DSI display setups.
 
 ## Difficulty
@@ -24,4 +26,3 @@ Beginner.
 ## Expected Behavior
 
 The screen initializes, turns on the backlight, and prints `Hello World!`.
-

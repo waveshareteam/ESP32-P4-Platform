@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Waveshare support
-    url: https://www.waveshare.com/contact-us
-    about: Contact Waveshare for order-specific support.
+  - name: Waveshare order and warranty support / 订单与保修支持
+    url: https://service.waveshare.com
+    about: Use the official support portal for order-specific and warranty requests. / 订单和保修问题请使用官方支持门户。

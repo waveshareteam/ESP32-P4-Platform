@@ -9,8 +9,10 @@ audio codec. It only prints board and runtime information through the serial
 monitor, then keeps running so beginners can confirm that the toolchain,
 flashing process, and serial monitor are working.
 
-If your board uses an early ESP32-P4 engineering sample earlier than rev v3.0,
-or you need to pin a production build to rev v3.0/v3.1, read
+The default profile is `rev3_x`, which uses the `MIN_300` chip-revision target
+for v3.x silicon. For pre-v3 silicon, including v1.3, explicitly select legacy
+`rev1_3` (`MIN_100` and `SELECTS_REV_LESS_V3`); do not exchange generated
+`sdkconfig` files or binaries between the profiles. Read
 [../../../docs/ESP32P4_REVISION_CONFIG.md](../../../docs/ESP32P4_REVISION_CONFIG.md)
 before flashing.
 
@@ -38,8 +40,8 @@ idf.py build
 idf.py -p PORT flash monitor
 ```
 
-Replace `PORT` with your serial port, for example `COM7` on Windows or
-`/dev/ttyACM0` on Linux.
+Replace `PORT` with your serial port, for example `COMx` on Windows or
+`/dev/ttyACMx` on Linux.
 
 ## Expected Output
 

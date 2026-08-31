@@ -116,7 +116,7 @@ namespace esp_brookesia::apps
         lv_obj_set_width(brightness_slider, lv_pct(94));
         lv_obj_set_height(brightness_slider, 18);
         lv_obj_align(brightness_slider, LV_ALIGN_CENTER, 0, 0);
-        int value = bsp_display_brightness_get();
+        int value = product_display_brightness_get();
         lv_slider_set_value(brightness_slider, value, LV_ANIM_OFF);
 
         lv_obj_set_style_bg_color(brightness_slider, lv_color_hex(0x505050), LV_PART_MAIN);

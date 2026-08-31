@@ -1,5 +1,7 @@
 # AsciiTable
 
+[简体中文](README_CN.md)
+
 Arduino display text rendering example. It draws an ASCII table on a supported
 DSI display.
 
@@ -24,4 +26,3 @@ Beginner.
 ## Expected Behavior
 
 The display shows rows and columns of ASCII characters.
-

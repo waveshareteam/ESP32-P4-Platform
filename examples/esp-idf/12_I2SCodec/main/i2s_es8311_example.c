@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -18,7 +19,8 @@
 #include "example_config.h"
 
 #if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
-#include "bsp_board_extra.h"
+#include "bsp/esp-bsp.h"
+#include "esp_codec_dev.h"
 #else
 #include "es8311.h"
 #endif
@@ -30,6 +32,11 @@ static const char err_reason[][30] = {"input param is invalid",
 #if !(CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4)
 static i2s_chan_handle_t tx_handle = NULL;
 static i2s_chan_handle_t rx_handle = NULL;
+#else
+static esp_codec_dev_handle_t s_play_dev;
+static esp_codec_dev_handle_t s_record_dev;
+static bool s_play_opened;
+static bool s_record_opened;
 #endif
 
 /* Import music file as buffer */
@@ -53,12 +60,58 @@ static void gpio_init(void)
 #endif
 }
 
+#if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
+static esp_err_t p4_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t ch)
+{
+    ESP_RETURN_ON_FALSE(s_play_dev || s_record_dev, ESP_ERR_INVALID_STATE, TAG, "codec is not initialized");
+
+    esp_err_t ret = ESP_OK;
+    esp_codec_dev_sample_info_t fs = {
+        .sample_rate = rate,
+        .channel = ch,
+        .bits_per_sample = bits_cfg,
+    };
+
+    if (s_play_opened) {
+        ret |= esp_codec_dev_close(s_play_dev);
+        s_play_opened = false;
+    }
+    if (s_record_opened) {
+        ret |= esp_codec_dev_close(s_record_dev);
+        s_record_opened = false;
+    }
+    if (s_play_dev) {
+        ret |= esp_codec_dev_open(s_play_dev, &fs);
+        if (ret == ESP_OK) {
+            s_play_opened = true;
+        }
+    }
+    if (s_record_dev) {
+        ret |= esp_codec_dev_set_in_gain(s_record_dev, 24.0);
+        ret |= esp_codec_dev_open(s_record_dev, &fs);
+        if (ret == ESP_OK) {
+            s_record_opened = true;
+        }
+    }
+    return ret;
+}
+
+static esp_err_t p4_codec_volume_set(int volume)
+{
+    ESP_RETURN_ON_FALSE(s_play_dev, ESP_ERR_INVALID_STATE, TAG, "speaker codec is not initialized");
+    return esp_codec_dev_set_out_vol(s_play_dev, volume);
+}
+#endif
+
 static esp_err_t es8311_codec_init(void)
 {
 #if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
-    ESP_RETURN_ON_ERROR(bsp_extra_codec_init(), TAG, "init ESP32-P4 BSP codec failed");
-    ESP_RETURN_ON_ERROR(bsp_extra_codec_set_fs(EXAMPLE_SAMPLE_RATE, 16, I2S_SLOT_MODE_STEREO), TAG, "set ESP32-P4 BSP codec format failed");
-    ESP_RETURN_ON_ERROR(bsp_extra_codec_volume_set(EXAMPLE_VOICE_VOLUME, NULL), TAG, "set ESP32-P4 BSP codec volume failed");
+    s_play_dev = bsp_audio_codec_speaker_init();
+    ESP_RETURN_ON_FALSE(s_play_dev, ESP_FAIL, TAG, "init ESP32-P4 speaker codec failed");
+    s_record_dev = bsp_audio_codec_microphone_init();
+    ESP_RETURN_ON_FALSE(s_record_dev, ESP_FAIL, TAG, "init ESP32-P4 microphone codec failed");
+    ESP_RETURN_ON_ERROR(p4_codec_set_fs(EXAMPLE_SAMPLE_RATE, 16, I2S_SLOT_MODE_STEREO), TAG, "set ESP32-P4 BSP codec format failed");
+    ESP_RETURN_ON_ERROR(p4_codec_volume_set(EXAMPLE_VOICE_VOLUME), TAG, "set ESP32-P4 BSP codec volume failed");
     return ESP_OK;
 #else
 #if !CONFIG_EXAMPLE_BSP
@@ -159,7 +212,8 @@ static void i2s_music(void *args)
     while (1) {
 #if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
         data_ptr = (uint8_t *)music_pcm_start;
-        ret = bsp_extra_i2s_write(data_ptr, music_size, &bytes_write, portMAX_DELAY);
+        ret = esp_codec_dev_write(s_play_dev, data_ptr, music_size);
+        bytes_write = (ret == ESP_OK) ? music_size : 0;
 #else
         ret = i2s_channel_write(tx_handle, data_ptr, music_pcm_end - data_ptr, &bytes_write, portMAX_DELAY);
 #endif
@@ -195,7 +249,8 @@ static void i2s_echo(void *args)
     while (1) {
         memset(mic_data, 0, EXAMPLE_RECV_BUF_SIZE);
 #if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
-        ret = bsp_extra_i2s_read(mic_data, EXAMPLE_RECV_BUF_SIZE, &bytes_read, 1000);
+        ret = esp_codec_dev_read(s_record_dev, mic_data, EXAMPLE_RECV_BUF_SIZE);
+        bytes_read = (ret == ESP_OK) ? EXAMPLE_RECV_BUF_SIZE : 0;
 #else
         ret = i2s_channel_read(rx_handle, mic_data, EXAMPLE_RECV_BUF_SIZE, &bytes_read, 1000);
 #endif
@@ -204,7 +259,8 @@ static void i2s_echo(void *args)
             abort();
         }
 #if CONFIG_EXAMPLE_BSP && CONFIG_IDF_TARGET_ESP32P4
-        ret = bsp_extra_i2s_write(mic_data, EXAMPLE_RECV_BUF_SIZE, &bytes_write, 1000);
+        ret = esp_codec_dev_write(s_play_dev, mic_data, EXAMPLE_RECV_BUF_SIZE);
+        bytes_write = (ret == ESP_OK) ? EXAMPLE_RECV_BUF_SIZE : 0;
 #else
         ret = i2s_channel_write(tx_handle, mic_data, EXAMPLE_RECV_BUF_SIZE, &bytes_write, 1000);
 #endif

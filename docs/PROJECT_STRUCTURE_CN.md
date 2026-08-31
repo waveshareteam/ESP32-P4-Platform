@@ -13,10 +13,10 @@
 | `examples/` | ESP-IDF 和 Arduino 示例 |
 | `docs/` | 仓库级文档 |
 | `.github/` | issue 和 pull request 模板 |
-| `CONTRIBUTING.md` | 贡献工作流 |
-| `SUPPORT.md` | 支持渠道 |
-| `SECURITY.md` | 漏洞报告策略 |
-| `THIRD_PARTY.md` | 第三方代码清单 |
+| `CONTRIBUTING.md` / `CONTRIBUTING_CN.md` | 贡献工作流 |
+| `SUPPORT.md` / `SUPPORT_CN.md` | 支持渠道 |
+| `SECURITY.md` / `SECURITY_CN.md` | 可执行的私密漏洞报告策略 |
+| `THIRD_PARTY_CN.md` | 第三方代码清单 |
 | `LICENSE.txt` | Apache-2.0 license |
 
 ## ESP-IDF 示例
@@ -43,8 +43,9 @@ Arduino sketch 位于 `examples/arduino/examples/` 下。内置库位于 `exampl
 添加 Arduino 内容时：
 
 - 将 sketch 添加到 `examples/arduino/examples/<ExampleName>/`。
-- 更新 `examples/README.md`。
-- 当所需 Arduino core 或内置库版本变化时，更新 `examples/arduino/README.md`。
+- 更新 `examples/README.md` 和 `examples/README_CN.md`。
+- 当所需 Arduino core 或内置库版本变化时，更新
+  `examples/arduino/README.md` 和 `examples/arduino/README_CN.md`。
 - 在 sketch README 或注释中记录开发板引脚假设。
 
 ## 文档期望

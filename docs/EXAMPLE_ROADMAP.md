@@ -18,7 +18,8 @@ complete for both beginners and advanced users.
 - SDMMC card example.
 - I2S codec example.
 - Display, LVGL, camera, video server, and ESP-Brookesia examples.
-- Arduino display-oriented examples with bundled libraries.
+- Arduino display, touch, camera, SD-card, and ES8311 playback examples with
+  bundled libraries where required.
 
 ## High-Priority Additions
 

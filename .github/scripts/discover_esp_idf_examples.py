@@ -4,19 +4,38 @@
 from __future__ import annotations
 
 import argparse
-import fnmatch
 import json
 import os
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+
+from ci_change_routing import (
+    ChangeListError,
+    RoutingResult,
+    parse_name_status,
+    read_name_status,
+    route_changes,
+)
 
 
 EXAMPLES_ROOT = Path("examples/esp-idf")
 GLOBAL_EXAMPLE_PATTERNS = (
     ".github/workflows/esp-idf-examples.yml",
     ".github/scripts/discover_esp_idf_examples.py",
-    "config/esp32p4_rev_*.defaults",
+    ".github/scripts/ci_change_routing.py",
+    ".github/scripts/tests/test_ci_discovery.py",
+    "config/esp32p4_local_defaults.cmake",
+    "config/esp32p4_rev1_3.defaults",
+    "config/esp32p4_rev3_x.defaults",
+)
+ARDUINO_ONLY_PATTERNS = (
+    ".github/workflows/arduino-examples.yml",
+    ".github/scripts/discover_arduino_examples.py",
+    ".github/scripts/package_arduino_firmware.py",
+    ".github/scripts/tests/test_arduino_serial_readiness.py",
+    ".github/scripts/tests/test_package_arduino_firmware.py",
+    "examples/arduino/common/**",
 )
 
 
@@ -27,7 +46,7 @@ def run_git(args: list[str]) -> list[str]:
         text=True,
         stdout=subprocess.PIPE,
     )
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    return result.stdout.splitlines()
 
 
 def list_examples() -> list[str]:
@@ -52,38 +71,37 @@ def normalize_example(value: str) -> str:
     return (EXAMPLES_ROOT / value).as_posix()
 
 
-def discover_from_paths(paths: list[str], known_examples: set[str]) -> list[str]:
-    selected = set()
-    root_prefix = EXAMPLES_ROOT.as_posix() + "/"
-
-    for changed_path in paths:
-        changed_path = changed_path.strip().strip("/")
-        if any(fnmatch.fnmatch(changed_path, pattern) for pattern in GLOBAL_EXAMPLE_PATTERNS):
-            selected.update(known_examples)
-            continue
-
-        if not changed_path.startswith(root_prefix):
-            continue
-
-        parts = Path(changed_path).parts
-        if len(parts) < 3:
-            selected.update(known_examples)
-            continue
-
-        example = Path(*parts[:3]).as_posix()
-        if example in known_examples:
-            selected.add(example)
-
-    return sorted(selected)
-
-
-def discover_changed_examples(base_ref: str | None, head_ref: str, known_examples: set[str]) -> list[str]:
-    if base_ref:
-        diff_args = ["diff", "--name-only", f"{base_ref}...{head_ref}"]
+def route_changed_examples(
+    *,
+    known_examples: set[str],
+    changed_files_from: Path | None = None,
+    base_ref: str | None = None,
+    head_ref: str = "HEAD",
+) -> RoutingResult:
+    if changed_files_from is not None:
+        changes = read_name_status(changed_files_from)
+    elif base_ref:
+        changes = parse_name_status(
+            run_git(
+                [
+                    "diff",
+                    "--name-status",
+                    "--find-renames",
+                    f"{base_ref}...{head_ref}",
+                ]
+            )
+        )
     else:
-        diff_args = ["diff-tree", "--no-commit-id", "--name-only", "-r", head_ref]
+        raise ChangeListError("provide --changed-files-from or --base-ref")
 
-    return discover_from_paths(run_git(diff_args), known_examples)
+    return route_changes(
+        changes,
+        known_entries=known_examples,
+        root=PurePosixPath(EXAMPLES_ROOT.as_posix()),
+        other_framework_root=PurePosixPath("examples/arduino"),
+        global_patterns=GLOBAL_EXAMPLE_PATTERNS,
+        other_framework_patterns=ARDUINO_ONLY_PATTERNS,
+    )
 
 
 def github_output(name: str, value: str) -> None:
@@ -97,16 +115,29 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-ref")
     parser.add_argument("--head-ref", default="HEAD")
+    parser.add_argument("--changed-files-from", type=Path)
     parser.add_argument("--example", default="")
-    parser.add_argument(
-        "--fallback-all",
-        action="store_true",
-        help="Build all examples when no changed example is detected.",
-    )
     args = parser.parse_args()
 
     known_examples = set(list_examples())
+    if not known_examples:
+        print("No first-party ESP-IDF examples were discovered.", file=sys.stderr)
+        return 2
     requested_example = normalize_example(args.example)
+    if requested_example and (args.changed_files_from or args.base_ref):
+        print(
+            "--example cannot be combined with changed-file selection",
+            file=sys.stderr,
+        )
+        return 2
+    if args.changed_files_from and args.base_ref:
+        print(
+            "--changed-files-from and --base-ref are mutually exclusive",
+            file=sys.stderr,
+        )
+        return 2
+
+    routing = RoutingResult((), False, (), (), (), 0)
 
     if requested_example == "all":
         selected = sorted(known_examples)
@@ -119,9 +150,17 @@ def main() -> int:
             return 1
         selected = [requested_example]
     else:
-        selected = discover_changed_examples(args.base_ref, args.head_ref, known_examples)
-        if args.fallback_all and not selected:
-            selected = sorted(known_examples)
+        try:
+            routing = route_changed_examples(
+                known_examples=known_examples,
+                changed_files_from=args.changed_files_from,
+                base_ref=args.base_ref,
+                head_ref=args.head_ref,
+            )
+        except (ChangeListError, subprocess.CalledProcessError) as exc:
+            print(f"Could not classify changed files: {exc}", file=sys.stderr)
+            return 2
+        selected = list(routing.selected)
 
     matrix = {"example": selected}
     matrix_json = json.dumps(matrix, separators=(",", ":"))
@@ -130,6 +169,11 @@ def main() -> int:
     github_output("matrix", matrix_json)
     github_output("has_examples", has_examples)
     github_output("examples", ",".join(selected))
+    github_output("docs_only", "true" if routing.docs_only else "false")
+    github_output("changed_path_count", str(routing.changed_path_count))
+    github_output("firmware_paths", json.dumps(routing.firmware_paths))
+    github_output("unknown_paths", json.dumps(routing.unknown_paths))
+    github_output("removed_examples", json.dumps(routing.removed_entries))
 
     print(matrix_json)
     return 0

@@ -16,7 +16,7 @@
 
 #include "lv_demo_music.h"
 #include "esp_log.h"
-#include "bsp_board_extra.h"
+#include "product_support.h"
 #include "audio_player.h"
 
 /*********************
@@ -376,13 +376,13 @@ void lv_demo_music_resume(void)
     lv_slider_set_range(slider_obj, 0, lv_demo_music_get_track_length(track_id));
 
     lv_obj_add_state(play_obj, LV_STATE_CHECKED);
-    if (!pause_exit && pause && bsp_extra_player_is_playing_by_index(file_iterator, track_id)) {
+    if (!pause_exit && pause && product_player_is_playing_by_index(file_iterator, track_id)) {
         LV_LOG_USER("Resume music");
         audio_player_resume();
     } else {
         pause_exit = false;
         LV_LOG_USER("Music is not playing. Start playing.");
-        bsp_extra_player_play_index(file_iterator, track_id);
+        product_player_play_index(file_iterator, track_id);
     }
 
     playing = true;

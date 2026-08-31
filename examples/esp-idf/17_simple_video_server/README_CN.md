@@ -5,7 +5,7 @@
 
 # Simple Video Server 示例
 
-*(更多示例信息请参见上一级 [examples](../) 目录中的 [README.md](../README.md) 文件。)*
+*(更多示例信息请参见[示例总览](../../README_CN.md)。)*
 
 ## 概览
 
@@ -42,7 +42,7 @@
 
 ### 硬件配置
 
-使用此示例前，请参考 [video initialization configuration guide](components/example_video_common/README.md)，了解以下详细信息：
+使用此示例前，请参考 [video initialization configuration guide](components/example_video_common/README_CN.md)，了解以下详细信息：
 
 - 板级配置
 - 摄像头传感器接口设置
@@ -209,16 +209,16 @@ I (1628) main_task: Started on CPU0
 I (1638) esp_psram: Reserving pool of 32K of internal memory for DMA/internal allocations
 I (1638) main_task: Calling app_main()
 I (1648) mdns_mem: mDNS task will be created from internal RAM
-I (1698) esp_eth.netif.netif_glue: 60:55:f9:fb:c2:3a
+I (1698) esp_eth.netif.netif_glue: xx:xx:xx:xx:xx:xx
 I (1698) esp_eth.netif.netif_glue: ethernet attached to netif
 I (3298) ethernet_connect: Waiting for IP(s).
 I (3298) ethernet_connect: Ethernet Link Up
-I (4648) ethernet_connect: Got IPv6 event: Interface "example_netif_eth" address: fe80:0000:0000:0000:6255:f9ff:fefb:c23a, type: ESP_IP6_ADDR_IS_LINK_LOCAL
-I (5298) esp_netif_handlers: example_netif_eth ip: 172.168.30.45, mask: 255.255.255.0, gw: 172.168.30.1
-I (5298) ethernet_connect: Got IPv4 event: Interface "example_netif_eth" address: 172.168.30.45
+I (4648) ethernet_connect: Got IPv6 event: Interface "example_netif_eth" address: fe80::1234, type: ESP_IP6_ADDR_IS_LINK_LOCAL
+I (5298) esp_netif_handlers: example_netif_eth ip: 192.0.2.45, mask: 255.255.255.0, gw: 192.0.2.1
+I (5298) ethernet_connect: Got IPv4 event: Interface "example_netif_eth" address: 192.0.2.45
 I (5298) example_common: Connected to example_netif_eth
-I (5308) example_common: - IPv4 address: 172.168.30.45,
-I (5308) example_common: - IPv6 address: fe80:0000:0000:0000:6255:f9ff:fefb:c23a, type: ESP_IP6_ADDR_IS_LINK_LOCAL
+I (5308) example_common: - IPv4 address: 192.0.2.45,
+I (5308) example_common: - IPv6 address: fe80::1234, type: ESP_IP6_ADDR_IS_LINK_LOCAL
 I (5318) example_init_video: MIPI-CSI camera sensor I2C port=0, scl_pin=8, sda_pin=7, freq=100000
 I (5328) example_init_video: DVP camera sensor I2C port=1, scl_pin=8, sda_pin=7, freq=100000
 I (5378) ov2640: Detected Camera sensor PID=0x26
@@ -237,7 +237,7 @@ I (5918) main_task: Returned from app_main()
 1. **打开浏览器**并访问以下地址之一：
 
    - `http://esp-web.local`（使用 mDNS）
-   - `http://172.168.30.45`（替换为日志输出中的设备 IP 地址）
+   - `http://192.0.2.45`（文档示例地址，请替换为日志输出中的设备 IP 地址）
 
 2. **Web 界面功能：**
 

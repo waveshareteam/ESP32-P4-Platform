@@ -1,0 +1,23 @@
+dependencies:
+  idf:
+    version: '>=5.5'
+
+  waveshare/esp32_p4_platform:
+    version: "2.0.1"
+
+  espressif/esp_codec_dev:
+    version: "*"
+    public: true
+
+  chmorgan/esp-audio-player:
+    version: "1.0.*"
+    public: true
+
+  chmorgan/esp-file-iterator:
+    version: "1.0.0"
+    public: true
+
+description: Product audio, player, and display-brightness support
+targets:
+- esp32p4
+version: 0.0.2

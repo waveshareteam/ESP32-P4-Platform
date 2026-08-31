@@ -57,6 +57,10 @@
 | `Drawing_board` | 中级用户 | DSI display 和 touch | 触摸绘图 demo |
 | `GFX_ESPWiFiAnalyzer` | 中级用户 | DSI display 和 Wi-Fi | Wi-Fi 扫描可视化 |
 | `LVGLV9_Arduino` | 高级用户 | DSI display、touch、PSRAM | Arduino 上的 LVGL v9 demo |
+| `Camera_Preview` | 中级用户 | OV5647、DSI display、PSRAM | 使用共用 Platform I2C bus 的 MIPI-CSI 预览 |
+| `Camera_ISP_Tuning` | 高级用户 | OV5647、DSI display、PSRAM | 通过非阻塞串口命令调校 camera ISP |
+| `SD_Card` | 中级用户 | 已插入的 SD 卡 | 四位 SDMMC 写入/回读检查 |
+| `Audio_Playback` | 中级用户 | ES8311 和板载 speaker | I2S 音调播放；不是 LCD-5 的 ES7210 麦克风路径 |
 
 ## 值得补齐的空白
 

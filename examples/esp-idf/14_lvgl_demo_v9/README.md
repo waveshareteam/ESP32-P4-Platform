@@ -29,9 +29,11 @@ idf.py -p PORT flash monitor
 
 ## Configuration
 
-This example uses LVGL v9 and BSP/display-related managed components. Check
-`main/idf_component.yml`, `components/bsp_extra/idf_component.yml`, and
-`sdkconfig.defaults` when changing LVGL or display behavior.
+This example uses LVGL v9 and the online
+`waveshare/esp32_p4_platform` `2.0.1` managed BSP component.
+`components/lvgl_demo_support` is local product glue, not a BSP copy. Check
+`main/idf_component.yml` and `sdkconfig.defaults` when changing LVGL or
+display behavior.
 
 The current application starts the BSP display with:
 

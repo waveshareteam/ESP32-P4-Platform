@@ -1,5 +1,7 @@
 # GFX ESP Wi-Fi Analyzer
 
+[简体中文](README_CN.md)
+
 Arduino Wi-Fi scan visualization example using Arduino_GFX.
 
 ## Difficulty
@@ -28,4 +30,3 @@ The display shows nearby Wi-Fi networks and their signal levels.
 
 - Confirm your board has Wi-Fi support.
 - Confirm the display initializes with the simpler `HelloWorld` sketch first.
-

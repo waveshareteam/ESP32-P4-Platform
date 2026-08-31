@@ -7,6 +7,7 @@
 #include <lvgl.h>
 #include "lv_conf.h"
 #include <demos/lv_demos.h>
+#include "../../common/serial_log.h"
 
 static esp_lcd_touch_handle_t tp_handle = NULL;
 #define MAX_TOUCH_POINTS 5
@@ -57,6 +58,11 @@ void my_disp_flush(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map) {
 }
 
 void my_touchpad_read(lv_indev_t *indev, lv_indev_data_t *data) {
+  if (tp_handle == NULL) {
+    data->state = LV_INDEV_STATE_RELEASED;
+    return;
+  }
+
   esp_lcd_touch_read_data(tp_handle);
   touch_pressed = esp_lcd_touch_get_coordinates(
     tp_handle, touch_x, touch_y, touch_strength, &touch_cnt, MAX_TOUCH_POINTS);
@@ -75,7 +81,7 @@ void lvglTick(void *param) {
 }
 
 void setup(void) {
-  Serial.begin(115200);
+  waveshare::logging::beginSerialLog();
   Serial.println("Arduino GFX + LVGL Integration");
 
   delay(1000);

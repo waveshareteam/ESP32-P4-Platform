@@ -4,6 +4,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include "gt911.h"
+#include "../../common/serial_log.h"
 
 static esp_lcd_touch_handle_t tp_handle = NULL;
 #define MAX_TOUCH_POINTS 5
@@ -41,7 +42,7 @@ Arduino_DSI_Display *gfx = new Arduino_DSI_Display(
 
 void setup(void) {
 
-  Serial.begin(115200);
+  waveshare::logging::beginSerialLog();
   Serial.println("Arduino_GFX Hello World example");
 
   delay(1000);
@@ -68,10 +69,12 @@ void setup(void) {
 
 void loop() {
 
-  esp_lcd_touch_read_data(tp_handle);
-
-  bool pressed = esp_lcd_touch_get_coordinates(
-    tp_handle, touch_x, touch_y, touch_strength, &touch_cnt, MAX_TOUCH_POINTS);
+  bool pressed = false;
+  if (tp_handle != NULL) {
+    esp_lcd_touch_read_data(tp_handle);
+    pressed = esp_lcd_touch_get_coordinates(
+      tp_handle, touch_x, touch_y, touch_strength, &touch_cnt, MAX_TOUCH_POINTS);
+  }
 
   if (pressed && touch_cnt > 0) {
     for (int i = 0; i < touch_cnt; i++) {

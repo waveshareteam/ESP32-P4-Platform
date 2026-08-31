@@ -4,4 +4,4 @@ dependencies:
   esp_video:
     version: ">=2.2,<3.0"
     public: true
-  waveshare/esp32_p4_platform: "*"
+  waveshare/esp32_p4_platform: "2.0.1"

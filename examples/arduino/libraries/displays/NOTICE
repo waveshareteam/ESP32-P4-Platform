@@ -1,0 +1,11 @@
+License and provenance
+
+The gt911.cpp, gt911.h, touch.cpp, and touch.h files are Arduino adaptations
+of Espressif's esp_lcd_touch and esp_lcd_touch_gt911 components. The pinned
+upstream source is:
+
+https://github.com/espressif/esp-bsp/tree/442c9b3f21b3fe23dfe2e7470c14b7e74c956048/components/lcd_touch
+
+Those Espressif portions are licensed under Apache-2.0 and retain their
+original copyright ownership. The other files in this directory are Waveshare
+display and I2C integration code covered by the repository's LICENSE.txt.

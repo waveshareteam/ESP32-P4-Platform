@@ -1,5 +1,7 @@
 # Examples
 
+[中文版本](README_CN.md)
+
 This directory contains both ESP-IDF projects and Arduino sketches for the
 Waveshare ESP32-P4 platform boards.
 
@@ -16,11 +18,18 @@ idf.py build
 idf.py -p PORT flash monitor
 ```
 
-ESP32-P4 production v3.x chips and earlier pre-v3 engineering samples require
-different ESP-IDF build profiles. The examples keep revision selection in the
-shared overlays under [../config](../config/). See
+ESP32-P4 production v3.x chips and earlier pre-v3 chips require different
+ESP-IDF build profiles. The default is `rev3_x`/`MIN_300`; select legacy
+`rev1_3`/`MIN_100` explicitly for pre-v3 silicon including v1.3. The examples
+keep revision selection in the shared overlays under [../config](../config/).
+Generated `sdkconfig` files and binaries are not interchangeable. See
 [../docs/ESP32P4_REVISION_CONFIG.md](../docs/ESP32P4_REVISION_CONFIG.md) before
 flashing across different chip revision families.
+
+Managed dependency policy and the classification of example-local components
+are documented in [../docs/COMPONENTS.md](../docs/COMPONENTS.md). For P4 boards
+using a C6 Wi-Fi coprocessor, also read
+[../docs/P4_C6_HOSTED_WIFI.md](../docs/P4_C6_HOSTED_WIFI.md).
 
 | Directory | Purpose | Notes |
 | --- | --- | --- |
@@ -49,7 +58,8 @@ flashing across different chip revision families.
 
 Arduino examples are under [arduino/examples](arduino/examples/). The
 [arduino/README.md](arduino/README.md) file documents the recommended
-Arduino-ESP32 core and bundled libraries.
+Arduino-ESP32 core and bundled libraries. A
+[Chinese Arduino guide](arduino/README_CN.md) is also available.
 
 | Directory | Purpose |
 | --- | --- |
@@ -58,6 +68,16 @@ Arduino-ESP32 core and bundled libraries.
 | [GFX_ESPWiFiAnalyzer](arduino/examples/GFX_ESPWiFiAnalyzer/) | Wi-Fi analyzer UI |
 | [HelloWorld](arduino/examples/HelloWorld/) | Minimal Arduino sketch |
 | [LVGLV9_Arduino](arduino/examples/LVGLV9_Arduino/) | LVGL v9 Arduino example |
+| [Camera_Preview](arduino/examples/Camera_Preview/) | OV5647 camera preview; requires PSRAM and the Platform I2C bus |
+| [Camera_ISP_Tuning](arduino/examples/Camera_ISP_Tuning/) | OV5647 ISP tuning; requires PSRAM and the Platform I2C bus |
+| [SD_Card](arduino/examples/SD_Card/) | SD-card access; requires an inserted card |
+| [Audio_Playback](arduino/examples/Audio_Playback/) | ES8311 playback using the on-board speaker |
+
+The Arduino default is `ChipVariant=postv3` (v3.00+, 400 MHz). Use the
+explicit `prev3`/360 MHz option only for legacy pre-v3 boards. Camera sketches
+require a supported OV5647 and PSRAM; they reuse the Platform I2C bus. The
+Platform audio surface is ES8311 output, so LCD-5's ES7210 `Mic_Record` is not
+part of this product example set. Compilation is not a hardware check.
 
 The [arduino/libraries](arduino/libraries/) directory contains bundled
 libraries used by these sketches. Check each library's own metadata and
