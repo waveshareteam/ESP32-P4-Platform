@@ -8,7 +8,7 @@
 #include <Wire.h>
 #include <driver/i2s.h>
 #include "esp_check.h"
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 #include "es8311.h"
 
 constexpr int PLATFORM_ES8311_ADDRESS = 0x18;

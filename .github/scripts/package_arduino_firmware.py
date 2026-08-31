@@ -231,7 +231,7 @@ STOCK_BINARY_PATH_RE = re.compile(
 # Deterministic labels emitted by this workflow or by the pinned ESP32-P4
 # precompiled runtime are public source identities, not host filesystem roots.
 STOCK_SYNTHETIC_PATH_RE = re.compile(
-    rb"^(?:/product/examples/arduino/(?:common|examples|libraries)/"
+    rb"^(?:/product/examples/arduino/(?:examples|libraries)/"
     rb"[A-Za-z0-9._+\-/]+|/\./managed_components/"
     rb"(?:espressif__esp_hosted|espressif__esp_video|espressif__esp_wifi_remote)/"
     rb"[A-Za-z0-9._+\-/]+)$"

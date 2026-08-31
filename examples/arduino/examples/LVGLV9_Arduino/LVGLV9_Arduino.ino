@@ -7,7 +7,7 @@
 #include <lvgl.h>
 #include "lv_conf.h"
 #include <demos/lv_demos.h>
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 static esp_lcd_touch_handle_t tp_handle = NULL;
 #define MAX_TOUCH_POINTS 5

@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <SD_MMC.h>
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 constexpr int PLATFORM_SD_CLK = 43;
 constexpr int PLATFORM_SD_CMD = 44;

@@ -11,8 +11,11 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SKETCH_ROOT = REPO_ROOT / "examples" / "arduino" / "examples"
-COMMON_ROOT = REPO_ROOT / "examples" / "arduino" / "common"
-HELPER = COMMON_ROOT / "serial_log.h"
+ARDUINO_ROOT = REPO_ROOT / "examples" / "arduino"
+LOGGING_LIBRARY_ROOT = ARDUINO_ROOT / "libraries" / "Waveshare_Arduino_Logging"
+LOGGING_LIBRARY_SOURCE = LOGGING_LIBRARY_ROOT / "src"
+HELPER = LOGGING_LIBRARY_SOURCE / "Waveshare_Arduino_Logging.h"
+LIBRARY_PROPERTIES = LOGGING_LIBRARY_ROOT / "library.properties"
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".h", ".hh", ".hpp", ".ino"}
 SERIAL_OBJECT = r"(?:Serial[0-9]*|USBSerial|HWCDCSerial)"
 
@@ -39,19 +42,27 @@ class ArduinoSerialReadinessTests(unittest.TestCase):
         self.sketches = sorted(SKETCH_ROOT.glob("*/*.ino"))
         self.first_party_sources = sorted(
             path
-            for root in (SKETCH_ROOT, COMMON_ROOT)
+            for root in (SKETCH_ROOT, LOGGING_LIBRARY_SOURCE)
             for path in root.rglob("*")
             if path.is_file() and path.suffix.lower() in SOURCE_SUFFIXES
         )
 
+    def test_serial_initializer_is_a_bundled_arduino_library(self):
+        self.assertFalse((ARDUINO_ROOT / "common").exists())
+        self.assertTrue(HELPER.is_file(), "logging library header is missing")
+        properties = LIBRARY_PROPERTIES.read_text(encoding="utf-8")
+        self.assertIn("name=Waveshare Arduino Logging\n", properties)
+        self.assertIn("architectures=esp32\n", properties)
+        self.assertIn("includes=Waveshare_Arduino_Logging.h\n", properties)
+
     def test_all_nine_first_party_sketches_use_shared_non_waiting_initializer(self):
         self.assertEqual({path.parent.name for path in self.sketches}, EXPECTED_SKETCHES)
-        self.assertTrue(HELPER.is_file(), "shared serial log helper is missing")
+        self.assertTrue(HELPER.is_file(), "logging library header is missing")
 
         for sketch in self.sketches:
             source = sketch.read_text(encoding="utf-8")
             with self.subTest(sketch=sketch.relative_to(REPO_ROOT)):
-                self.assertIn('#include "../../common/serial_log.h"', source)
+                self.assertIn("#include <Waveshare_Arduino_Logging.h>", source)
                 self.assertEqual(source.count("waveshare::logging::beginSerialLog();"), 1)
                 self.assertNotRegex(source, r"\b(?:Serial|USBSerial)\s*\.\s*begin\s*\(")
 
@@ -60,11 +71,10 @@ class ArduinoSerialReadinessTests(unittest.TestCase):
             self.first_party_sources,
             "no first-party Arduino serial sources were found",
         )
-        self.assertNotIn(
-            REPO_ROOT / "examples" / "arduino" / "libraries",
-            {parent for path in self.first_party_sources for parent in path.parents},
-            "bundled library examples must remain outside the first-party readiness scan",
-        )
+        library_sources = [
+            path for path in self.first_party_sources if LOGGING_LIBRARY_ROOT in path.parents
+        ]
+        self.assertEqual(library_sources, [HELPER])
 
         for path in self.first_party_sources:
             source = path.read_text(encoding="utf-8")
@@ -159,7 +169,7 @@ class ArduinoSerialReadinessTests(unittest.TestCase):
             uint32_t fake_millis = 0;
             FakeSerial Serial;
 
-            #include "examples/arduino/common/serial_log.h"
+            #include <Waveshare_Arduino_Logging.h>
 
             int main() {{
               waveshare::logging::beginSerialLog();
@@ -194,7 +204,7 @@ class ArduinoSerialReadinessTests(unittest.TestCase):
                     "-I",
                     str(temp),
                     "-I",
-                    str(REPO_ROOT),
+                    str(LOGGING_LIBRARY_SOURCE),
                     str(temp / "harness.cpp"),
                     "-o",
                     str(executable),

@@ -4,7 +4,7 @@
 
 #include <Arduino_GFX_Library.h>
 #include "WiFi.h"
-#include "../../common/serial_log.h"
+#include <Waveshare_Arduino_Logging.h>
 
 int16_t w, h, text_size, banner_height, graph_baseline, graph_height, channel_width, signal_width;
 

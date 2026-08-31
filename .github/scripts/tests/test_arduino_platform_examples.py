@@ -131,7 +131,7 @@ class ArduinoPlatformExamplesTests(unittest.TestCase):
     def test_each_sketch_uses_the_shared_nonblocking_serial_initializer_once(self):
         for name, source in self.sources.items():
             with self.subTest(sketch=name):
-                self.assertIn('#include "../../common/serial_log.h"', source)
+                self.assertIn("#include <Waveshare_Arduino_Logging.h>", source)
                 self.assertEqual(source.count("waveshare::logging::beginSerialLog();"), 1)
                 self.assertNotRegex(source, r"\b(?:Serial|USBSerial)\s*\.\s*begin\s*\(")
 
