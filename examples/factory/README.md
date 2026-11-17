@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Run a dark-card interface for the 800 x 1280 rectangular portrait display, with calculator, drawing, spectrum, music, camera, video and settings apps. The music view shows the bundled audio file names and provides playback, pause, track selection and a playlist.
+Run the reference Brookesia icon launcher on the 800 x 1280 rectangular portrait display, with calculator, drawing, spectrum, music, camera, video and settings apps. The music view shows the bundled audio file names and provides playback, pause, track selection and a playlist.
 
 ## Hardware Required
 
@@ -22,7 +22,7 @@ idf.py build flash monitor
 
 ## Expected Result
 
-The launcher uses a three-column app grid, with blue settings controls and consistent back navigation; camera and video retain their full-screen views. The image below is a software-rendered UI preview.
+The launcher shows four icons per page over the Brookesia wallpaper, with horizontal paging and press animations; settings uses blue controls, while camera and video retain their full-screen views. The images below are software-rendered UI previews.
 
 | Launcher | Settings |
 | --- | --- |
