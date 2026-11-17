@@ -1,5 +1,6 @@
 #include "WlanPage.hpp"
 #include "../Settings.hpp"
+#include "factory_ui.hpp"
 
 #define ESP_UTILS_LOG_TAG "BS:WlanPage"
 #include "esp_lib_utils.h"
@@ -14,10 +15,10 @@ LV_IMG_DECLARE(wifi_4);
 
 namespace esp_brookesia::apps
 {
-    static constexpr int SETTINGS_PAGE_MARGIN = 40;
+    static constexpr int SETTINGS_PAGE_MARGIN = factory_ui::GUTTER;
     static constexpr int SETTINGS_LIST_WIDTH = BSP_LCD_H_RES - SETTINGS_PAGE_MARGIN * 2;
-    static constexpr int SETTINGS_LIST_HEIGHT = BSP_LCD_V_RES - 220;
-    static constexpr int SETTINGS_ROW_HEIGHT = 88;
+    static constexpr int SETTINGS_LIST_HEIGHT = factory_ui::HEIGHT - factory_ui::CONTENT_TOP - factory_ui::NAVIGATION_HEIGHT - 16;
+    static constexpr int SETTINGS_ROW_HEIGHT = 112;
 
     WlanPage *WlanPage::_instance = nullptr;
 
@@ -151,6 +152,8 @@ namespace esp_brookesia::apps
             lv_style_reset(&style_list_btn_pressed);
         }
 
+        if (page_root) lv_obj_delete(page_root);
+        page_root = nullptr;
         return true;
     }
 
@@ -158,79 +161,57 @@ namespace esp_brookesia::apps
     void WlanPage::CreateWifiUI()
     {
         lv_obj_clean(lv_scr_act());
+        auto view = factory_ui::page(lv_scr_act(), "Wi-Fi", [](lv_event_t *) {
+            lv_async_call([](void *) {
+                WlanPage::requestInstance(true, false)->close();
+                Settings::requestInstance(true, false)->run();
+            }, nullptr);
+        }, this);
+        page_root = view.root;
+        status_btn = view.back;
+        lv_obj_delete(view.content);
 
         lv_style_init(&style_list);
         lv_style_init(&style_list_btn);
         lv_style_init(&style_list_text);
         lv_style_init(&style_list_btn_pressed);
 
-        lv_style_set_pad_all(&style_list, 5);
-        lv_style_set_pad_row(&style_list, 2);
+        lv_style_set_pad_all(&style_list, 0);
+        lv_style_set_pad_row(&style_list, 16);
         lv_style_set_border_width(&style_list, 0);
-        lv_style_set_radius(&style_list, 10);
-        lv_style_set_bg_color(&style_list, lv_color_hex(0x000000));
+        lv_style_set_radius(&style_list, 0);
+        lv_style_set_bg_color(&style_list, lv_color_hex(factory_ui::BACKGROUND));
         lv_style_set_bg_opa(&style_list, LV_OPA_COVER);
 
         lv_style_set_height(&style_list_btn, SETTINGS_ROW_HEIGHT);
-        lv_style_set_pad_all(&style_list_btn, 16);
-        lv_style_set_radius(&style_list_btn, 8);
-        lv_style_set_bg_color(&style_list_btn, lv_color_hex(0x38393A));
+        lv_style_set_pad_all(&style_list_btn, 24);
+        lv_style_set_radius(&style_list_btn, 24);
+        lv_style_set_bg_color(&style_list_btn, lv_color_hex(factory_ui::CARD));
         lv_style_set_text_font(&style_list_btn, &lv_font_montserrat_30);
         lv_style_set_text_color(&style_list_btn, lv_color_hex(0xFFFFFF));
-        lv_style_set_border_width(&style_list_btn, 1);
+        lv_style_set_border_width(&style_list_btn, 0);
         lv_style_set_border_side(&style_list_btn, LV_BORDER_SIDE_BOTTOM);
-        lv_style_set_border_color(&style_list_btn, lv_color_hex(0x505050));
+        lv_style_set_border_color(&style_list_btn, lv_color_hex(factory_ui::PRESSED));
 
-        lv_style_set_text_font(&style_list_text, &lv_font_montserrat_30);
-        lv_style_set_text_color(&style_list_text, lv_color_hex(0xFFFFFF));
-        lv_style_set_bg_color(&style_list_text, lv_color_hex(0x000000));
+        lv_style_set_text_font(&style_list_text, &lv_font_montserrat_24);
+        lv_style_set_text_color(&style_list_text, lv_color_hex(factory_ui::HINT));
+        lv_style_set_bg_color(&style_list_text, lv_color_hex(factory_ui::BACKGROUND));
         lv_style_set_bg_opa(&style_list_text, LV_OPA_COVER);
         lv_style_set_pad_all(&style_list_text, 10);
         lv_style_set_pad_bottom(&style_list_text, 5);
 
-        lv_style_set_bg_color(&style_list_btn_pressed, lv_color_hex(0x505050));
+        lv_style_set_bg_color(&style_list_btn_pressed, lv_color_hex(factory_ui::PRESSED));
         lv_style_set_text_color(&style_list_btn_pressed, lv_color_hex(0xFFFFFF));
-        lv_style_set_border_color(&style_list_btn_pressed, lv_color_hex(0x505050));
+        lv_style_set_border_color(&style_list_btn_pressed, lv_color_hex(factory_ui::PRESSED));
 
         lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
         lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
 
-        list1 = lv_list_create(lv_scr_act());
+        list1 = lv_list_create(page_root);
         lv_obj_add_style(list1, &style_list, 0);
         lv_obj_set_size(list1, SETTINGS_LIST_WIDTH, SETTINGS_LIST_HEIGHT);
-        lv_obj_center(list1);
+        lv_obj_set_pos(list1, factory_ui::GUTTER, factory_ui::CONTENT_TOP);
         lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
-
-        static lv_style_t style_status;
-        lv_style_init(&style_status);
-        lv_style_set_text_font(&style_status, &lv_font_montserrat_30);
-        lv_style_set_text_color(&style_status, lv_color_hex(0x00BFFF));
-        lv_style_set_bg_color(&style_status, lv_color_hex(0x38393A));
-        lv_style_set_bg_opa(&style_status, LV_OPA_COVER);
-        lv_style_set_pad_all(&style_status, 10);
-
-        status_btn = lv_list_add_btn(list1, LV_SYMBOL_LEFT, "back");
-        lv_obj_add_style(status_btn, &style_status, 0);
-        lv_obj_add_event_cb(status_btn, [](lv_event_t *e)
-                            {
-        (void)e;
-        ESP_UTILS_LOGI("Goback clicked!");
-        lv_async_call([](void *param) {
-            (void)param;
-            auto wlan = WlanPage::requestInstance(true, false);
-            wlan->close();
-            auto settings = Settings::requestInstance(true, false);
-            settings->run();
-        }, nullptr); }, LV_EVENT_CLICKED, nullptr);
-         
-        lv_obj_t * wifi_ant_btn = lv_button_create(status_btn);
-        lv_obj_add_style(wifi_ant_btn, &style_status, 0);
-        lv_obj_set_user_data(wifi_ant_btn, (void*)0);
-        
-        lv_obj_add_event_cb(wifi_ant_btn, [](lv_event_t *e)
-        {
-            (void)e;
-        }, LV_EVENT_CLICKED, nullptr);
 
         lv_obj_t *text_obj = lv_list_add_text(list1, "Status");
         lv_obj_add_style(text_obj, &style_list_text, 0);
@@ -239,7 +220,10 @@ namespace esp_brookesia::apps
         lv_obj_add_style(wlan_btn, &style_list_btn, 0);
 
         wlan_switch = lv_switch_create(wlan_btn);
-        lv_obj_align_to(wlan_switch, wlan_btn, LV_ALIGN_RIGHT_MID, 0, 0);
+        lv_obj_set_size(wlan_switch, 96, 52);
+        lv_obj_set_style_bg_color(wlan_switch, lv_color_hex(factory_ui::ACCENT), LV_PART_INDICATOR | LV_STATE_CHECKED);
+        lv_obj_align(wlan_switch, LV_ALIGN_RIGHT_MID, 0, 0);
+        lv_obj_set_ext_click_area(wlan_switch, 12);
         lv_obj_remove_state(wlan_switch, LV_STATE_CHECKED);
         
         lv_obj_add_event_cb(wlan_switch, [](lv_event_t *e)
@@ -253,10 +237,10 @@ namespace esp_brookesia::apps
         }, 
         LV_EVENT_VALUE_CHANGED, nullptr);
 
-        lv_obj_add_state(wlan_btn, LV_STATE_DISABLED);
+        lv_obj_remove_flag(wlan_btn, LV_OBJ_FLAG_CLICKABLE);
         // lv_obj_add_state(conn_btn, LV_STATE_DISABLED);
 
-        spinner = lv_spinner_create(lv_scr_act()); // Create a spinner with 1000ms rotation duration
+        spinner = lv_spinner_create(page_root); // Create a spinner with 1000ms rotation duration
         lv_obj_set_size(spinner, 96, 96);
         lv_obj_set_pos(spinner, 0, 80);
         lv_obj_set_align(spinner, LV_ALIGN_CENTER);              // Align spinner to the center of the parent container
@@ -264,10 +248,10 @@ namespace esp_brookesia::apps
         lv_obj_set_style_arc_width(spinner, 3, LV_PART_MAIN);
         lv_obj_set_style_arc_width(spinner, 3, LV_PART_INDICATOR);
 
-        ta = lv_textarea_create(lv_scr_act());
+        ta = lv_textarea_create(page_root);
         lv_obj_add_flag(ta, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_size(ta, BSP_LCD_H_RES - 160, 72);
-        lv_obj_align(ta, LV_ALIGN_TOP_MID, 0, 120);
+        lv_obj_set_size(ta, BSP_LCD_H_RES - 2 * factory_ui::GUTTER, 88);
+        lv_obj_align(ta, LV_ALIGN_TOP_MID, 0, factory_ui::CONTENT_TOP + 24);
 
         lv_textarea_set_password_mode(ta, true);
         lv_textarea_set_password_show_time(ta,1500);
@@ -275,27 +259,27 @@ namespace esp_brookesia::apps
 
         lv_obj_set_style_border_color(ta, lv_color_hex(0x555555), LV_PART_MAIN);
         lv_obj_set_style_border_width(ta, 2, LV_PART_MAIN);
-        lv_obj_set_style_radius(ta, 5, LV_PART_MAIN);
+        lv_obj_set_style_radius(ta, 20, LV_PART_MAIN);
         lv_obj_set_style_text_color(ta, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
 
         lv_obj_set_style_bg_color(ta, lv_color_hex(0x181818), static_cast<lv_style_prop_t>(LV_PART_CURSOR) | static_cast<lv_style_prop_t>(LV_STATE_DEFAULT));
 
         lv_obj_set_style_text_color(ta, lv_color_hex(0xAAAAAA), LV_PART_TEXTAREA_PLACEHOLDER);
 
-        lv_obj_set_style_text_font(ta, &lv_font_montserrat_20, LV_PART_MAIN);
-        lv_obj_set_style_text_font(ta, &lv_font_montserrat_20, LV_PART_TEXTAREA_PLACEHOLDER);
+        lv_obj_set_style_text_font(ta, &lv_font_montserrat_28, LV_PART_MAIN);
+        lv_obj_set_style_text_font(ta, &lv_font_montserrat_28, LV_PART_TEXTAREA_PLACEHOLDER);
 
         lv_obj_add_event_cb(ta, ta_event_cb, LV_EVENT_ALL, this);
 
-        kb = lv_keyboard_create(lv_scr_act());
+        kb = lv_keyboard_create(page_root);
         lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_size(kb, BSP_LCD_H_RES - 80, 420);
-        lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, -40);
+        lv_obj_set_size(kb, BSP_LCD_H_RES - 2 * factory_ui::GUTTER, 420);
+        lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, -factory_ui::NAVIGATION_HEIGHT);
 
         lv_obj_set_style_bg_color(kb, lv_color_hex(0x181818), 0);
         lv_obj_set_style_border_color(kb, lv_color_hex(0x555555), 0);
         lv_obj_set_style_border_width(kb, 2, 0);
-        lv_obj_set_style_radius(kb, 5, 0);
+        lv_obj_set_style_radius(kb, 24, 0);
 
         // LVGL keyboard buttons are child objects; style them after creation.
         uint32_t child_cnt = lv_obj_get_child_cnt(kb);
@@ -311,12 +295,15 @@ namespace esp_brookesia::apps
                 lv_obj_set_style_radius(btn, 5, 0);
             }
         }
+        lv_obj_set_style_text_font(kb, &lv_font_montserrat_24, LV_PART_ITEMS);
+        lv_obj_set_style_bg_color(kb, lv_color_hex(factory_ui::CARD), LV_PART_ITEMS);
+        lv_obj_set_style_bg_color(kb, lv_color_hex(factory_ui::ACCENT), LV_PART_ITEMS | LV_STATE_PRESSED);
+        lv_obj_set_style_text_color(kb, lv_color_white(), LV_PART_ITEMS);
         lv_keyboard_set_textarea(kb, ta);
 
         lv_obj_add_event_cb(kb, kb_event_cb, LV_EVENT_ALL, this);
 
-        lv_obj_set_scroll_dir(lv_scr_act(), LV_DIR_VER);
-        lv_obj_scroll_to_view(ta, LV_ANIM_ON);
+        lv_obj_remove_flag(lv_scr_act(), LV_OBJ_FLAG_SCROLLABLE);
     }
 
     bool WlanPage::OpenWifi()
@@ -632,7 +619,16 @@ namespace esp_brookesia::apps
         WlanPage *self = (WlanPage *)lv_event_get_user_data(e);
         lv_event_code_t code = lv_event_get_code(e);
 
-        if(code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+        if (code == LV_EVENT_CANCEL) {
+            lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(ta, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_flag(self->list1, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(self->spinner, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_remove_state(self->wlan_switch, LV_STATE_DISABLED);
+            lv_obj_remove_state(self->status_btn, LV_STATE_DISABLED);
+            return;
+        }
+        if (code == LV_EVENT_READY) {
             
             self->wifi_pwd = (uint8_t *)lv_textarea_get_text(ta);
             

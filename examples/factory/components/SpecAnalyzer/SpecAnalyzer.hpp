@@ -4,6 +4,7 @@
 #include "esp_dsp.h"
 #include "bsp/esp-bsp.h"
 #include "product_support.h"
+#include "factory_ui.hpp"
 
 namespace esp_brookesia::apps
 {
@@ -36,9 +37,10 @@ namespace esp_brookesia::apps
         static constexpr uint16_t I2S_CHANNELS = 2;       // BSP capture frame layout: L/R interleaved
         static constexpr uint16_t MIC_COUNT = 1;          // Only one microphone is visualized
         static constexpr uint16_t STRIPE_COUNT = 48;      // Bar count for the visualizer
-        static constexpr uint16_t CANVAS_WIDTH = BSP_LCD_H_RES;
-        static constexpr uint16_t CANVAS_HEIGHT = (BSP_LCD_V_RES >= 720) ? 360 : (BSP_LCD_V_RES / 2);
+        static constexpr uint16_t CANVAS_WIDTH = BSP_LCD_H_RES - 2 * factory_ui::GUTTER;
+        static constexpr uint16_t CANVAS_HEIGHT = 640;
 
+        factory_ui::Page _page;
         lv_obj_t *_canvas;
         lv_obj_t *_mic_label;
         lv_timer_t *_timer;

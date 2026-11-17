@@ -18,6 +18,9 @@
 #include "esp_wifi.h"
 
 #include "product_support.h"
+#include "factory_ui.hpp"
+#include "factory_stylesheet.hpp"
+#include <vector>
 
 #include "Drawpanel.hpp"
 #include "SpecAnalyzer.hpp"
@@ -74,12 +77,11 @@ extern "C" void app_main(void)
             .mirror_x = 0,
             .mirror_y = 0}};
 
-    // Keep LVGL on core 1 with a larger PSRAM-backed stack; high-resolution UI and
-    // app switching can otherwise starve the GUI task or overflow the default stack.
+    // Settings callbacks write NVS, so the LVGL task stack must stay in internal RAM.
     cfg.lv_adapter_cfg.task_stack_size = 16 * 1024;
     cfg.lv_adapter_cfg.task_priority = 10;
     cfg.lv_adapter_cfg.task_core_id = 1;
-    cfg.lv_adapter_cfg.stack_in_psram = true;
+    cfg.lv_adapter_cfg.stack_in_psram = false;
 
     /* Configure display */
     lv_display_t *disp = bsp_display_start_with_config(&cfg);
@@ -106,6 +108,7 @@ extern "C" void app_main(void)
         LvLockGuard gui_guard;
 
         /* Begin the phone */
+        ESP_UTILS_CHECK_FALSE_EXIT(phone->addStylesheet(factory_stylesheet()), "Add portrait stylesheet failed");
         ESP_UTILS_CHECK_FALSE_EXIT(phone->begin(), "Begin failed");
         // assert(phone->getDisplay().showContainerBorder() && "Show container border failed");
 
@@ -114,21 +117,49 @@ extern "C" void app_main(void)
         ESP_UTILS_CHECK_FALSE_EXIT(phone->initAppFromRegistry(inited_apps), "Init app registry failed");
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installAppFromRegistry(inited_apps), "Install app registry failed");
 
-        auto app2 = esp_brookesia::apps::Calculator::requestInstance();
+        auto app2 = esp_brookesia::apps::Calculator::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app2), "Start Calculator failed");
-        auto app = esp_brookesia::apps::Drawpanel::requestInstance();
+        auto app = esp_brookesia::apps::Drawpanel::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app), "Start Drawpanel failed");
 
-        auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance();
+        auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app1), "Start SpecAnalyzer failed");
-        auto app5 = esp_brookesia::apps::MusicPlayer::requestInstance();
+        auto app5 = esp_brookesia::apps::MusicPlayer::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app5), "Start MusicPlayer failed");
         auto camera_app = esp_brookesia::apps::Camera::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(camera_app), "Start Camera failed");
         auto video_player_app = esp_brookesia::apps::VideoPlayer::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(video_player_app), "Start VideoPlayer failed");
-        auto app6 = esp_brookesia::apps::Settings::requestInstance();
+        auto app6 = esp_brookesia::apps::Settings::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app6), "Start Settings failed");
+
+        // Retain Brookesia's app lifecycle and navigation, with a portrait home
+        // view on its main screen instead of a circular-screen layout.
+        std::vector<factory_ui::Tile> tiles;
+        auto add_tile = [&tiles](systems::base::App *app, const char *title, const char *description) {
+            tiles.push_back({app->getId(), title, description, app->getLauncherIcon().resource});
+        };
+        add_tile(camera_app, "Camera", "Live camera preview");
+        add_tile(app5, "Music", "On-device playlist");
+        add_tile(video_player_app, "Video", "Play from microSD");
+        add_tile(app, "Drawing", "Touch canvas");
+        add_tile(app1, "Spectrum", "Microphone analysis");
+        add_tile(app2, "Calculator", "Quick calculations");
+        add_tile(app6, "Settings", "Device controls");
+        for (auto &registered : inited_apps) {
+            auto *registered_app = std::get<1>(registered).get();
+            if (registered_app) add_tile(registered_app, "UI demo", "Interface showcase");
+        }
+        factory_ui::home(phone->getDisplay().getMainScreenObject(), tiles.data(), tiles.size(), [](lv_event_t *event) {
+            auto *context = static_cast<Phone *>(lv_event_get_user_data(event));
+            auto *tile = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
+            systems::base::Context::AppEventData app_event = {
+                .id = static_cast<int>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(tile))),
+                .type = systems::base::Context::AppEventType::START,
+                .data = nullptr,
+            };
+            ESP_UTILS_CHECK_FALSE_EXIT(context->sendAppEvent(&app_event), "Open factory app failed");
+        }, phone);
 
         bsp_display_backlight_on();
 

@@ -54,7 +54,6 @@ namespace esp_brookesia::apps
 
         static void event_handler_cb(lv_event_t *e);
         static void open_page_async_cb(void *user_data);
-        void add_button_with_arrow(const void *icon, const char *text);
         void create_settings_ui();
         void destroy_settings_ui();
         void event_handler(lv_event_t *e);
@@ -65,10 +64,6 @@ namespace esp_brookesia::apps
     private:
         static Settings *_instance;
         lv_obj_t *list1;
-        lv_style_t style_list;
-        lv_style_t style_list_btn;
-        lv_style_t style_list_text;
-        lv_style_t style_list_btn_pressed;
         ActivePage active_page;
     };
 

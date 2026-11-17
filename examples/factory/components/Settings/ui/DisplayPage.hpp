@@ -23,10 +23,6 @@ private:
     static DisplayPage *_instance;
     lv_obj_t *label;
     lv_obj_t *list1;
-    lv_style_t style_list;
-    lv_style_t style_list_btn;
-    lv_style_t style_list_text;
-    lv_style_t style_list_btn_pressed;
 };
 
 } // namespace esp_brookesia::apps

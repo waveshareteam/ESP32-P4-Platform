@@ -2,6 +2,7 @@ idf_component_register(
     SRCS "main.cpp"
     INCLUDE_DIRS "."
     REQUIRES
+        factory_ui
         product_support
         brookesia_core
     PRIV_REQUIRES

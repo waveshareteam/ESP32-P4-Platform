@@ -1,9 +1,11 @@
+#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "Settings.hpp"
+#include "factory_ui.hpp"
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
 #include "esp_event.h"
@@ -32,10 +34,6 @@ LV_IMG_DECLARE(img_app_settings);
 
 namespace esp_brookesia::apps
 {
-    static constexpr int SETTINGS_PAGE_MARGIN = 40;
-    static constexpr int SETTINGS_LIST_WIDTH = BSP_LCD_H_RES - SETTINGS_PAGE_MARGIN * 2;
-    static constexpr int SETTINGS_LIST_HEIGHT = BSP_LCD_V_RES - 220;
-    static constexpr int SETTINGS_ROW_HEIGHT = 88;
     static bool s_time_sync_started = false;
     static bool s_time_synced = false;
 
@@ -85,7 +83,7 @@ namespace esp_brookesia::apps
         return _instance;
     }
 
-    Settings::Settings(bool use_status_bar, bool use_navigation_bar) : App("Settings", &img_app_settings, true, use_status_bar, use_navigation_bar),
+    Settings::Settings(bool use_status_bar, bool use_navigation_bar) : App(factory_ui::screen_config("Settings", &img_app_settings), factory_ui::app_config(use_status_bar, use_navigation_bar)),
                                                                        list1(nullptr),
                                                                        active_page(ActivePage::None)
     {
@@ -98,91 +96,22 @@ namespace esp_brookesia::apps
     void Settings::create_settings_ui()
     {
         lv_obj_clean(lv_scr_act());
-        list1 = nullptr;
-
-        lv_style_init(&style_list);
-        lv_style_init(&style_list_btn);
-        lv_style_init(&style_list_text);
-        lv_style_init(&style_list_btn_pressed);
-
-        // List, row, and text styles are recreated whenever the settings root is shown.
-        lv_style_set_pad_all(&style_list, 5);
-        lv_style_set_pad_row(&style_list, 2);
-        lv_style_set_border_width(&style_list, 0);
-        lv_style_set_radius(&style_list, 10);
-        lv_style_set_bg_color(&style_list, lv_color_hex(0x000000));
-        lv_style_set_bg_opa(&style_list, LV_OPA_COVER);
-
-        lv_style_set_height(&style_list_btn, SETTINGS_ROW_HEIGHT);
-        lv_style_set_pad_all(&style_list_btn, 16);
-        lv_style_set_border_width(&style_list_btn, 0);
-        lv_style_set_radius(&style_list_btn, 8);
-        lv_style_set_bg_color(&style_list_btn, lv_color_hex(0x38393A));
-        lv_style_set_text_font(&style_list_btn, &lv_font_montserrat_30);
-        lv_style_set_text_color(&style_list_btn, lv_color_hex(0xFFFFFF));
-        lv_style_set_border_width(&style_list_btn, 1);
-        lv_style_set_border_side(&style_list_btn, LV_BORDER_SIDE_BOTTOM);
-        lv_style_set_border_color(&style_list_btn, lv_color_hex(0x505050));
-
-        lv_style_set_text_font(&style_list_text, &lv_font_montserrat_30);
-        lv_style_set_text_color(&style_list_text, lv_color_hex(0xFFFFFF));
-        lv_style_set_bg_color(&style_list_text, lv_color_hex(0x000000));
-        lv_style_set_bg_opa(&style_list_text, LV_OPA_COVER);
-        lv_style_set_pad_all(&style_list_text, 10);
-        lv_style_set_pad_bottom(&style_list_text, 5);
-
-        lv_style_set_bg_color(&style_list_btn_pressed, lv_color_hex(0x505050));
-        lv_style_set_text_color(&style_list_btn_pressed, lv_color_hex(0xFFFFFF));
-        lv_style_set_border_color(&style_list_btn_pressed, lv_color_hex(0x505050));
-
-        lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
-        lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
-
-        list1 = lv_list_create(lv_scr_act());
-        lv_obj_add_style(list1, &style_list, 0);
-        lv_obj_set_size(list1, SETTINGS_LIST_WIDTH, SETTINGS_LIST_HEIGHT);
-        lv_obj_center(list1);
-        lv_obj_set_scrollbar_mode(list1, LV_SCROLLBAR_MODE_OFF);
-
-        lv_obj_t *text_obj = nullptr;
-        text_obj = lv_list_add_text(list1, "Wireless");
-        lv_obj_add_style(text_obj, &style_list_text, 0);
-        add_button_with_arrow(&WIFI, "WLAN");
-        // add_button_with_arrow(&BLE, "Bluetooth");
-
-        text_obj = lv_list_add_text(list1, "Media");
-        lv_obj_add_style(text_obj, &style_list_text, 0);
-        add_button_with_arrow(&sound, "Sound");
-        add_button_with_arrow(&backlights, "Display");
-
-        text_obj = lv_list_add_text(list1, "More");
-        lv_obj_add_style(text_obj, &style_list_text, 0);
-        add_button_with_arrow(&info, "About");
+        wifi_ap_record_t current = {};
+        const char *wifi = esp_wifi_sta_get_ap_info(&current) == ESP_OK ?
+            reinterpret_cast<const char *>(current.ssid) : "Not connected";
+        auto view = factory_ui::settings(lv_scr_act(), wifi, [](lv_event_t *event) {
+            auto *settings = static_cast<Settings *>(lv_event_get_user_data(event));
+            lv_async_call([](void *context) { static_cast<Settings *>(context)->back(); }, settings);
+        }, event_handler_cb, this);
+        list1 = view.root;
     }
 
     void Settings::destroy_settings_ui()
     {
-        if (list1)
-        {
-            lv_obj_del(list1);
+        if (list1) {
+            lv_obj_delete(list1);
             list1 = nullptr;
-            lv_style_reset(&style_list);
-            lv_style_reset(&style_list_btn);
-            lv_style_reset(&style_list_text);
-            lv_style_reset(&style_list_btn_pressed);
         }
-    }
-
-    void Settings::add_button_with_arrow(const void *icon, const char *text)
-    {
-        lv_obj_t *btn = lv_list_add_button(list1, icon, text);
-        lv_obj_add_style(btn, &style_list_btn, 0);
-        lv_obj_add_style(btn, &style_list_btn_pressed, LV_STATE_PRESSED);
-        lv_obj_add_event_cb(btn, event_handler_cb, LV_EVENT_CLICKED, this);
-
-        lv_obj_t *arrow_img = lv_img_create(btn);
-        lv_img_set_src(arrow_img, &arrow);
-        lv_obj_align(arrow_img, LV_ALIGN_RIGHT_MID, -10, 0);
     }
 
     void Settings::event_handler_cb(lv_event_t *e)
@@ -206,29 +135,11 @@ namespace esp_brookesia::apps
 
     void Settings::event_handler(lv_event_t *e)
     {
-        lv_event_code_t code = lv_event_get_code(e);
-        if (code == LV_EVENT_CLICKED)
-        {
-            lv_obj_t *obj = static_cast<lv_obj_t *>(lv_event_get_target(e));
-            const char *txt = lv_list_get_button_text(list1, obj);
-            ESP_UTILS_LOGI("Clicked: %s", txt);
-
-            if (strcmp(txt, "WLAN") == 0)
-            {
-                lv_async_call(open_page_async_cb, (void *)"WLAN");
-            }
-            else if (strcmp(txt, "Sound") == 0)
-            {
-                lv_async_call(open_page_async_cb, (void *)"Sound");
-            }
-            else if (strcmp(txt, "Display") == 0)
-            {
-                lv_async_call(open_page_async_cb, (void *)"Display");
-            }
-            else if (strcmp(txt, "About") == 0)
-            {
-                lv_async_call(open_page_async_cb, (void *)"About");
-            }
+        auto *object = static_cast<lv_obj_t *>(lv_event_get_current_target(e));
+        const intptr_t choice = reinterpret_cast<intptr_t>(lv_obj_get_user_data(object));
+        const char *pages[] = {"WLAN", "Sound", "Display", "About"};
+        if (choice >= 1 && choice <= 4) {
+            lv_async_call(open_page_async_cb, const_cast<char *>(pages[choice - 1]));
         }
     }
 

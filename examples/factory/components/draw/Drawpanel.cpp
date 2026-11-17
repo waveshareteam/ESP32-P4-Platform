@@ -1,3 +1,4 @@
+#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
@@ -34,7 +35,7 @@ Drawpanel *Drawpanel::requestInstance(bool use_status_bar, bool use_navigation_b
 }
 
 Drawpanel::Drawpanel(bool use_status_bar, bool use_navigation_bar) :
-    App(APP_NAME, &img_app_drawpanel, true, use_status_bar, use_navigation_bar),
+    App(factory_ui::screen_config(APP_NAME, &img_app_drawpanel), factory_ui::app_config(use_status_bar, use_navigation_bar)),
     _max_points(1000)
 {
 }
@@ -47,7 +48,7 @@ Drawpanel::~Drawpanel()
 bool Drawpanel::run(void)
 {
     ESP_UTILS_LOGD("Run");
-    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0xFFFFE0), LV_PART_MAIN);
+    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x0C0D12), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
 
     lv_area_t area = getVisualArea();
@@ -57,6 +58,11 @@ bool Drawpanel::run(void)
     _panel_obj = lv_obj_create(lv_scr_act());
     lv_obj_set_size(_panel_obj, width, height);
     lv_obj_set_pos(_panel_obj, area.x1, area.y1);
+    lv_obj_set_style_bg_color(_panel_obj, lv_color_white(), 0);
+    lv_obj_set_style_bg_opa(_panel_obj, LV_OPA_COVER, 0);
+    lv_obj_set_style_border_width(_panel_obj, 0, 0);
+    lv_obj_set_style_radius(_panel_obj, 0, 0);
+    lv_obj_set_style_pad_all(_panel_obj, 0, 0);
 
     lv_obj_add_event_cb(_panel_obj, touch_event_cb, LV_EVENT_PRESSING, this);
 

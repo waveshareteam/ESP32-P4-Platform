@@ -1,3 +1,4 @@
+#include "factory_phone.hpp"
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
 #include "esp_task.h"
@@ -34,7 +35,7 @@ SpecAnalyzer *SpecAnalyzer::requestInstance(bool use_status_bar, bool use_naviga
 }
 
 SpecAnalyzer::SpecAnalyzer(bool use_status_bar, bool use_navigation_bar) : 
-    App(APP_NAME, &img_app_specanalyzer, true, use_status_bar, use_navigation_bar),
+    App(factory_ui::screen_config(APP_NAME, &img_app_specanalyzer), factory_ui::app_config(use_status_bar, use_navigation_bar)),
     _canvas(nullptr),
     _mic_label(nullptr),
     _timer(nullptr),
@@ -61,10 +62,10 @@ bool SpecAnalyzer::run(void)
 {
     ESP_UTILS_LOGD("Run");
 
-    lv_obj_t *scr = lv_scr_act();
-    lv_obj_set_style_bg_color(scr, lv_color_black(), LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, LV_PART_MAIN);
-    
+    _page = factory_ui::page(lv_scr_act(), "Spectrum", [](lv_event_t *event) {
+        lv_async_call([](void *context) { static_cast<SpecAnalyzer *>(context)->back(); }, lv_event_get_user_data(event));
+    }, this);
+
     // Prefer PSRAM for the large canvas buffer and fall back to SRAM if PSRAM is exhausted.
     size_t buf_size = CANVAS_WIDTH * CANVAS_HEIGHT * sizeof(lv_color_t);
     _draw_buf = (lv_color_t*)heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM);
@@ -81,7 +82,7 @@ bool SpecAnalyzer::run(void)
     
     // Draw into an LVGL canvas so the FFT task only updates numeric buffers and the
     // GUI timer owns all rendering work on the LVGL thread.
-    _canvas = lv_canvas_create(lv_scr_act());
+    _canvas = lv_canvas_create(_page.content);
     if (!_canvas) {
         ESP_UTILS_LOGE("Canvas creation failed!");
         free(_draw_buf);
@@ -89,7 +90,7 @@ bool SpecAnalyzer::run(void)
         return false;
     }
     lv_obj_set_size(_canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
-    lv_obj_align(_canvas, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_radius(_canvas, 24, 0);
     lv_canvas_set_buffer(_canvas, _draw_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_COLOR_FORMAT_RGB565);
     
     // Initialize the ESP-DSP radix-2 FFT tables once before the audio task starts.
@@ -130,13 +131,13 @@ bool SpecAnalyzer::run(void)
         return false;
     }
     
-    _mic_label = lv_label_create(scr);
-    lv_label_set_text(_mic_label, "Mic");
-    lv_obj_set_style_text_color(_mic_label, lv_color_hex(0x00BFFF), LV_PART_MAIN);
+    _mic_label = lv_label_create(_page.content);
+    lv_label_set_text(_mic_label, "Live microphone spectrum");
+    lv_obj_set_style_text_color(_mic_label, lv_color_hex(factory_ui::ACCENT), LV_PART_MAIN);
     lv_obj_set_style_bg_color(_mic_label, lv_color_hex(0x222222), LV_PART_MAIN);
     lv_obj_set_style_bg_opa(_mic_label, LV_OPA_70, LV_PART_MAIN);
     lv_obj_set_style_pad_all(_mic_label, 6, LV_PART_MAIN);
-    lv_obj_align_to(_mic_label, _canvas, LV_ALIGN_TOP_LEFT, 20, 12);
+    lv_obj_set_style_text_font(_mic_label, &lv_font_montserrat_28, 0);
     
     return true;
 }
@@ -188,6 +189,8 @@ bool SpecAnalyzer::close(void)
         _draw_buf = nullptr;
     }
     
+    if (_page.root) lv_obj_delete(_page.root);
+    _page = {};
     return true;
 }
 

@@ -1,3 +1,4 @@
+#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
@@ -12,6 +13,7 @@
 #define ESP_UTILS_LOG_TAG "BS:App:Calculator"
 #include "esp_lib_utils.h"
 #include "esp_brookesia_app_calculator.hpp"
+#include "factory_ui.hpp"
 
 using namespace std;
 using namespace esp_brookesia::gui;
@@ -20,21 +22,17 @@ using namespace esp_brookesia::systems;
 LV_IMG_DECLARE(img_app_calculator);
 
 #define KEYBOARD_H_PERCENT      70
-#define KEYBOARD_FONT           &lv_font_montserrat_20
-#define KEYBOARD_SPECIAL_COLOR  lv_color_hex(0xFF3034)
-#define KEYBOARD_BG_COLOR       lv_color_hex(0xFFFFFF)
+#define KEYBOARD_FONT           &lv_font_montserrat_48
+#define KEYBOARD_SPECIAL_COLOR  lv_color_hex(factory_ui::ACCENT)
+#define KEYBOARD_BG_COLOR       lv_color_hex(factory_ui::BACKGROUND)
 
-#define LABEL_PAD               3
-#define LABEL_FONT_SMALL        &lv_font_montserrat_16
-#define LABEL_FONT_BIG          &lv_font_montserrat_20
-#define LABEL_COLOR             lv_color_hex(0xFF3034)
+#define LABEL_PAD               24
+#define LABEL_FONT_SMALL        &lv_font_montserrat_28
+#define LABEL_FONT_BIG          &lv_font_montserrat_48
+#define LABEL_COLOR             lv_color_hex(factory_ui::ACCENT)
 #define LABEL_FORMULA_LEN_MAX   256
 
 #define APP_NAME                "Calculator"
-
-// Adaptation for 360x360 round screen
-#define SCREEN_360_EFFECTIVE_WIDTH  320  // Effective display area for round screen
-#define SCREEN_360_EFFECTIVE_HEIGHT 320
 
 static const char *keyboard_map[] = {
     "C", "/", "x", LV_SYMBOL_BACKSPACE, "\n",
@@ -61,7 +59,7 @@ Calculator *Calculator::requestInstance(bool use_status_bar, bool use_navigation
 }
 
 Calculator::Calculator(bool use_status_bar, bool use_navigation_bar) :
-   App(APP_NAME, &img_app_calculator, true, use_status_bar, use_navigation_bar)
+   App(factory_ui::screen_config(APP_NAME, &img_app_calculator), factory_ui::app_config(use_status_bar, use_navigation_bar))
 {
 }
 
@@ -91,19 +89,7 @@ bool Calculator::run(void)
     _width = lv_area_get_width(&visual_area);
     _height = lv_area_get_height(&visual_area);
 
-    // Special handling for 360x360 round screen
-    bool is_round_screen = false;
-    int y_offset = 0;  // Vertical offset
-    if (_width == 360 && _height == 360) {
-        // Round screen, use smaller effective area
-        is_round_screen = true;
-        _width = SCREEN_360_EFFECTIVE_WIDTH;
-        _height = SCREEN_360_EFFECTIVE_HEIGHT;
-        y_offset = 20;  // Offset downward by 20 pixels to avoid round top
-    } else if (_width == 0 || _height == 0) {
-        _width = 400;
-        _height = 600;
-    }
+    if (_width == 0 || _height == 0) return false;
 
     formula_len = 1;
 
@@ -120,12 +106,12 @@ bool Calculator::run(void)
     lv_obj_set_style_text_font(keyboard, KEYBOARD_FONT, 0);
     lv_obj_set_style_bg_color(keyboard, KEYBOARD_BG_COLOR, 0);
 
-    // Adjust keyboard position, round screen offset upward to avoid bottom occlusion
-    if (is_round_screen) {
-        lv_obj_align(keyboard, LV_ALIGN_BOTTOM_MID, 0, -30);  // Offset upward by 30 pixels
-    } else {
-        lv_obj_align(keyboard, LV_ALIGN_BOTTOM_MID, 0, 0);
-    }
+    lv_obj_set_pos(keyboard, visual_area.x1, visual_area.y1 + label_h);
+    lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::CARD), LV_PART_ITEMS);
+    lv_obj_set_style_text_color(keyboard, lv_color_white(), LV_PART_ITEMS);
+    lv_obj_set_style_radius(keyboard, 20, LV_PART_ITEMS);
+    lv_obj_set_style_pad_all(keyboard, 16, LV_PART_MAIN);
+    lv_obj_set_style_pad_gap(keyboard, 16, LV_PART_MAIN);
 
     lv_obj_add_event_cb(keyboard, keyboard_event_cb, LV_EVENT_ALL, this);
     lv_btnmatrix_set_btn_ctrl(keyboard, 18, LV_BTNMATRIX_CTRL_CHECKED);
@@ -145,12 +131,7 @@ bool Calculator::run(void)
     lv_obj_t *label_obj = lv_obj_create(lv_scr_act());
     lv_obj_set_size(label_obj, _width, label_h);
 
-    // Adjust label area position, round screen offset downward to avoid top occlusion
-    if (is_round_screen) {
-        lv_obj_align(label_obj, LV_ALIGN_TOP_MID, 0, y_offset);
-    } else {
-        lv_obj_align(label_obj, LV_ALIGN_TOP_MID, 0, 0);
-    }
+    lv_obj_set_pos(label_obj, visual_area.x1, visual_area.y1);
 
     lv_obj_set_style_radius(label_obj, 0, 0);
     lv_obj_set_style_border_width(label_obj, 0, 0);

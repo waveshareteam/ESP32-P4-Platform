@@ -55,6 +55,7 @@ private:
 
     lv_obj_t *label;
     lv_obj_t *list1;
+    lv_obj_t *page_root = nullptr;
     lv_obj_t *status_btn;
     lv_obj_t *wlan_switch;
     lv_obj_t *wifi_icon;

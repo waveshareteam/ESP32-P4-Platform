@@ -1,118 +1,195 @@
+#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
- *
+ * SPDX-FileCopyrightText: 2026 Waveshare
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "MusicPlayer.hpp"
-#include "lvgl.h"
-#include "esp_brookesia.hpp"
-#ifdef ESP_UTILS_LOG_TAG
-#undef ESP_UTILS_LOG_TAG
-#endif
-#define ESP_UTILS_LOG_TAG "BS:MusicPlayer"
-#include "esp_lib_utils.h"
-#include "sdkconfig.h"
-#include "bsp/esp-bsp.h"
 #include "product_support.h"
-#include "gui_music/lv_demo_music.h"
-#include "gui_music/lv_demo_music_main.h"
-
-#define MUSIC_DIR BSP_SPIFFS_MOUNT_POINT "/music"
+#include "bsp/esp-bsp.h"
+#include "esp_timer.h"
+#include "esp_log.h"
+#include <string>
 
 LV_IMG_DECLARE(img_app_musicplayer);
-
-static const char *TAG = "MusicPlayer";
-
-namespace esp_brookesia::apps
+namespace esp_brookesia::apps {
+MusicPlayer *MusicPlayer::_instance = nullptr;
+MusicPlayer *MusicPlayer::requestInstance(bool status, bool navigation)
 {
+    if (!_instance) _instance = new MusicPlayer(status, navigation);
+    return _instance;
+}
+MusicPlayer::MusicPlayer(bool status, bool navigation) : App(factory_ui::screen_config("MusicPlayer", &img_app_musicplayer), factory_ui::app_config(status, navigation)) {}
+MusicPlayer::~MusicPlayer() {}
+bool MusicPlayer::run()
+{
+    if (product_player_init() != ESP_OK) return false;
+    _player_started = true;
+    if (product_file_instance_init(BSP_SPIFFS_MOUNT_POINT "/music", &_file_iterator) != ESP_OK ||
+        file_iterator_get_count(_file_iterator) == 0) {
+        close();
+        return false;
+    }
+    _selected = 0;
+    _elapsed_ms = 0;
+    _want_playing = _seen_playing = _last_playing = false;
+    _page = _view.create(lv_screen_active(), &img_app_musicplayer, [](lv_event_t *event) {
+        lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->back(); }, lv_event_get_user_data(event));
+    }, action_cb, this);
+    refresh_title();
+    _last_tick_us = esp_timer_get_time();
+    _timer = lv_timer_create(tick_cb, 250, this);
+    return _timer != nullptr;
+}
 
-    MusicPlayer *MusicPlayer::_instance = nullptr;
+void MusicPlayer::refresh_title()
+{
+    const char *file = file_iterator_get_name_from_index(_file_iterator, _selected);
+    std::string name = file ? file : "Music";
+    auto extension = name.find_last_of('.');
+    if (extension != std::string::npos) name.resize(extension);
+    _view.title(name.c_str(), static_cast<int>(_selected), static_cast<int>(file_iterator_get_count(_file_iterator)));
+}
 
-    MusicPlayer *MusicPlayer::requestInstance(bool use_status_bar, bool use_navigation_bar)
-    {
-        if (_instance == nullptr)
-        {
-            _instance = new MusicPlayer(use_status_bar, use_navigation_bar);
+bool MusicPlayer::play_selected()
+{
+    if (!_player_started) {
+        if (product_player_init() != ESP_OK) return false;
+        _player_started = true;
+    }
+    file_iterator_set_index(_file_iterator, _selected);
+    if (product_player_play_index(_file_iterator, static_cast<int>(_selected)) != ESP_OK) {
+        _view.message("Unable to play this file");
+        return false;
+    }
+    _elapsed_ms = 0;
+    _last_tick_us = esp_timer_get_time();
+    _want_playing = true;
+    _seen_playing = _last_playing = false;
+    refresh_title();
+    _view.elapsed(0);
+    return true;
+}
+
+void MusicPlayer::action_cb(lv_event_t *event)
+{
+    auto *self = static_cast<MusicPlayer *>(lv_event_get_user_data(event));
+    auto *button = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
+    auto action = static_cast<factory_ui::PlayerAction>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(button)));
+    const size_t count = file_iterator_get_count(self->_file_iterator);
+    switch (action) {
+    case factory_ui::PlayerAction::PREVIOUS:
+        self->_selected = (self->_selected + count - 1) % count;
+        self->play_selected();
+        break;
+    case factory_ui::PlayerAction::NEXT:
+        self->_selected = (self->_selected + 1) % count;
+        self->play_selected();
+        break;
+    case factory_ui::PlayerAction::PLAY_PAUSE:
+        if (self->_player_started && audio_player_get_state() == AUDIO_PLAYER_STATE_PLAYING) {
+            self->_want_playing = false;
+            audio_player_pause();
+        } else if (self->_player_started && audio_player_get_state() == AUDIO_PLAYER_STATE_PAUSE) {
+            self->_want_playing = true;
+            audio_player_resume();
+        } else {
+            self->play_selected();
         }
-        return _instance;
+        break;
+    case factory_ui::PlayerAction::TRACKS:
+        self->show_tracks();
+        break;
     }
+}
 
-    MusicPlayer::MusicPlayer(bool use_status_bar, bool use_navigation_bar) : App("MusicPlayer", &img_app_musicplayer, true, use_status_bar, use_navigation_bar),
-                                                                             _file_iterator(NULL)
-    {
+void MusicPlayer::tick_cb(lv_timer_t *timer)
+{
+    auto *self = static_cast<MusicPlayer *>(lv_timer_get_user_data(timer));
+    const int64_t now = esp_timer_get_time();
+    if (!self->_player_started) {
+        self->_last_tick_us = now;
+        return;
     }
-
-    MusicPlayer::~MusicPlayer()
-    {
+    const auto state = audio_player_get_state();
+    const bool playing = state == AUDIO_PLAYER_STATE_PLAYING;
+    if (playing && self->_last_playing) self->_elapsed_ms += (now - self->_last_tick_us) / 1000;
+    self->_last_tick_us = now;
+    self->_last_playing = playing;
+    self->_view.playing(playing);
+    self->_view.elapsed(static_cast<uint32_t>(self->_elapsed_ms / 1000));
+    if (playing) self->_seen_playing = true;
+    if (state == AUDIO_PLAYER_STATE_IDLE && self->_seen_playing && self->_want_playing) {
+        self->_selected = (self->_selected + 1) % file_iterator_get_count(self->_file_iterator);
+        self->play_selected();
+    } else if (state == AUDIO_PLAYER_STATE_IDLE && !self->_want_playing) {
+        self->_view.message("Ready to play");
     }
+}
 
-    bool MusicPlayer::run(void)
-    {
-        ESP_UTILS_LOGD("Run");
-
-        if (product_player_init() != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Play init with SPIFFS failed");
-            return false;
-        }
-
-        if (product_file_instance_init(MUSIC_DIR, &_file_iterator) != ESP_OK)
-        {
-            ESP_LOGE(TAG, "product_file_instance_init failed");
-            return false;
-        }
-
-        lv_demo_music(lv_scr_act(), _file_iterator);
-        return true;
+void MusicPlayer::show_tracks()
+{
+    if (_tracks) return;
+    auto list = factory_ui::page(lv_screen_active(), "Tracks", [](lv_event_t *event) {
+        lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->hide_tracks(); }, lv_event_get_user_data(event));
+    }, this);
+    _tracks = list.root;
+    const size_t count = file_iterator_get_count(_file_iterator);
+    for (size_t i = 0; i < count; ++i) {
+        factory_ui::row(list.content, LV_SYMBOL_AUDIO, file_iterator_get_name_from_index(_file_iterator, i),
+                        i == _selected ? "Selected" : "On-device music", [](lv_event_t *event) {
+            auto *self = static_cast<MusicPlayer *>(lv_event_get_user_data(event));
+            auto *button = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
+            self->_selected = static_cast<size_t>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(button)));
+            self->play_selected();
+            lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->hide_tracks(); }, self);
+        }, this, static_cast<intptr_t>(i));
     }
-
-    bool MusicPlayer::back(void)
-    {
-        ESP_UTILS_LOGD("Back");
-        // If the app needs to exit, call notifyCoreClosed() to notify the core to close the app
-        ESP_UTILS_CHECK_FALSE_RETURN(notifyCoreClosed(), false, "Notify core closed failed");
-        return true;
-    }
-
-    bool MusicPlayer::close(void)
-    {
-        ESP_UTILS_LOGD("Close");
-        if (audio_player_pause() != ESP_OK)
-        {
-            ESP_LOGE(TAG, "audio_player_pause failed");
-            return false;
-        }
-        if (product_player_del() != ESP_OK)
-        {
-            ESP_LOGE(TAG, "DEL Play init with SPIFFS failed");
-            return false;
-        }
-        return true;
-    }
-
-    bool MusicPlayer::init()
-    {
-        ESP_UTILS_LOGD("Init");
-        return true;
-    }
-
-    bool MusicPlayer::deinit()
-    {
-        ESP_UTILS_LOGD("Deinit");
-        return true;
-    }
-
-    bool MusicPlayer::pause()
-    {
-        ESP_UTILS_LOGD("Pause");
-        lv_demo_music_exit_pause();
-        return true;
-    }
-
-    bool MusicPlayer::resume()
-    {
-        ESP_UTILS_LOGD("Resume");
-        return true;
-    }
-
+}
+void MusicPlayer::hide_tracks()
+{
+    if (_tracks) lv_obj_delete(_tracks);
+    _tracks = nullptr;
+}
+bool MusicPlayer::back()
+{
+    if (_tracks) { hide_tracks(); return true; }
+    return notifyCoreClosed();
+}
+bool MusicPlayer::close()
+{
+    if (_timer) lv_timer_delete(_timer);
+    _timer = nullptr;
+    _want_playing = false;
+    if (_player_started) product_player_del();
+    _player_started = false;
+    if (_file_iterator) file_iterator_delete(_file_iterator);
+    _file_iterator = nullptr;
+    hide_tracks();
+    if (_page.root) lv_obj_delete(_page.root);
+    _page = {};
+    _view.clear();
+    return true;
+}
+bool MusicPlayer::init() { return true; }
+bool MusicPlayer::deinit() { return true; }
+bool MusicPlayer::pause()
+{
+    if (_timer) lv_timer_pause(_timer);
+    // Other media apps share this codec. Release the decoder while this view is
+    // in the background; the selected track is started on demand when revisited.
+    if (_player_started) product_player_del();
+    _player_started = _want_playing = _seen_playing = _last_playing = false;
+    return true;
+}
+bool MusicPlayer::resume()
+{
+    _elapsed_ms = 0;
+    _last_tick_us = esp_timer_get_time();
+    _view.playing(false);
+    _view.message("Ready to play");
+    _view.elapsed(0);
+    if (_timer) lv_timer_resume(_timer);
+    return true;
+}
 } // namespace esp_brookesia::apps
