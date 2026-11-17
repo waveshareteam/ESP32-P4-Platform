@@ -178,7 +178,7 @@ different versions from the Arduino Library Manager. The bundled
 
 Arduino GFX provides the encapsulated ESP32-P4 MIPI DSI function
 
-The `displays/` helper combines Waveshare panel/I2C integration code with
+The `board_config/` helper combines Waveshare panel/I2C integration code with
 Arduino-adapted Espressif `esp_lcd_touch` and GT911 sources. The repository and
 upstream portions are Apache-2.0 licensed; see the
 [third-party inventory](../../docs/THIRD_PARTY.md) for the pinned provenance.

@@ -135,9 +135,9 @@ Manager 安装其他版本。LVGL sketch 还需要其中的 `lv_conf.h`。
 
 - [LVGL `9.3.0`](https://github.com/lvgl/lvgl)
 - [Arduino_GFX `1.6.0`](https://github.com/moononournation/Arduino_GFX)
-- `displays/` 中的 Waveshare 显示和 GT911 触摸辅助代码
+- `board_config/` 中的 Waveshare 显示和 GT911 触摸辅助代码
 
-`displays/` 辅助库由 Waveshare 面板/I2C 集成代码及适配 Arduino 的 Espressif
+`board_config/` 辅助库由 Waveshare 面板/I2C 集成代码及适配 Arduino 的 Espressif
 `esp_lcd_touch`、GT911 源码组成；仓库代码和上游部分均采用 Apache-2.0 许可证。
 固定来源请参阅[第三方清单](../../docs/THIRD_PARTY_ZH.md)。
 
