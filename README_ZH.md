@@ -14,14 +14,51 @@
     <a href="examples/arduino/examples/">🔧 Arduino</a> &middot;
     <a href="https://docs.waveshare.net/ESP32-P4/">📖 文档</a>
   </p>
-  <p><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Platform 支持的 ESP32-P4-Module-DEV-KIT 开发板" width="500"></p>
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="docs/images/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-NANO">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-Module-DEV-KIT">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="docs/images/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6-DEV-KIT">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="docs/images/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6">指南</a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="docs/images/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-ETH">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="docs/images/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-Pico">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="docs/images/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6-POE-ETH">指南</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="docs/images/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.net/ESP32-P4-Core-DEV-KIT">指南</a>
+    </td>
+  </tr>
+</table>
 </div>
 
 ---
 
 ## ✨ 概述
 
-本仓库为微雪 ESP32-P4 系列开发板提供 ESP-IDF、Arduino 示例和出厂演示源码，涵盖基础外设、网络、音频、显示、触摸和摄像头。请按下方板卡资料选择实际硬件及配件。
+本仓库为微雪 ESP32-P4 系列开发板提供 ESP-IDF、Arduino 示例和出厂演示源码，涵盖基础外设、网络、音频、显示、触摸和摄像头。请按上方板卡资料选择实际硬件及配件。
 
 | 功能 | 器件或接口 |
 | --- | --- |
@@ -31,46 +68,6 @@
 | 显示与摄像头 | 兼容的 MIPI-DSI 显示屏、MIPI-CSI 摄像头，按示例选配 |
 | 板级支持 | ESP-IDF 使用托管组件 `waveshare/esp32_p4_platform`；Arduino 使用随仓库提供的库 |
 
-### 支持的开发板
-
-<table>
-  <tr>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="docs/images/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-NANO">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-Module-DEV-KIT">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="docs/images/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6-DEV-KIT">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="docs/images/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6">文档</a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="docs/images/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-ETH">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="docs/images/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-Pico">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="docs/images/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-WIFI6-POE-ETH">文档</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="docs/images/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.net/ESP32-P4-Core-DEV-KIT">文档</a>
-    </td>
-  </tr>
-</table>
 
 ## 📦 快速开始
 
@@ -124,6 +121,38 @@
 | [Audio_Playback](examples/arduino/examples/Audio_Playback/README_ZH.md) | 音频播放 |
 
 Arduino 环境设置见[环境说明](examples/arduino/README_ZH.md)，草图使用的库位于 [examples/arduino/libraries](examples/arduino/libraries/)。
+
+### ESP-IDF 开发板支持矩阵
+
+图例：`✅` 表示该示例预期可在该开发板上运行。`❌` 表示示例所需外设不可用
+或该示例未支持该开发板。
+
+> [!NOTE]
+> 本矩阵汇总仓库当前声明的示例支持情况。CI 仅验证编译；板级接口和硬件连接
+> 请以上方各开发板的官方产品文档为准。
+
+| 编号 | 示例 | ESP32-P4-NANO | ESP32-P4-Module-DEV-KIT | ESP32-P4-WIFI6-DEV-KIT | ESP32-P4-WIFI6 | ESP32-P4-ETH | ESP32-P4-Pico | ESP32-P4-WIFI6-POE-ETH | ESP32-P4-Core-DEV-KIT |
+| --- | --- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 00 | [board_check](examples/esp-idf/00_board_check/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 01 | [HowToCreateProject](examples/esp-idf/01_HowToCreateProject/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 02 | [HelloWorld](examples/esp-idf/02_HelloWorld/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 03 | [nvs_counter](examples/esp-idf/03_nvs_counter/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 04 | [freertos_tasks](examples/esp-idf/04_freertos_tasks/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 05 | [gpio_io](examples/esp-idf/05_gpio_io/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 06 | [gpio_interrupt](examples/esp-idf/06_gpio_interrupt/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 07 | [uart_loopback](examples/esp-idf/07_uart_loopback/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 08 | [i2c_tools](examples/esp-idf/08_i2c_tools/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 09 | [sdmmc](examples/esp-idf/09_sdmmc/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| 10 | [wifistation](examples/esp-idf/10_wifistation/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| 11 | [ethernetbasic](examples/esp-idf/11_ethernetbasic/README_ZH.md) | ✅ | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ |
+| 12 | [I2SCodec](examples/esp-idf/12_I2SCodec/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| 13 | [Displaycolorbar](examples/esp-idf/13_Displaycolorbar/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 14 | [lvgl_demo_v9](examples/esp-idf/14_lvgl_demo_v9/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 15 | [eth2ap](examples/esp-idf/15_eth2ap/README_ZH.md) | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| 16 | [video_lcd_display](examples/esp-idf/16_video_lcd_display/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 17 | [simple_video_server](examples/esp-idf/17_simple_video_server/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅, Ethernet | ❌ | ✅ | ❌ |
+| 18 | [esp_brookesia_phone](examples/esp-idf/18_esp_brookesia_phone/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 19 | [system_monitor](examples/esp-idf/19_system_monitor/README_ZH.md) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## 🛠️ 开发环境
 
