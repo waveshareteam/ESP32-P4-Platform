@@ -62,5 +62,21 @@ dist/
 *.tar
 *.tar.gz
 
-# Prebuilt factory firmware packages
-!firmware/factory_firmware/**/*.zip
+
+# Shared build and release outputs
+.ci-template/
+**/components/gen_bmgr_codes/
+release-artifacts/
+release-downloads/
+release-dist/
+
+# Local AI coding agent state
+.claude/
+.cursor/
+.codex/
+.gemini/
+.windsurf/
+.continue/
+.roo/
+.cline/
+.aider*
