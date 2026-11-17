@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Run the ESP-Brookesia phone UI with calculator, drawing, spectrum, music, camera, video and settings apps.
+Run a dark-card interface for the 800 x 1280 rectangular portrait display, with calculator, drawing, spectrum, music, camera, video and settings apps. The music view shows the bundled audio file names and provides playback, pause, track selection and a playlist.
 
 ## Hardware Required
 
@@ -22,8 +22,12 @@ idf.py build flash monitor
 
 ## Expected Result
 
-The phone launcher appears and provides the installed demo apps.
+The launcher uses a three-column app grid, with blue settings controls and consistent back navigation; camera and video retain their full-screen views. The image below is a software-rendered UI preview.
+
+| Launcher | Settings |
+| --- | --- |
+| ![800 x 1280 factory home](../../docs/images/factory-home-800x1280.png) | ![800 x 1280 factory settings](../../docs/images/factory-settings-800x1280.png) |
 
 ## Troubleshooting
 
-Keep `spiffs/music/` with the project: CMake packs these audio files into the storage partition. For pre-v3 silicon, use the separate legacy defaults described in the [revision guide](../../docs/ESP32P4_REVISION_CONFIG.md).
+Keep `spiffs/music/` with the project: CMake packs these audio files into the storage partition. Wi-Fi needs C6 slave firmware compatible with the host components; see the [P4 + C6 guide](../../docs/P4_C6_HOSTED_WIFI.md).
