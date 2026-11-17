@@ -1,9 +1,9 @@
-#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "factory_phone.hpp"
 #include "Settings.hpp"
 #include "factory_ui.hpp"
 #include "lvgl.h"

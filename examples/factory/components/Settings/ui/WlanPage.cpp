@@ -221,7 +221,8 @@ namespace esp_brookesia::apps
 
         wlan_switch = lv_switch_create(wlan_btn);
         lv_obj_set_size(wlan_switch, 96, 52);
-        lv_obj_set_style_bg_color(wlan_switch, lv_color_hex(factory_ui::ACCENT), LV_PART_INDICATOR | LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(wlan_switch, lv_color_hex(factory_ui::ACCENT),
+                                 static_cast<lv_style_selector_t>(LV_PART_INDICATOR) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
         lv_obj_align(wlan_switch, LV_ALIGN_RIGHT_MID, 0, 0);
         lv_obj_set_ext_click_area(wlan_switch, 12);
         lv_obj_remove_state(wlan_switch, LV_STATE_CHECKED);
@@ -297,7 +298,8 @@ namespace esp_brookesia::apps
         }
         lv_obj_set_style_text_font(kb, &lv_font_montserrat_24, LV_PART_ITEMS);
         lv_obj_set_style_bg_color(kb, lv_color_hex(factory_ui::CARD), LV_PART_ITEMS);
-        lv_obj_set_style_bg_color(kb, lv_color_hex(factory_ui::ACCENT), LV_PART_ITEMS | LV_STATE_PRESSED);
+        lv_obj_set_style_bg_color(kb, lv_color_hex(factory_ui::ACCENT),
+                                 static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_PRESSED));
         lv_obj_set_style_text_color(kb, lv_color_white(), LV_PART_ITEMS);
         lv_keyboard_set_textarea(kb, ta);
 

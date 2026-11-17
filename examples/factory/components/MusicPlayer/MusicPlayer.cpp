@@ -1,9 +1,9 @@
-#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  * SPDX-FileCopyrightText: 2026 Waveshare
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "factory_phone.hpp"
 #include "MusicPlayer.hpp"
 #include "product_support.h"
 #include "bsp/esp-bsp.h"

@@ -43,6 +43,7 @@ static void pressable(lv_obj_t *object)
     lv_obj_set_style_bg_color(object, lv_color_hex(PRESSED), LV_STATE_PRESSED);
     lv_obj_set_style_border_width(object, 2, LV_STATE_PRESSED);
     lv_obj_set_style_border_color(object, lv_color_hex(ACCENT), LV_STATE_PRESSED);
+    lv_obj_set_style_opa(object, LV_OPA_40, LV_STATE_DISABLED);
 }
 
 static lv_obj_t *root(lv_obj_t *parent)

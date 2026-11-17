@@ -1,9 +1,9 @@
-#include "factory_phone.hpp"
 /*
  * SPDX-FileCopyrightText: 2023-2025 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+#include "factory_phone.hpp"
 #include <math.h>
 #include <vector>
 #include <unistd.h>
@@ -148,12 +148,7 @@ bool Calculator::run(void)
     lv_obj_set_size(history_label, _width, text_h / 3);
     lv_obj_add_flag(history_label, LV_OBJ_FLAG_SCROLLABLE);
 
-    // Round screen uses center alignment to avoid right edge occlusion
-    if (is_round_screen) {
-        lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_CENTER, 0);
-    } else {
-        lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_RIGHT, 0);
-    }
+    lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_RIGHT, 0);
 
     lv_obj_set_style_opa(history_label, LV_OPA_TRANSP, LV_PART_CURSOR);
     lv_obj_set_style_text_color(history_label, LABEL_COLOR, 0);
@@ -170,14 +165,8 @@ bool Calculator::run(void)
     formula_label = lv_label_create(formula_label_obj);
     lv_obj_set_size(formula_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 
-    // Round screen uses center alignment to avoid right edge occlusion
-    if (is_round_screen) {
-        lv_obj_align(formula_label, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_set_style_text_align(formula_label, LV_TEXT_ALIGN_CENTER, 0);
-    } else {
-        lv_obj_align(formula_label, LV_ALIGN_RIGHT_MID, 0, 0);
-        lv_obj_set_style_text_align(formula_label, LV_TEXT_ALIGN_RIGHT, 0);
-    }
+    lv_obj_align(formula_label, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_set_style_text_align(formula_label, LV_TEXT_ALIGN_RIGHT, 0);
 
     lv_obj_set_style_text_font(formula_label, LABEL_FONT_BIG, 0);
     lv_label_set_text(formula_label, "0");
@@ -192,14 +181,8 @@ bool Calculator::run(void)
     result_label = lv_label_create(result_label_obj);
     lv_obj_set_size(result_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
 
-    // Round screen uses center alignment to avoid right edge occlusion
-    if (is_round_screen) {
-        lv_obj_align(result_label, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_set_style_text_align(result_label, LV_TEXT_ALIGN_CENTER, 0);
-    } else {
-        lv_obj_align(result_label, LV_ALIGN_RIGHT_MID, 0, 0);
-        lv_obj_set_style_text_align(result_label, LV_TEXT_ALIGN_RIGHT, 0);
-    }
+    lv_obj_align(result_label, LV_ALIGN_RIGHT_MID, 0, 0);
+    lv_obj_set_style_text_align(result_label, LV_TEXT_ALIGN_RIGHT, 0);
 
     lv_obj_set_style_text_color(result_label, LABEL_COLOR, 0);
     lv_obj_set_style_text_font(result_label, LABEL_FONT_SMALL, 0);
