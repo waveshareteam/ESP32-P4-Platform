@@ -1,6 +1,6 @@
 # Examples
 
-[中文版本](README_CN.md)
+[中文版本](README_ZH.md)
 
 This directory contains both ESP-IDF projects and Arduino sketches for the
 Waveshare ESP32-P4 platform boards.
@@ -59,7 +59,7 @@ using a C6 Wi-Fi coprocessor, also read
 Arduino examples are under [arduino/examples](arduino/examples/). The
 [arduino/README.md](arduino/README.md) file documents the recommended
 Arduino-ESP32 core and bundled libraries. A
-[Chinese Arduino guide](arduino/README_CN.md) is also available.
+[Chinese Arduino guide](arduino/README_ZH.md) is also available.
 
 | Directory | Purpose |
 | --- | --- |

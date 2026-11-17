@@ -1,6 +1,6 @@
 # GPIO IO
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Small GPIO input/output example.
 

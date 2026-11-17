@@ -1,6 +1,6 @@
 # Hello World
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Classic ESP-IDF hello world example for ESP32-P4.
 

@@ -1,6 +1,6 @@
 # Display Color Bar
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Display color bars on a supported LCD panel. This is the simplest ESP-IDF
 display bring-up example in the repository.

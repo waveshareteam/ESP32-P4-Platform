@@ -1,6 +1,6 @@
 # SDMMC
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Mount and test an SD card over the SDMMC interface.
 

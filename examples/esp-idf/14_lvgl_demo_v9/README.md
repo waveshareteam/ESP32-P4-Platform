@@ -1,6 +1,6 @@
 # LVGL Demo v9
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Run LVGL v9 demos on a supported display.
 

@@ -2,23 +2,23 @@
   <h1>Waveshare ESP32-P4 Platform</h1>
   <p><strong>Examples and bring-up resources for Waveshare ESP32-P4 development boards</strong></p>
   <p>
-    <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="assets/products/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="assets/products/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="assets/products/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="assets/products/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="assets/products/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="assets/products/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="assets/products/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="assets/products/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="docs/images/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="docs/images/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="docs/images/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="docs/images/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="docs/images/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="docs/images/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="94"></a>
+    <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="docs/images/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="94"></a>
   </p>
   <p>
     <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/esp-idf-examples.yml"><img alt="ESP-IDF examples" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/esp-idf-examples.yml/badge.svg"></a>
     <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml"><img alt="Arduino examples" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml/badge.svg"></a>
     <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/repository-policy.yml"><img alt="Repository policy" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/repository-policy.yml/badge.svg"></a>
-    <a href="LICENSE.txt"><img alt="Apache-2.0 license" src="https://img.shields.io/github/license/waveshareteam/ESP32-P4-Platform"></a>
+    <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/github/license/waveshareteam/ESP32-P4-Platform"></a>
   </p>
   <p>
-    <a href="README_CN.md">中文</a> ·
+    <a href="README_ZH.md">中文</a> ·
     <a href="https://docs.waveshare.com/ESP32-P4">🌐 ESP32-P4 Products</a> ·
     <a href="docs/GETTING_STARTED.md">📚 Product Documentation</a> ·
     <a href="examples/esp-idf/">🧩 ESP-IDF Examples</a> ·
@@ -51,37 +51,37 @@ below each board for setup and hardware details.
 <table>
   <tr>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="assets/products/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="docs/images/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-NANO">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="assets/products/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-Module-DEV-KIT">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="assets/products/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="docs/images/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-DEV-KIT">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="assets/products/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="docs/images/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-WIFI6">Documentation</a>
     </td>
   </tr>
   <tr>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="assets/products/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="docs/images/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-ETH">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="assets/products/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="docs/images/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-Pico">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="assets/products/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="docs/images/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-POE-ETH">Documentation</a>
     </td>
     <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="assets/products/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
+      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="docs/images/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
       <a href="https://docs.waveshare.com/ESP32-P4-Core-DEV-KIT">Documentation</a>
     </td>
   </tr>
@@ -240,7 +240,7 @@ the required peripheral is not available or is not supported by the example.
 
 ## 🤝 Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
+Contributions are welcome. Please read [CONTRIBUTING.md](https://github.com/waveshareteam/.github/blob/main/CONTRIBUTING.md)
 before opening a pull request. Useful contributions include:
 
 - Fixing build issues on a supported board.
@@ -253,21 +253,21 @@ Arduino-ESP32 version, sanitized serial logs, and the exact example path.
 Remove credentials, tokens, private network details, unique device identifiers,
 and local filesystem paths before posting logs publicly.
 
-For support channel guidance, see [SUPPORT.md](SUPPORT.md).
+For support channel guidance, see [SUPPORT.md](https://github.com/waveshareteam/.github/blob/main/SUPPORT.md).
 
 ## 🔒 Security
 
 Do not publish vulnerability details in public issues. Use the actionable
-private reporting channel in [SECURITY.md](SECURITY.md).
+private reporting channel in [SECURITY.md](https://github.com/waveshareteam/.github/blob/main/SECURITY.md).
 
 ## 📦 Third-Party Code
 
 Some examples include third-party components or libraries for convenience,
 including LVGL, Arduino_GFX, ESP-Brookesia-related components, and Espressif
-managed components. See [THIRD_PARTY.md](THIRD_PARTY.md) for the high-level
+managed components. See [THIRD_PARTY.md](docs/THIRD_PARTY.md) for the high-level
 inventory and check each bundled component for its own license file.
 
 ## 📄 License
 
 This repository is licensed under the Apache License 2.0. See
-[LICENSE.txt](LICENSE.txt) for details.
+[LICENSE](LICENSE) for details.

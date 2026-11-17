@@ -1,6 +1,6 @@
 # SD Card
 
-[中文版本](README_CN.md)
+[中文版本](README_ZH.md)
 
 Access an inserted SD card with the Platform Arduino configuration.
 

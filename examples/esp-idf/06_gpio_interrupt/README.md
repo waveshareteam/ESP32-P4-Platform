@@ -1,6 +1,6 @@
 # GPIO Interrupt
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 GPIO interrupt and debounce example.
 

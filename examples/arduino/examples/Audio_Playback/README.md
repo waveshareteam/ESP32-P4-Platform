@@ -1,6 +1,6 @@
 # Audio Playback
 
-[中文版本](README_CN.md)
+[中文版本](README_ZH.md)
 
 Play audio through the Platform ES8311 output codec and on-board speaker.
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/waveshareteam/esp32-repo-template/v1/schema/product.schema.json",
   "product": "ESP32-P4-Platform",
-  "product_url": "https://www.waveshare.com/product/esp32/esp32-p4.htm",
+  "product_url": "https://www.waveshare.com/catalogsearch/result/?q=ESP32-P4",
   "tier": 0,
   "target": "esp32p4",
   "esp_idf": {

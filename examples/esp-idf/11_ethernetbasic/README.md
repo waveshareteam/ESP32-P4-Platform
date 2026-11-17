@@ -1,6 +1,6 @@
 # Ethernet Basic
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Bring up Ethernet, wait for link, and obtain an IP address.
 

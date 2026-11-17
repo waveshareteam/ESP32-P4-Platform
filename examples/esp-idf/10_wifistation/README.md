@@ -1,6 +1,6 @@
 # Wi-Fi Station
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Connect an ESP32-P4 setup to an existing Wi-Fi access point.
 

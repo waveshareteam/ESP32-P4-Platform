@@ -1,6 +1,6 @@
 # I2C Tools
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Interactive I2C command-line tools for scanning and debugging devices on an
 I2C bus.

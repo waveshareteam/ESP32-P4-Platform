@@ -1,6 +1,6 @@
 # Examples Guide
 
-[中文版本](./EXAMPLES_GUIDE_CN.md)
+[中文版本](EXAMPLES_GUIDE_ZH.md)
 
 The repository serves two kinds of users:
 

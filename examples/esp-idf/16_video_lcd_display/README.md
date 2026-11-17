@@ -1,7 +1,7 @@
 | Supported Targets | ESP32-P4 |
 | ----------------- | -------- |
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 # Video LCD Display
 

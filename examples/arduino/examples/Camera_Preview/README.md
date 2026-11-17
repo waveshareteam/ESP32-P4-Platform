@@ -1,6 +1,6 @@
 # Camera Preview
 
-[中文版本](README_CN.md)
+[中文版本](README_ZH.md)
 
 Preview an OV5647 camera on the Platform display.
 

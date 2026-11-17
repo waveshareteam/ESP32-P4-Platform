@@ -1,6 +1,6 @@
 # UART Loopback
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Small UART example that sends text from TX and reads it back on RX.
 

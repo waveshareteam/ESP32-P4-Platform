@@ -1,6 +1,6 @@
 # I2S Codec
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Audio codec example using I2S. It can run in music playback mode or echo mode,
 depending on configuration.

@@ -1,6 +1,6 @@
 # Ethernet To AP
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Network example that combines Ethernet and Wi-Fi AP behavior.
 

@@ -1,6 +1,6 @@
 # LVGL v9 Arduino
 
-[简体中文](README_CN.md)
+[简体中文](README_ZH.md)
 
 LVGL v9 demo for Arduino on supported ESP32-P4 display and touch hardware.
 

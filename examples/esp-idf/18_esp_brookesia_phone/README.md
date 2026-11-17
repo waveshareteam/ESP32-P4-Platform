@@ -1,6 +1,6 @@
 # ESP32-P4 Platform Running ESP-Brookesia Phone Example
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 This example demonstrates how to run the ESP-Brookesia Phone UI on the
 Waveshare ESP32-P4 Platform display BSP. It is adapted from Espressif's

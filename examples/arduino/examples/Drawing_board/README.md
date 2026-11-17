@@ -1,6 +1,6 @@
 # Drawing Board
 
-[简体中文](README_CN.md)
+[简体中文](README_ZH.md)
 
 Arduino drawing example using a DSI display and GT911 touch input.
 

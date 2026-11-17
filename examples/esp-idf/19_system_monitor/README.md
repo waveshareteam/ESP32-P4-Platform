@@ -1,6 +1,6 @@
 # System Monitor
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 Serial diagnostics and runtime monitor for advanced users.
 

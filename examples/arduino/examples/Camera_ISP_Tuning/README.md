@@ -1,6 +1,6 @@
 # Camera ISP Tuning
 
-[中文版本](README_CN.md)
+[中文版本](README_ZH.md)
 
 Exercise the OV5647 camera ISP tuning path on the Platform display.
 

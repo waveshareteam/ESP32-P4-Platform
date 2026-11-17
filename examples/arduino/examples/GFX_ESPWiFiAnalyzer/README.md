@@ -1,6 +1,6 @@
 # GFX ESP Wi-Fi Analyzer
 
-[简体中文](README_CN.md)
+[简体中文](README_ZH.md)
 
 Arduino Wi-Fi scan visualization example using Arduino_GFX.
 

@@ -1,6 +1,6 @@
 # How To Create Project
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 This is the smallest ESP-IDF project layout in the repository. It is useful
 when you want to understand which files are required before adding real

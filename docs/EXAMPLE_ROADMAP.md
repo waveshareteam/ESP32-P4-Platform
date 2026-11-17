@@ -1,6 +1,6 @@
 # Example Roadmap
 
-[中文版本](./EXAMPLE_ROADMAP_CN.md)
+[中文版本](EXAMPLE_ROADMAP_ZH.md)
 
 This roadmap tracks example coverage that would make the repository more
 complete for both beginners and advanced users.

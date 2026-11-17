@@ -1,6 +1,6 @@
 # AsciiTable
 
-[简体中文](README_CN.md)
+[简体中文](README_ZH.md)
 
 Arduino display text rendering example. It draws an ASCII table on a supported
 DSI display.

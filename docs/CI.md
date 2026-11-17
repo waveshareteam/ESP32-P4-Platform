@@ -1,6 +1,6 @@
 # Continuous Integration
 
-[中文版本](CI_CN.md)
+[中文版本](CI_ZH.md)
 
 This repository uses ESP-IDF examples, Arduino examples, firmware/Brookesia
 product jobs, and a lightweight repository-policy workflow. Every workflow
@@ -90,7 +90,7 @@ is a release surface distinct from the new 32 MiB CI product artifacts; no CI
 job regenerates or replaces a factory package.
 
 The product selector builds only non-documentation changes under
-`firmware/brookesia/` and evidenced product build/packaging inputs. Known
+`examples/factory/` and evidenced product build/packaging inputs. Known
 example, policy, and documentation paths select no product build. An
 unclassified non-document path fails closed and is reported as unknown instead
 of silently spending two firmware builds or pretending the path is safe.
@@ -106,7 +106,7 @@ audit. Unit coverage keeps CI routing behavior and the Arduino segmented-package
 boundary checked; routing may also be audited with its dedicated CLI when a
 complete base range is available.
 
-The repository keeps its established public `_CN.md` companion URLs. Every
+The repository keeps its established public `_ZH.md` companion URLs. Every
 pair is explicit in `config/markdown-audit.json`; this is an intentional public
 path compatibility policy, not an unclassified language suffix. The
 repository-local gate is a tested target adaptation of the reusable audit: it

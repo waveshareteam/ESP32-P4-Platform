@@ -1,6 +1,6 @@
 # Managed Components and Local Component Policy
 
-[中文版本](COMPONENTS_CN.md)
+[中文版本](COMPONENTS_ZH.md)
 
 This repository uses ESP-IDF Component Manager for reusable upstream
 dependencies and keeps board- or example-specific glue beside the example that

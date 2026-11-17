@@ -1,6 +1,6 @@
 # ESP32-P4 + ESP32-C6 Hosted Wi-Fi
 
-[中文版本](P4_C6_HOSTED_WIFI_CN.md)
+[中文版本](P4_C6_HOSTED_WIFI_ZH.md)
 
 ESP32-P4 has no native Wi-Fi radio. The Wi-Fi examples can use an ESP32-C6 as a
 coprocessor through ESP-Hosted and expose the remote interface through

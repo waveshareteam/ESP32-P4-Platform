@@ -1,6 +1,6 @@
 # ESP32-P4 Arduino Examples
 
-[中文版本](./README_CN.md)
+[中文版本](README_ZH.md)
 
 [![Arduino examples](https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml/badge.svg)](https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml)
 
@@ -181,7 +181,7 @@ Arduino GFX provides the encapsulated ESP32-P4 MIPI DSI function
 The `displays/` helper combines Waveshare panel/I2C integration code with
 Arduino-adapted Espressif `esp_lcd_touch` and GT911 sources. The repository and
 upstream portions are Apache-2.0 licensed; see the
-[third-party inventory](../../THIRD_PARTY.md) for the pinned provenance.
+[third-party inventory](../../docs/THIRD_PARTY.md) for the pinned provenance.
 
 ## GT911 Touch Contract
 

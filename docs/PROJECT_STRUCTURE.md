@@ -1,6 +1,6 @@
 # Project Structure
 
-[中文版本](./PROJECT_STRUCTURE_CN.md)
+[中文版本](PROJECT_STRUCTURE_ZH.md)
 
 This repository is organized as a collection of examples rather than as one
 monolithic firmware application.
@@ -18,7 +18,7 @@ monolithic firmware application.
 | `SUPPORT.md` | Support channels |
 | `SECURITY.md` | Actionable private vulnerability reporting policy |
 | `THIRD_PARTY.md` | Third-party code inventory |
-| `LICENSE.txt` | Apache-2.0 license |
+| `LICENSE` | Apache-2.0 license |
 
 ## ESP-IDF Examples
 
@@ -51,7 +51,7 @@ with fewer manual dependency steps.
 When adding Arduino content:
 
 - Add the sketch under `examples/arduino/examples/<ExampleName>/`.
-- Update `examples/README.md` and `examples/README_CN.md`.
+- Update `examples/README.md` and `examples/README_ZH.md`.
 - Update `examples/arduino/README.md` when the required Arduino core or
   bundled library version changes.
 - Keep board pin assumptions documented in the sketch README or comments.

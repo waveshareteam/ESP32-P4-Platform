@@ -1,6 +1,6 @@
 # ESP32-P4 Revision Configuration
 
-[中文版本](./ESP32P4_REVISION_CONFIG_CN.md)
+[中文版本](ESP32P4_REVISION_CONFIG_ZH.md)
 
 This repository maintains two mutually incompatible ESP32-P4 product profiles.
 They are selected by the revision configuration supplied to a product build; do

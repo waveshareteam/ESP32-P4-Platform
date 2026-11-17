@@ -1,6 +1,6 @@
 # Getting Started
 
-[中文版本](./GETTING_STARTED_CN.md)
+[中文版本](GETTING_STARTED_ZH.md)
 
 This guide is written for first-time users. If you already know ESP-IDF or
 Arduino, use [EXAMPLES_GUIDE.md](EXAMPLES_GUIDE.md) to jump directly to an
