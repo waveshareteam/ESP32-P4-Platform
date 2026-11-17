@@ -8,3 +8,7 @@ if(NOT DEFINED SDKCONFIG_DEFAULTS)
 endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp-brookesia)
+
+# The included Brookesia/Boost stack targets C++23. ESP-IDF 6.1 defaults to
+# C++26, whose new deprecation diagnostics reject this Boost release.
+idf_build_set_property(COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:CXX>:-std=gnu++23>" APPEND)
