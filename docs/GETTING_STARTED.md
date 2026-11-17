@@ -19,7 +19,7 @@ example.
 ## ESP-IDF First Run
 
 1. Install an ESP-IDF version listed in [CI.md](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/ci.md). CI currently checks
-   `v5.5.5` and `v6.0.2`; an example README may declare additional constraints.
+   `v6.1.1`; an example README may declare additional constraints.
 2. Open an ESP-IDF terminal.
 3. Clone this repository.
 4. Build the board check example:

@@ -15,9 +15,6 @@
 void app_main(void)
 {
 
-/*
-If you need to use the three-cache anti-tear configuration, you need to fix idf 5.5. Refer to: https://github.com/espressif/esp-iot-solution/blob/da973d162cc88736a4e05e6582393e666f221c2a/components/display/tools/esp_lvgl_adapter/README.md?plain=1#L671-L709 
-*/
     bsp_display_cfg_t cfg = {
         .lv_adapter_cfg = ESP_LV_ADAPTER_DEFAULT_CONFIG(),
         .rotation = ESP_LV_ADAPTER_ROTATE_0,

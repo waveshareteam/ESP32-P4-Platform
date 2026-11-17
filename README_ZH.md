@@ -158,9 +158,9 @@ Arduino 环境设置见[环境说明](examples/arduino/README_ZH.md)，草图使
 
 | 开发框架 | 版本 | 示例数 |
 | --- | --- | ---: |
-| ESP-IDF | `v5.5.5`、`v6.0.2` | 20 |
+| ESP-IDF | `v6.1.1` | 20 |
 | Arduino-ESP32 | `3.3.11` | 9 |
-| 出厂工程 ESP-IDF | `v5.5.5` | 1 |
+| 出厂工程 ESP-IDF | `v6.1.1` | 1 |
 
 版本和 Arduino 开发板选项以 [product.json](.github/product.json) 为准；出厂工程单独构建。
 

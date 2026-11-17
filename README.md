@@ -159,9 +159,9 @@ the required peripheral is not available or is not supported by the example.
 
 | Framework | Version | Examples |
 | --- | --- | ---: |
-| ESP-IDF | `v5.5.5`, `v6.0.2` | 20 |
+| ESP-IDF | `v6.1.1` | 20 |
 | Arduino-ESP32 | `3.3.11` | 9 |
-| Factory-project ESP-IDF | `v5.5.5` | 1 |
+| Factory-project ESP-IDF | `v6.1.1` | 1 |
 
 [product.json](.github/product.json) defines the framework versions and Arduino board options; the factory project is built separately.
 

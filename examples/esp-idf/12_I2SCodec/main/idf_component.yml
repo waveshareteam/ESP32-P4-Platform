@@ -13,7 +13,7 @@ dependencies:
     rules:
       - if: "target in [esp32p4]"
 
-  # ESP32-P4 / IDF 5.5 and 6: BSP 2.0.1 uses esp_lvgl_adapter 0.6.x.
+  # ESP32-P4 / IDF 6.1: BSP 2.0.1 uses esp_lvgl_adapter 0.6.x.
   # Its legacy headers trigger -Werror=cpp with LVGL 9.6 on IDF 6.
   # Lift this cap after the BSP supports an adapter with LVGL 9.6 headers.
   lvgl/lvgl:

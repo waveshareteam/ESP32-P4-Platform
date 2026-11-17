@@ -26,4 +26,4 @@ The display shows the LVGL widgets UI and performance monitor.
 
 ## Troubleshooting
 
-The application uses triple partial anti-tearing mode; check the existing source note before changing this mode on ESP-IDF 5.5.
+The application uses triple partial anti-tearing mode; select the actual panel in the BSP configuration and keep its buffer settings consistent.

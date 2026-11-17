@@ -13,16 +13,16 @@ First-party ESP32-P4 examples use the following constraints:
 
 | Component | Constraint | Scope and reason |
 | --- | --- | --- |
-| `waveshare/esp32_p4_platform` | `2.0.1` | Exact board BSP version for examples 12, 13, 14, 16, and 18; update deliberately and validate both CI lanes |
-| `lvgl/lvgl` | `>=9.3,<9.6` | ESP32-P4 examples 12, 13, 14 and 16 on both IDF lanes: BSP 2.0.1 uses the 0.6.x adapter, whose legacy headers fail with LVGL 9.6 under IDF 6; remove the cap after adopting a BSP adapter that supports the new headers |
+| `waveshare/esp32_p4_platform` | `2.0.1` | Exact board BSP version for examples 12, 13, 14, 16, and 18; update deliberately and validate the configured ESP-IDF version |
+| `lvgl/lvgl` | `>=9.3,<9.6` | ESP32-P4 examples 12, 13, 14 and 16 on ESP-IDF 6.1: BSP 2.0.1 uses the 0.6.x adapter, whose legacy headers fail with LVGL 9.6 under IDF 6; remove the cap after adopting a BSP adapter that supports the new headers |
 | `esp_new_jpeg` | `1.0.2` | Exact JPEG helper version in example 17, avoiding an unbounded major-version change |
 | `esp_video` | `>=2.2,<3.0` | Compatible 2.x API lane used by examples 16 and 17 |
-| `espressif/esp_wifi_remote` | IDF 5.x: `0.14.*`; IDF 6.x: `>=1.6,<2.0` | Keeps the generated `esp_wifi` interface aligned with the selected ESP-IDF family |
-| `espressif/esp_hosted` | IDF 5.x: `1.4.*`; IDF 6.x: `>=2.12,<3.0` | Direct dependency of examples 10 and 15; host/slave compatibility must also be checked on hardware |
+| `espressif/esp_wifi_remote` | `>=1.6,<2.0` | Keeps the generated `esp_wifi` interface aligned with the selected ESP-IDF family |
+| `espressif/esp_hosted` | `>=2.12,<3.0` | Direct dependency of examples 10 and 15; host/slave compatibility must also be checked on hardware |
 
 Do not replace these constraints with `"*"`. When changing a version, update
 this document and let the full ESP-IDF Actions matrix resolve every project on
-ESP-IDF `v5.5.5` and `v6.0.2` before merging. Runtime-sensitive Hosted changes
+ESP-IDF `v6.1.1` before merging. Runtime-sensitive Hosted changes
 also require the hardware checks in [P4_C6_HOSTED_WIFI.md](P4_C6_HOSTED_WIFI.md).
 
 ## Example-Local Components

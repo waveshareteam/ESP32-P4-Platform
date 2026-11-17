@@ -16,8 +16,7 @@
 
 ## 第一次运行 ESP-IDF
 
-1. 安装 [CI 说明](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/ci.md)中列出的 ESP-IDF 版本。CI 当前检查 `v5.5.5`
-   和 `v6.0.2`；个别示例 README 可能声明额外约束。
+1. 安装 [CI 说明](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/ci.md)中列出的 ESP-IDF 版本。CI 当前检查 `v6.1.1`；个别示例 README 可能声明额外约束。
 2. 打开 ESP-IDF terminal。
 3. 克隆本仓库。
 4. 构建 board check 示例：

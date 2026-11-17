@@ -12,15 +12,15 @@
 
 | 组件 | 约束 | 范围和原因 |
 | --- | --- | --- |
-| `waveshare/esp32_p4_platform` | `2.0.1` | 示例 12、13、14、16、18 使用的精确板级 BSP 版本；升级时须有意更新并验证两条 CI 版本通道 |
-| `lvgl/lvgl` | `>=9.3,<9.6` | 两条 IDF 通道上的 ESP32-P4 示例 12、13、14、16：BSP 2.0.1 使用的 0.6.x 适配器仍引用旧头文件，在 IDF 6 与 LVGL 9.6 组合下编译失败；采用支持新头文件的 BSP 适配器后解除上限 |
+| `waveshare/esp32_p4_platform` | `2.0.1` | 示例 12、13、14、16、18 使用的精确板级 BSP 版本；升级时须有意更新并验证配置的 ESP-IDF 版本 |
+| `lvgl/lvgl` | `>=9.3,<9.6` | ESP-IDF 6.1 上的 ESP32-P4 示例 12、13、14、16：BSP 2.0.1 使用的 0.6.x 适配器仍引用旧头文件，在 IDF 6 与 LVGL 9.6 组合下编译失败；采用支持新头文件的 BSP 适配器后解除上限 |
 | `esp_new_jpeg` | `1.0.2` | 示例 17 使用的精确 JPEG helper 版本，避免无边界 major 升级 |
 | `esp_video` | `>=2.2,<3.0` | 示例 16、17 使用的兼容 2.x API 通道 |
-| `espressif/esp_wifi_remote` | IDF 5.x：`0.14.*`；IDF 6.x：`>=1.6,<2.0` | 让生成的 `esp_wifi` 接口与所选 ESP-IDF 系列保持匹配 |
-| `espressif/esp_hosted` | IDF 5.x：`1.4.*`；IDF 6.x：`>=2.12,<3.0` | 示例 10、15 的直接依赖；host/slave 兼容性还须在硬件上检查 |
+| `espressif/esp_wifi_remote` | `>=1.6,<2.0` | 让生成的 `esp_wifi` 接口与所选 ESP-IDF 系列保持匹配 |
+| `espressif/esp_hosted` | `>=2.12,<3.0` | 示例 10、15 的直接依赖；host/slave 兼容性还须在硬件上检查 |
 
 不要把这些约束替换为 `"*"`。变更版本时同步更新本文，并在合并前让完整
-ESP-IDF Actions 矩阵用 ESP-IDF `v5.5.5` 和 `v6.0.2` 解析并构建每个工程。
+ESP-IDF Actions 矩阵用 ESP-IDF `v6.1.1` 解析并构建每个工程。
 Hosted 运行时相关变更还须完成
 [P4 + C6 Hosted Wi-Fi](P4_C6_HOSTED_WIFI_ZH.md) 中的硬件检查。
 

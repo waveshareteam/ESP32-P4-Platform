@@ -26,4 +26,4 @@ The backlight turns on and the phone UI appears with a periodically updated stat
 
 ## Troubleshooting
 
-The default panel is the 7-inch portrait model; select your actual LCD in the BSP menu and check the source anti-tearing note before changing display buffering.
+The default panel is the 7-inch portrait model; select your actual LCD in the BSP menu and keep display buffering consistent with its configuration.

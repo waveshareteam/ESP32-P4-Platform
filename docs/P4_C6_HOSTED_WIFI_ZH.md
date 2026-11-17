@@ -10,8 +10,7 @@ ESP32-P4 没有原生 Wi-Fi 射频。Wi-Fi 示例可以通过 ESP-Hosted 把 ESP
 
 | 范围 | Host stack | C6 固件边界 |
 | --- | --- | --- |
-| ESP-IDF 5.x 示例 10、15 | `esp_wifi_remote` `0.14.*`；`esp_hosted` `1.4.*` | 使用所解析 Hosted release 要求的 slave 固件 |
-| ESP-IDF 6.x 示例 10、15 | `esp_wifi_remote` `>=1.6,<2.0`；`esp_hosted` `>=2.12,<3.0` | 使用所解析 Hosted release 要求的 slave 固件 |
+| ESP-IDF 6.1 示例 10、15 | `esp_wifi_remote` `>=1.6,<2.0`；`esp_hosted` `>=2.12,<3.0` | 使用所解析 Hosted release 要求的 slave 固件 |
 | ESP-IDF 示例 17 | 使用相同的直接 `esp_wifi_remote` 通道；transport 依赖由所选组件图解析 | 必须一起验证解析后的组件图和 slave 镜像 |
 | Arduino-ESP32 `3.3.11` | 使用所选 Arduino core 随附的依赖 | 不要独立覆盖某一个 Hosted 组件 |
 
@@ -21,8 +20,8 @@ ESP32-P4 没有原生 Wi-Fi 射频。Wi-Fi 示例可以通过 ESP-Hosted 把 ESP
 
 ## CI 能证明什么
 
-ESP-IDF matrix 证明每个直属 P4 示例使用默认 `rev3_x`/`MIN_300` 可在两条声明的 IDF
-通道上编译。统一 Arduino 构建使用默认 `ChipVariant=postv3`
+ESP-IDF matrix 证明每个直属 P4 示例使用默认 `rev3_x`/`MIN_300` 可在配置的 ESP-IDF
+版本上编译。统一 Arduino 构建使用默认 `ChipVariant=postv3`
 （v3.00+、400 MHz）配置编译 9 个草图。pre-v3/v1.3 需要显式
 `rev1_3`/`MIN_100` 或 `prev3`（360 MHz），不同芯片版本系列的输出不可互换。工作流
 不会烧录 P4、烧录 C6、证明关闭 monitor 时的
