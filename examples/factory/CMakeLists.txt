@@ -9,6 +9,7 @@ endif()
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp-brookesia)
 
-# The included Brookesia/Boost stack targets C++23. ESP-IDF 6.1 defaults to
-# C++26, whose new deprecation diagnostics reject this Boost release.
-idf_build_set_property(COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:CXX>:-std=gnu++23>" APPEND)
+# Match the Knob factory reference: this Boost release predates C++26's
+# variadic-comma diagnostics. Other components keep the IDF 6.1 default.
+idf_component_get_property(FACTORY_BOOST_LIBRARY espressif__esp-boost COMPONENT_LIB)
+target_compile_options(${FACTORY_BOOST_LIBRARY} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=gnu++23>")
