@@ -30,13 +30,6 @@ struct Page {
     lv_obj_t *back = nullptr;
 };
 
-struct Tile {
-    int id;
-    const char *title;
-    const char *description;
-    const void *image;
-};
-
 struct Row {
     lv_obj_t *object = nullptr;
     lv_obj_t *value = nullptr;
@@ -54,7 +47,6 @@ struct ControlPage {
 lv_obj_t *plain(lv_obj_t *parent);
 lv_obj_t *label(lv_obj_t *parent, const char *text, const lv_font_t *font, uint32_t color = TEXT);
 Page page(lv_obj_t *parent, const char *title, lv_event_cb_t back, void *context);
-lv_obj_t *home(lv_obj_t *parent, const Tile *tiles, size_t count, lv_event_cb_t activate, void *context);
 void section(lv_obj_t *parent, const char *title);
 lv_obj_t *note(lv_obj_t *parent, const char *text);
 Row row(lv_obj_t *parent, const char *symbol, const char *title, const char *value,

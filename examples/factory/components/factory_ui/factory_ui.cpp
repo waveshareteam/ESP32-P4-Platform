@@ -106,58 +106,6 @@ static void image(lv_obj_t *parent, const void *source, int size)
     lv_obj_remove_flag(object, LV_OBJ_FLAG_CLICKABLE);
 }
 
-lv_obj_t *home(lv_obj_t *parent, const Tile *tiles, size_t count, lv_event_cb_t activate, void *context)
-{
-    auto *view = root(parent);
-    auto *heading = label(view, "ESP32-P4", &lv_font_montserrat_48);
-    lv_obj_set_pos(heading, GUTTER, STATUS_HEIGHT + 28);
-    auto *subtitle = label(view, "Factory applications", &lv_font_montserrat_24, HINT);
-    lv_obj_set_pos(subtitle, GUTTER, STATUS_HEIGHT + 94);
-    auto *divider = plain(view);
-    lv_obj_set_size(divider, WIDTH - 2 * GUTTER, 2);
-    lv_obj_set_pos(divider, GUTTER, 202);
-    lv_obj_set_style_bg_color(divider, lv_color_hex(PRESSED), 0);
-    lv_obj_set_style_bg_opa(divider, LV_OPA_COVER, 0);
-    auto *caption = label(view, "Applications", &lv_font_montserrat_22, HINT);
-    lv_obj_set_pos(caption, GUTTER, 224);
-
-    auto *grid = plain(view);
-    lv_obj_set_size(grid, WIDTH - 2 * GUTTER, HEIGHT - 276 - NAVIGATION_HEIGHT - 62);
-    lv_obj_set_pos(grid, GUTTER, 276);
-    lv_obj_set_flex_flow(grid, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_flex_align(grid, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_set_style_pad_gap(grid, 20, 0);
-    lv_obj_add_flag(grid, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_scroll_dir(grid, LV_DIR_VER);
-    lv_obj_set_scrollbar_mode(grid, LV_SCROLLBAR_MODE_AUTO);
-    for (size_t i = 0; i < count; ++i) {
-        auto *tile = card(grid, 248);
-        lv_obj_set_width(tile, 232);
-        lv_obj_set_style_pad_all(tile, 16, 0);
-        pressable(tile);
-        lv_obj_set_user_data(tile, reinterpret_cast<void *>(static_cast<intptr_t>(tiles[i].id)));
-        lv_obj_add_event_cb(tile, activate, LV_EVENT_CLICKED, context);
-        auto *art = plain(tile);
-        lv_obj_set_size(art, 128, 128);
-        lv_obj_align(art, LV_ALIGN_TOP_MID, 0, 0);
-        lv_obj_remove_flag(art, LV_OBJ_FLAG_CLICKABLE);
-        image(art, tiles[i].image, 112);
-        auto *title = label(tile, tiles[i].title, &lv_font_montserrat_28);
-        lv_obj_set_width(title, 200);
-        lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
-        lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 140);
-        auto *description = label(tile, tiles[i].description, &lv_font_montserrat_20, HINT);
-        lv_obj_set_width(description, 200);
-        lv_obj_set_style_text_align(description, LV_TEXT_ALIGN_CENTER, 0);
-        lv_label_set_long_mode(description, LV_LABEL_LONG_DOT);
-        lv_obj_align(description, LV_ALIGN_TOP_MID, 0, 182);
-    }
-    auto *hint = label(view, "Tap an application to open", &lv_font_montserrat_22, HINT);
-    lv_obj_align(hint, LV_ALIGN_BOTTOM_MID, 0, -NAVIGATION_HEIGHT - 24);
-    return view;
-}
-
 void section(lv_obj_t *parent, const char *title)
 {
     auto *heading = label(parent, title, &lv_font_montserrat_24, HINT);

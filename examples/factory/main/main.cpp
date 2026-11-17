@@ -133,33 +133,7 @@ extern "C" void app_main(void)
         auto app6 = esp_brookesia::apps::Settings::requestInstance(true, true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app6), "Start Settings failed");
 
-        // Retain Brookesia's app lifecycle and navigation, with a portrait home
-        // view on its main screen instead of a circular-screen layout.
-        std::vector<factory_ui::Tile> tiles;
-        auto add_tile = [&tiles](systems::base::App *app, const char *title, const char *description) {
-            tiles.push_back({app->getId(), title, description, app->getLauncherIcon().resource});
-        };
-        add_tile(camera_app, "Camera", "Live camera preview");
-        add_tile(app5, "Music", "On-device playlist");
-        add_tile(video_player_app, "Video", "Play from microSD");
-        add_tile(app, "Drawing", "Touch canvas");
-        add_tile(app1, "Spectrum", "Microphone analysis");
-        add_tile(app2, "Calculator", "Quick calculations");
-        add_tile(app6, "Settings", "Device controls");
-        for (auto &registered : inited_apps) {
-            auto *registered_app = std::get<1>(registered).get();
-            if (registered_app) add_tile(registered_app, "UI demo", "Interface showcase");
-        }
-        factory_ui::home(phone->getDisplay().getMainScreenObject(), tiles.data(), tiles.size(), [](lv_event_t *event) {
-            auto *context = static_cast<Phone *>(lv_event_get_user_data(event));
-            auto *tile = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
-            systems::base::Context::AppEventData app_event = {
-                .id = static_cast<int>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(tile))),
-                .type = systems::base::Context::AppEventType::START,
-                .data = nullptr,
-            };
-            ESP_UTILS_CHECK_FALSE_EXIT(context->sendAppEvent(&app_event), "Open factory app failed");
-        }, phone);
+        factory_launcher_wallpaper(phone->getDisplay().getMainScreenObject());
 
         bsp_display_backlight_on();
 
