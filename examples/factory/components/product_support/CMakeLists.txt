@@ -15,8 +15,8 @@ endforeach()
 idf_component_register(
     SRCS ${SRCS}
     INCLUDE_DIRS ${INCLUDE_DIRS}
-    REQUIRES driver esp_codec_dev esp32_p4_platform esp-audio-player esp-file-iterator
-    PRIV_REQUIRES esp_timer fatfs esp_psram esp_mm
+    REQUIRES esp_driver_i2s esp_codec_dev esp32_p4_platform esp-audio-player esp-file-iterator
+    PRIV_REQUIRES esp_driver_i2c esp_timer fatfs esp_psram esp_mm
 )
 
 target_compile_options(
