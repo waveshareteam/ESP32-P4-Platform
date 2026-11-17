@@ -163,7 +163,7 @@ bool MusicPlayer::close()
     _want_playing = false;
     if (_player_started) product_player_del();
     _player_started = false;
-    if (_file_iterator) file_iterator_delete(_file_iterator);
+    product_file_instance_del(_file_iterator);
     _file_iterator = nullptr;
     hide_tracks();
     if (_page.root) lv_obj_delete(_page.root);

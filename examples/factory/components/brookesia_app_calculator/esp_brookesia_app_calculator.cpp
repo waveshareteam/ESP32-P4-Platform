@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "factory_phone.hpp"
+#include <cctype>
+#include <cstdio>
+#include <cstring>
 #include <math.h>
 #include <vector>
 #include <unistd.h>

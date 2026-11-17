@@ -168,6 +168,12 @@ esp_err_t product_player_del(void);
 esp_err_t product_file_instance_init(const char *path, file_iterator_instance_t **ret_instance);
 
 /**
+ * @brief Release an instance returned by product_file_instance_init.
+ * @param instance Iterator to release, or NULL.
+ */
+void product_file_instance_del(file_iterator_instance_t *instance);
+
+/**
  * @brief Play the audio file at the specified index in the file iterator
  *
  * @param instance The file iterator instance.

@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include "esp_log.h"
 #include "esp_check.h"
@@ -246,6 +247,22 @@ esp_err_t product_file_instance_init(const char *path, file_iterator_instance_t 
     *ret_instance = file_iterator;
 
     return ESP_OK;
+}
+
+void product_file_instance_del(file_iterator_instance_t *instance)
+{
+    if (!instance) {
+        return;
+    }
+
+    // esp-file-iterator 1.0.0 declares file_iterator_delete but does not define
+    // it. Its constructor owns each list entry, the list and a duplicated path.
+    for (size_t index = 0; index < instance->count; ++index) {
+        free(instance->list[index]);
+    }
+    free(instance->list);
+    free((void *)instance->directory_path);
+    free(instance);
 }
 
 esp_err_t product_player_play_index(file_iterator_instance_t *instance, int index)
