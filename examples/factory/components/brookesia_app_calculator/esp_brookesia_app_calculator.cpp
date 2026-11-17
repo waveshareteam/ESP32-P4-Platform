@@ -89,7 +89,10 @@ bool Calculator::run(void)
     _width = lv_area_get_width(&visual_area);
     _height = lv_area_get_height(&visual_area);
 
-    if (_width == 0 || _height == 0) return false;
+    if (_width == 0 || _height == 0) {
+        _is_starting = false;
+        return false;
+    }
 
     formula_len = 1;
 
@@ -119,7 +122,11 @@ bool Calculator::run(void)
     lv_obj_set_style_radius(keyboard, 0, 0);
 
     // Set special colors for operator buttons (C, /, x, <, -, +, %)
-    lv_obj_set_style_text_color(keyboard, KEYBOARD_SPECIAL_COLOR, KEYBOARD_ITEMS_DEFAULT);
+    lv_obj_set_style_text_color(keyboard, lv_color_hex(factory_ui::TEXT), KEYBOARD_ITEMS_DEFAULT);
+    lv_obj_set_style_text_color(keyboard, KEYBOARD_SPECIAL_COLOR,
+        static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_USER_1));
+    lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::ACCENT),
+        static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
     lv_btnmatrix_set_btn_ctrl(keyboard, 0, LV_BTNMATRIX_CTRL_CUSTOM_1);  // C
     lv_btnmatrix_set_btn_ctrl(keyboard, 1, LV_BTNMATRIX_CTRL_CUSTOM_1);  // /
     lv_btnmatrix_set_btn_ctrl(keyboard, 2, LV_BTNMATRIX_CTRL_CUSTOM_1);  // x
@@ -136,6 +143,9 @@ bool Calculator::run(void)
     lv_obj_set_style_radius(label_obj, 0, 0);
     lv_obj_set_style_border_width(label_obj, 0, 0);
     lv_obj_set_style_pad_all(label_obj, 0, 0);
+    lv_obj_set_style_pad_hor(label_obj, factory_ui::GUTTER, 0);
+    lv_obj_set_style_bg_color(label_obj, KEYBOARD_BG_COLOR, 0);
+    lv_obj_set_style_text_color(label_obj, lv_color_hex(factory_ui::TEXT), 0);
     lv_obj_set_style_text_font(label_obj, LABEL_FONT_SMALL, 0);
     lv_obj_set_flex_flow(label_obj, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(label_obj, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_END);
@@ -145,18 +155,19 @@ bool Calculator::run(void)
     lv_obj_set_style_radius(history_label, 0, 0);
     lv_obj_set_style_border_width(history_label, 0, 0);
     lv_obj_set_style_pad_all(history_label, 0, 0);
-    lv_obj_set_size(history_label, _width, text_h / 3);
+    lv_obj_set_size(history_label, _width - 2 * factory_ui::GUTTER, text_h / 3);
+    lv_obj_set_style_bg_opa(history_label, LV_OPA_TRANSP, 0);
     lv_obj_add_flag(history_label, LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_RIGHT, 0);
 
     lv_obj_set_style_opa(history_label, LV_OPA_TRANSP, LV_PART_CURSOR);
-    lv_obj_set_style_text_color(history_label, LABEL_COLOR, 0);
+    lv_obj_set_style_text_color(history_label, lv_color_hex(factory_ui::HINT), 0);
     lv_obj_set_style_text_font(history_label, LABEL_FONT_SMALL, 0);
     lv_textarea_set_text(history_label, "");
 
     lv_obj_t *formula_label_obj = lv_obj_create(label_obj);
-    lv_obj_set_size(formula_label_obj, _width, text_h / 3);
+    lv_obj_set_size(formula_label_obj, _width - 2 * factory_ui::GUTTER, text_h / 3);
     lv_obj_set_style_radius(formula_label_obj, 0, 0);
     lv_obj_set_style_border_width(formula_label_obj, 0, 0);
     lv_obj_set_style_pad_all(formula_label_obj, 0, 0);
@@ -172,7 +183,7 @@ bool Calculator::run(void)
     lv_label_set_text(formula_label, "0");
 
     lv_obj_t *result_label_obj = lv_obj_create(label_obj);
-    lv_obj_set_size(result_label_obj, _width, text_h / 3);
+    lv_obj_set_size(result_label_obj, _width - 2 * factory_ui::GUTTER, text_h / 3);
     lv_obj_set_style_radius(result_label_obj, 0, 0);
     lv_obj_set_style_border_width(result_label_obj, 0, 0);
     lv_obj_set_style_pad_all(result_label_obj, 0, 0);
