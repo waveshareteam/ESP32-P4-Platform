@@ -116,18 +116,20 @@ bool Calculator::run(void)
     lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::CARD), LV_PART_ITEMS);
     lv_obj_set_style_text_color(keyboard, lv_color_white(), LV_PART_ITEMS);
     lv_obj_set_style_radius(keyboard, 20, LV_PART_ITEMS);
+    lv_obj_set_style_shadow_width(keyboard, 0, LV_PART_ITEMS);
+    lv_obj_set_style_border_width(keyboard, 0, LV_PART_ITEMS);
     lv_obj_set_style_pad_all(keyboard, 16, LV_PART_MAIN);
+    lv_obj_set_style_pad_hor(keyboard, factory_ui::GUTTER, LV_PART_MAIN);
     lv_obj_set_style_pad_gap(keyboard, 16, LV_PART_MAIN);
 
     lv_obj_add_event_cb(keyboard, keyboard_event_cb, LV_EVENT_ALL, this);
+    lv_obj_add_flag(keyboard, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
     lv_btnmatrix_set_btn_ctrl(keyboard, 18, LV_BTNMATRIX_CTRL_CHECKED);
     lv_obj_set_style_border_width(keyboard, 0, 0);
     lv_obj_set_style_radius(keyboard, 0, 0);
 
     // Set special colors for operator buttons (C, /, x, <, -, +, %)
     lv_obj_set_style_text_color(keyboard, lv_color_hex(factory_ui::TEXT), KEYBOARD_ITEMS_DEFAULT);
-    lv_obj_set_style_text_color(keyboard, KEYBOARD_SPECIAL_COLOR,
-        static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_USER_1));
     lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::ACCENT),
         static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
     lv_btnmatrix_set_btn_ctrl(keyboard, 0, LV_BTNMATRIX_CTRL_CUSTOM_1);  // C
@@ -183,6 +185,7 @@ bool Calculator::run(void)
     lv_obj_set_style_text_align(formula_label, LV_TEXT_ALIGN_RIGHT, 0);
 
     lv_obj_set_style_text_font(formula_label, LABEL_FONT_BIG, 0);
+    lv_obj_set_style_text_color(formula_label, lv_color_hex(factory_ui::TEXT), 0);
     lv_label_set_text(formula_label, "0");
 
     lv_obj_t *result_label_obj = lv_obj_create(label_obj);
@@ -366,6 +369,18 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
 {
     lv_event_code_t code = lv_event_get_code(e);
     Calculator *app = (Calculator *)lv_event_get_user_data(e);
+
+    if (code == LV_EVENT_DRAW_TASK_ADDED) {
+        auto *task = lv_event_get_draw_task(e);
+        auto *descriptor = static_cast<lv_draw_dsc_base_t *>(lv_draw_task_get_draw_dsc(task));
+        if (descriptor->part == LV_PART_ITEMS &&
+            lv_buttonmatrix_has_button_ctrl(app->keyboard, descriptor->id1, LV_BTNMATRIX_CTRL_CUSTOM_1)) {
+            if (auto *text = lv_draw_task_get_label_dsc(task)) {
+                text->color = KEYBOARD_SPECIAL_COLOR;
+            }
+        }
+        return;
+    }
 
     if (code == LV_EVENT_VALUE_CHANGED) {
         int btn_id = lv_btnmatrix_get_selected_btn(app->keyboard);
