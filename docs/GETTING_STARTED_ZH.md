@@ -16,7 +16,7 @@
 
 ## 第一次运行 ESP-IDF
 
-1. 安装 [CI 说明](CI_ZH.md)中列出的 ESP-IDF 版本。CI 当前检查 `v5.5.5`
+1. 安装 [CI 说明](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/ci.md)中列出的 ESP-IDF 版本。CI 当前检查 `v5.5.5`
    和 `v6.0.2`；个别示例 README 可能声明额外约束。
 2. 打开 ESP-IDF terminal。
 3. 克隆本仓库。
@@ -55,8 +55,8 @@ idf.py -p PORT flash monitor
 6. 上传 sketch。
 
 本仓库中的大多数 Arduino 示例都偏向显示应用。它们需要兼容的 DSI display 配置和
-PSRAM。同一份 [Arduino 指南](../examples/arduino/README_ZH.md)还说明分段 CI
-artifact、分段烧录，以及关闭串口监视器时必须执行的冷启动测试。打开 monitor
+PSRAM。同一份 [Arduino 指南](../examples/arduino/README_ZH.md)还说明开发板选项、随附库，
+以及关闭串口监视器时的冷启动检查。打开 monitor
 绝不是 sketch 启动的前提。
 
 ## 初学者检查清单
@@ -73,4 +73,4 @@ artifact、分段烧录，以及关闭串口监视器时必须执行的冷启动
 
 - [示例指南](EXAMPLES_GUIDE_ZH.md)：按难度和外设选择示例。
 - [故障排查](TROUBLESHOOTING_ZH.md)：常见设置和运行时问题。
-- [项目结构](PROJECT_STRUCTURE_ZH.md)：面向贡献者的仓库布局。
+- [项目结构](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/spec.md)：面向贡献者的仓库布局。

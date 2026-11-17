@@ -1,33 +1,23 @@
 # Camera ISP Tuning
 
-[中文版本](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Exercise the OV5647 camera ISP tuning path on the Platform display.
+## What It Does
 
-## Requirements
+Preview OV5647 video and adjust sensor settings with non-blocking serial commands.
 
-- Arduino-ESP32 `3.3.11`, `ESP32P4 Dev Module`, PSRAM enabled, and default
-  `ChipVariant=postv3` (v3.00+, 400 MHz).
-- A supported OV5647 camera and the Platform display.
-- The shared Platform I2C bus; do not use a separate camera-control bus.
+## Hardware Required
 
-## Build
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI display and an OV5647 camera.
 
-Open `Camera_ISP_Tuning.ino` in Arduino IDE, or compile it with the documented
-repository FQBN and board options.
+## How to Run
+
+Follow the [Arduino setup](../../README.md), open `Camera_ISP_Tuning.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
 ## Expected Result
 
-The sketch starts the camera/display path and exposes its ISP tuning behavior.
-Compilation does not validate sensor tuning, captured image quality, or I2C
-electrical behavior.
-
-## HIL Checklist
-
-Cold-start with the monitor closed, verify the expected tuning UI or preview,
-then open UART0 at `115200` without resetting or stalling the application.
+Live video includes the current gain, exposure and AE target; g/e/a/v/h/t commands adjust settings and s prints them.
 
 ## Troubleshooting
 
-Check the OV5647, PSRAM, display selection, and shared I2C bus. Pre-v3/v1.3
-boards require a separate explicit `ChipVariant=prev3`/360 MHz build.
+Camera control reuses the display I2C bus; unsupported sensor settings are rejected.

@@ -1,61 +1,29 @@
 # Ethernet Basic
 
-[中文版本](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Bring up Ethernet, wait for link, and obtain an IP address.
+## What It Does
 
-## Difficulty
-
-Intermediate.
+Initialize Ethernet and obtain an IP address through DHCP.
 
 ## Hardware Required
 
-- ESP32-P4 board with Ethernet support, or a supported external Ethernet
-  module.
-- Ethernet cable and network with DHCP.
+An Ethernet-capable ESP32-P4 board, an Ethernet cable, a DHCP network and a USB data cable.
 
-## Build and Flash
+## How to Run
+
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory. Match the PHY model, address, clock and GPIO settings to the board in menuconfig.
 
 ```bash
-cd examples/esp-idf/11_ethernetbasic
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## Configuration
+## Expected Result
 
-Check **Example Configuration** and the Ethernet PHY settings:
-
-- `Stop and deinit Ethernet after elapsing number of secs`: leave at `-1` for a
-  normal bring-up run, or set a value to exercise driver teardown.
-- Internal EMAC or SPI Ethernet mode.
-- PHY model and PHY address.
-- MDC/MDIO GPIOs for internal EMAC.
-- Reset GPIO.
-- Clock mode.
-
-The right values depend on the board schematic.
-
-## Expected Output
-
-The log should show Ethernet driver initialization, link up, the Ethernet MAC
-address, and the DHCP result:
-
-```text
-Ethernet Started
-Ethernet Link Up
-Ethernet Got IP Address
-ETHIP:...
-```
-
-Use this example before [15_eth2ap](../15_eth2ap/) because it validates the
-Ethernet side without adding Wi-Fi AP forwarding.
+The log reports Ethernet startup, link-up and the DHCP address.
 
 ## Troubleshooting
 
-- Confirm your board actually has Ethernet hardware.
-- Check cable, switch, and DHCP server.
-- Verify PHY address and reset GPIO.
-- If link never comes up, check clock mode and PHY power.
+A configured deinitialization timeout stops Ethernet after the selected interval; leave it at -1 for continuous operation.

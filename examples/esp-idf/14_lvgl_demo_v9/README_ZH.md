@@ -1,55 +1,29 @@
-# LVGL Demo v9
+# LVGL v9 示例
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-在受支持的显示屏上运行 LVGL v9 demos。
+## 功能
 
-## 难度
+使用微雪显示 BSP 和本地 LVGL 支持组件运行 widgets 示例。
 
-高级。
+## 硬件需求
 
-## 硬件要求
+带 PSRAM 的 ESP32-P4 开发板、兼容的 DSI 显示屏，可选配触摸输入。
 
-- ESP32-P4 开发板。
-- 受支持的 LCD 面板。
-- 已启用 PSRAM。
+## 怎么运行
 
-根据所选 LVGL demo 和开发板配置，可能需要触摸硬件。
-
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。在 BSP 菜单选择连接的屏幕，并使用工程提供的 LVGL v9 配置。
 
 ```bash
-cd examples/esp-idf/14_lvgl_demo_v9
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 配置
+## 预期现象
 
-该示例使用 LVGL v9 和在线
-`waveshare/esp32_p4_platform` `2.0.1` 托管 BSP 组件。
-`components/lvgl_demo_support` 是本地产品 glue，不是 BSP 副本。修改 LVGL 或显示
-行为时，请检查 `main/idf_component.yml` 和 `sdkconfig.defaults`。
+显示屏运行 LVGL widgets 界面并显示性能监视信息。
 
-当前应用使用以下配置启动 BSP 显示：
+## 常见问题
 
-- 旋转 `ESP_LV_ADAPTER_ROTATE_0`。
-- 三缓冲局部防撕裂模式。
-- 不交换或镜像触摸坐标轴。
-- 默认启用 `lv_demo_widgets()`。
-
-其他 LVGL demos，例如 `lv_demo_music()` 和 `lv_demo_benchmark()`，已经在 `sdkconfig.defaults` 中启用，可通过修改 `main/main.c` 中的调用来选择。
-
-## 预期行为
-
-显示屏应初始化、点亮背光，并运行带 LVGL 性能监视器的 widgets demo。
-
-## 排障
-
-- 先运行 [13_Displaycolorbar](../13_Displaycolorbar/) 验证面板。
-- 确认 PSRAM 已初始化。
-- 检查 LVGL buffer 大小和显示分辨率设置。
-- 如果触摸不工作，单独验证触摸控制器和 I2C 引脚。
-- 如果在 ESP-IDF 5.5 下修改防撕裂模式，请查看 `main/main.c` 中关于三缓冲防撕裂修复的注释。
+程序使用三缓冲局部防撕裂模式；在 ESP-IDF 5.5 上调整该模式前，请阅读源码中的现有说明。

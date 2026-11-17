@@ -1,28 +1,23 @@
-# Arduino Hello World
+# Hello World
 
-[English](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-用于受支持 ESP32-P4 DSI 显示配置的最小 Arduino 显示测试。
+## 功能
 
-## 难度
+使用 Arduino_GFX 在 DSI 显示屏上绘制文本。
 
-初级。
+## 硬件需求
 
-## 所需硬件
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及兼容的 DSI 显示屏。
 
-- ESP32-P4 开发板。
-- 受支持的 DSI 显示屏。
-- 在 Arduino 开发板设置中启用 PSRAM。
+## 怎么运行
 
-## 运行方法
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `HelloWorld.ino` 并使用其中的开发板选项上传。上传前通过 `CURRENT_SCREEN` 选择连接的屏幕。
 
-1. 阅读 [../../README_ZH.md](../../README_ZH.md)，了解 Arduino core 和库说明。
-2. 在 Arduino IDE 中打开 `HelloWorld.ino`。
-3. 选择正确的 ESP32-P4 开发板和端口。
-4. 启用 PSRAM。
-5. 如果显示屏并非默认配置，请设置 `CURRENT_SCREEN`。
-6. 上传 sketch。
+## 预期现象
 
-## 预期行为
+显示屏点亮并显示 Hello World!。
 
-屏幕初始化、打开背光并显示 `Hello World!`。
+## 常见问题
+
+暂无。

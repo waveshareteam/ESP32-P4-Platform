@@ -1,60 +1,29 @@
 # GPIO Interrupt
 
-[中文版本](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-GPIO interrupt and debounce example.
+## What It Does
 
-This demo is the next step after [05_gpio_io](../05_gpio_io/). It shows how to
-handle GPIO edges in an ISR, pass events to a FreeRTOS queue, and process them
-in a normal task.
-
-## Difficulty
-
-Beginner to intermediate.
+Pass GPIO edge events from an interrupt handler to a task, with software debounce.
 
 ## Hardware Required
 
-- One ESP32-P4 board.
-- Button, jumper wire, or other safe 3.3 V input source.
+An ESP32-P4 board, a USB data cable and a button or jumper on the configured input.
 
-## Default Pin
+## How to Run
 
-| Signal | Default GPIO |
-| --- | --- |
-| Input | GPIO3 |
-
-Change the input GPIO and debounce time in `idf.py menuconfig`.
-
-## Wiring Notes
-
-The default input pull-up is enabled. For a simple test, connect a button or
-jumper between GPIO3 and GND. The example triggers on both rising and falling
-edges, so the log should update when the input is pressed and released.
-
-Only drive the input with 3.3 V logic. Do not connect the GPIO directly to a
-5 V signal.
-
-## Build and Flash
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory. Select the input GPIO and debounce time in Example Configuration.
 
 ```bash
-cd examples/esp-idf/06_gpio_interrupt
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## Expected Output
+## Expected Result
 
-When the input changes level, the monitor prints an event:
+Pressing and releasing the input produces level and timestamp messages.
 
-```text
-gpio=3 level=0 time=1234 ms
-gpio=3 level=1 time=1456 ms
-```
+## Troubleshooting
 
-## What to Reuse
-
-- `gpio_install_isr_service()` and `gpio_isr_handler_add()`.
-- `xQueueSendFromISR()` for passing ISR events to a task.
-- A simple software debounce pattern.
+The input uses a pull-up and detects both edges; configure the debounce interval for your switch.

@@ -24,12 +24,12 @@ a tested set.
 ## What CI Proves
 
 The ESP-IDF matrix proves that every direct P4 example compiles on the two
-declared IDF lanes using default `rev3_x`/`MIN_300`. The Arduino workflow proves
-nine-sketch compilation and segmented-package integrity using default
+declared IDF lanes using default `rev3_x`/`MIN_300`. The shared Arduino build checks
+nine sketches using default
 `ChipVariant=postv3` (v3.00+, 400 MHz). Pre-v3/v1.3 needs explicit
 `rev1_3`/`MIN_100` or `prev3` (360 MHz); do not exchange the resulting build
 outputs across revision families.
-Neither workflow flashes a P4, flashes a C6, proves monitor-free cold startup,
+The workflow does not flash a P4, flashes a C6, proves monitor-free cold startup,
 negotiates the SDIO link, associates with an access point, or tests traffic.
 
 ## Hardware Acceptance

@@ -48,5 +48,5 @@ Hosted 运行时相关变更还须完成
 BSP 配置等 target 专属文件会保留，但不会由本 P4 产品 matrix 编译。因此绿色
 matrix 只证明 P4 编译，不能证明这些附加 target 或硬件运行时行为。
 
-`firmware/` 下的维护源码工程和不可变发布包不属于示例 matrix，必须使用独立
-发布流程。
+`examples/factory/` 中的出厂源码不属于示例矩阵，使用 `product.json` 中的
+`factory_firmware.esp_idf` 单独构建。

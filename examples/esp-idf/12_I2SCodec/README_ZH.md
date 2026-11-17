@@ -1,62 +1,29 @@
-# I2S Codec
+# I2S 音频编解码器
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-使用 I2S 的音频 codec 示例。根据配置，它可以运行在音乐播放模式或回声模式。
+## 功能
 
-## 难度
+通过音频编解码器播放内嵌的 canon.pcm，或运行配置的麦克风回放通路。
 
-中级。
+## 硬件需求
 
-## 硬件要求
+带兼容编解码器的 ESP32-P4 开发板、扬声器或耳机；回放模式还需麦克风。
 
-- 带受支持音频 codec 路径的 ESP32-P4 开发板。
-- 播放模式需要扬声器或耳机。
-- 如果使用回声模式，需要麦克风输入。
+## 怎么运行
 
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。选择音乐或回放模式，并配置音量、麦克风增益和匹配的 BSP 或编解码器通路。
 
 ```bash
-cd examples/esp-idf/12_I2SCodec
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 配置
+## 预期现象
 
-在 **Example Configuration** 中检查：
+日志显示 I2S 和 ES8311 初始化成功，随后开始播放或麦克风回放。
 
-- 模式：music 或 echo。
-- 麦克风增益。
-- 音量。
-- BSP 支持选项。
+## 常见问题
 
-`main/example_config.h` 使用的默认非 BSP ESP32-P4 接线：
-
-| 信号 | 默认 GPIO |
-| --- | --- |
-| I2C SDA | GPIO7 |
-| I2C SCL | GPIO8 |
-| I2S MCLK | GPIO13 |
-| I2S BCLK | GPIO12 |
-| I2S WS | GPIO10 |
-| I2S DOUT | GPIO9 |
-| I2S DIN | GPIO11 |
-| 功放使能 | GPIO53 |
-
-只有在所选 BSP 与你的开发板音频原理图匹配时才启用 BSP 选项。当前 Kconfig 中，回声模式只在非 BSP 路径可用。
-
-## 预期行为
-
-- Music 模式播放内置的 `canon.pcm` 样本。
-- Echo 模式把麦克风输入通过 codec 路径回放。
-- 在音频播放或回声开始前，日志会打印 `i2s driver init success` 和 `es8311 codec init success`。
-
-## 排障
-
-- 确认 codec 供电、时钟、I2C 控制总线和 I2S 引脚。
-- 从适中音量开始。
-- 如果没有声音，检查所选开发板路径是否匹配你的硬件。
-- 如果 codec 初始化失败，在相同 SDA/SCL 引脚上运行 [08_i2c_tools](../08_i2c_tools/) 确认 ES8311 是否响应控制总线。
+麦克风回放仅在非 BSP 配置下可选；工程需要保留 canon.pcm 文件。

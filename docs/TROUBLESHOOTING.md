@@ -81,7 +81,7 @@ For the repository's Arduino profile, `USB CDC On Boot` is disabled and
 monitor closed; open the board's UART0 monitor at `115200` only after startup.
 If the display or other primary behavior waits for a monitor, report it as a
 startup defect and include the exact FQBN and board options. See the
-[Arduino HIL checklist](../examples/arduino/README.md#serial-startup-and-hardware-in-the-loop-check).
+[Arduino HIL checklist](../examples/arduino/README.md#serial-startup).
 
 ## Runtime Problems
 

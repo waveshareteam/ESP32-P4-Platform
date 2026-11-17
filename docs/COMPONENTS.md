@@ -54,5 +54,5 @@ configuration in example 12 are retained, but they are not compiled by this
 P4 product matrix. A green matrix therefore proves P4 compilation only; it is
 not evidence for those additional targets or for hardware runtime behavior.
 
-The maintained source project and immutable release packages under `firmware/`
-are outside the example matrix and must follow a separate release process.
+The factory source project in `examples/factory/` is built separately with
+`factory_firmware.esp_idf` from `product.json`; it is outside the example matrix.

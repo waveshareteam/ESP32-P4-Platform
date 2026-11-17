@@ -1,42 +1,28 @@
 # FreeRTOS 任务
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-这是一个适合初学者的 FreeRTOS 示例，包含两个任务和一个队列。
+## 功能
 
-它适合作为 `00_board_check` 和 `02_HelloWorld` 之后的下一步，因为它展示了大多数真实 ESP-IDF 应用都会使用的任务模型。
+创建生产者和消费者任务，通过队列传递消息。
 
-## 难度
+## 硬件需求
 
-入门到中级。
+ESP32-P4 开发板和 USB 数据线。
 
-## 硬件要求
+## 怎么运行
 
-- 一块 ESP32-P4 开发板。
-- USB 线。
-
-不需要外接外设。
-
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。
 
 ```bash
-cd examples/esp-idf/04_freertos_tasks
 idf.py set-target esp32p4
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 预期输出
+## 预期现象
 
-生产者任务每秒发送一条消息。消费者任务接收并打印它：
+生产者每秒发送一条带序号的消息，消费者输出接收到的消息。
 
-```text
-producer sent message 0
-consumer received message 0 at 1234 ms
-```
+## 常见问题
 
-## 可复用内容
-
-- 使用 `xTaskCreate()` 创建任务。
-- 使用 `xQueueCreate()`、`xQueueSend()` 和 `xQueueReceive()` 进行任务间通信。
-- 使用 `vTaskDelay()` 执行周期性工作。
+暂无。

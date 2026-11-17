@@ -1,32 +1,23 @@
-# Drawing Board
+# 画板
 
-[English](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-使用 DSI 显示屏和 GT911 触摸输入的 Arduino 绘图示例。
+## 功能
 
-## 难度
+通过 GT911 触摸输入在显示屏上绘图。
 
-中级。
+## 硬件需求
 
-## 所需硬件
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及带 GT911 触摸的兼容 DSI 显示屏。
 
-- ESP32-P4 开发板。
-- 受支持的 DSI 触摸显示屏。
-- 在 Arduino 开发板设置中启用 PSRAM。
+## 怎么运行
 
-## 运行方法
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `Drawing_board.ino` 并使用其中的开发板选项上传。上传前通过 `CURRENT_SCREEN` 选择连接的屏幕。
 
-1. 阅读 [../../README_ZH.md](../../README_ZH.md)。
-2. 打开 `Drawing_board.ino`。
-3. 选择正确的开发板、端口和 PSRAM 设置。
-4. 如有需要，设置 `CURRENT_SCREEN`。
-5. 上传 sketch。
+## 预期现象
 
-## 预期行为
+触摸画板区域时，屏幕绘制对应笔迹。
 
-显示屏显示绘图区域，触摸输入会在屏幕上绘制内容。
+## 常见问题
 
-## 故障排查
-
-- 如果显示正常但触摸无响应，请检查 GT911 I2C 路径。
-- 确认所选显示配置与实际屏幕相匹配。
+程序依次探测 0x5D 和 0x14 后轮询触摸；两个地址都不响应时，程序继续运行但没有触摸输入。

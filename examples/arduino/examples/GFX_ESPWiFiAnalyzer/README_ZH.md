@@ -1,32 +1,23 @@
-# GFX ESP Wi-Fi Analyzer
+# Wi-Fi 分析仪
 
-[English](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-使用 Arduino_GFX 的 Arduino Wi-Fi 扫描可视化示例。
+## 功能
 
-## 难度
+扫描附近的 Wi-Fi 网络并显示信号强度。
 
-中级。
+## 硬件需求
 
-## 所需硬件
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及兼容 DSI 显示屏和 ESP32-C6 Wi-Fi 通路。
 
-- 具备 Wi-Fi 支持的 ESP32-P4 开发板。
-- 受支持的 DSI 显示屏。
-- 在 Arduino 开发板设置中启用 PSRAM。
+## 怎么运行
 
-## 运行方法
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `GFX_ESPWiFiAnalyzer.ino` 并使用其中的开发板选项上传。上传前通过 `CURRENT_SCREEN` 选择连接的屏幕。
 
-1. 阅读 [../../README_ZH.md](../../README_ZH.md)。
-2. 打开 `GFX_ESPWiFiAnalyzer.ino`。
-3. 选择正确的开发板、端口和 PSRAM 设置。
-4. 如有需要，设置 `CURRENT_SCREEN`。
-5. 上传 sketch。
+## 预期现象
 
-## 预期行为
+显示屏列出检测到的网络及信号强度。
 
-显示屏显示附近的 Wi-Fi 网络及其信号强度。
+## 常见问题
 
-## 故障排查
-
-- 确认你的开发板支持 Wi-Fi。
-- 先使用更简单的 `HelloWorld` sketch 确认显示屏能够初始化。
+Wi-Fi 初始化或扫描失败后会重试，需要可用的 ESP32-C6 通路。

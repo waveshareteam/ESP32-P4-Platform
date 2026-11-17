@@ -1,31 +1,23 @@
-# Audio Playback
+# 音频播放
 
-[English Version](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-通过 Platform ES8311 输出 codec 和板载 speaker 播放音频。
+## 功能
 
-## 要求
+生成旋律并通过 ES8311 输出编解码器播放。
 
-- Arduino-ESP32 `3.3.11`、`ESP32P4 Dev Module`、已启用 PSRAM，以及默认
-  `ChipVariant=postv3`（v3.00+、400 MHz）。
-- Platform ES8311 输出 codec 和板载 speaker。
+## 硬件需求
 
-## 构建
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及Platform ES8311 音频通路和连接的扬声器。
 
-在 Arduino IDE 中打开 `Audio_Playback.ino`，或使用仓库文档中的 FQBN 和 board
-options 编译。
+## 怎么运行
 
-## 预期结果
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `Audio_Playback.ino` 并使用其中的开发板选项上传。
 
-sketch 为 Platform 输出路径初始化播放。它不是麦克风示例：LCD-5 的 ES7210
-`Mic_Record` 拓扑尚未移植到这个 ES8311 产品 surface。编译不能证明真实可听播放。
+## 预期现象
 
-## HIL 清单
+串口显示 ES8311 playback ready，扬声器循环播放旋律。
 
-关闭串口 monitor 后冷启动，确认板载 speaker 可听到播放；随后以 `115200` 打开 UART0，
-确认播放继续。
+## 常见问题
 
-## 故障排查
-
-确认所选开发板提供 ES8311 和 speaker 路径。pre-v3/v1.3 silicon 请单独显式使用
-`ChipVariant=prev3`/360 MHz 构建。
+草图使用固定的 Platform 编解码器和功放接线；编解码器初始化失败时不会播放。

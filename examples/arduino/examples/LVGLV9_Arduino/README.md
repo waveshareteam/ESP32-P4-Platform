@@ -1,33 +1,23 @@
-# LVGL v9 Arduino
+# LVGL v9
 
-[简体中文](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-LVGL v9 demo for Arduino on supported ESP32-P4 display and touch hardware.
+## What It Does
 
-## Difficulty
-
-Advanced.
+Run the bundled LVGL v9 widgets demo with display and touch support.
 
 ## Hardware Required
 
-- ESP32-P4 board.
-- Supported DSI touch display.
-- PSRAM enabled in the Arduino board settings.
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI touch display.
 
 ## How to Run
 
-1. Read [../../README.md](../../README.md).
-2. Open `LVGLV9_Arduino.ino`.
-3. Select the correct board, port, and PSRAM setting.
-4. Set `CURRENT_SCREEN` if needed.
-5. Upload the sketch.
+Follow the [Arduino setup](../../README.md), open `LVGLV9_Arduino.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
-## Expected Behavior
+## Expected Result
 
-The display initializes and runs an LVGL demo with touch input.
+The display runs the LVGL widgets UI and responds to available touch input.
 
 ## Troubleshooting
 
-- Run Arduino `HelloWorld` first to verify the display path.
-- Run `Drawing_board` first to verify touch input.
-- Check LVGL memory and draw buffer settings if the board resets.
+Use the bundled lvgl and lv_conf.h together; GT911 input is unavailable if neither probed address responds.

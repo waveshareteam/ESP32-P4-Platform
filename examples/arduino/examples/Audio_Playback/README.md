@@ -1,32 +1,23 @@
 # Audio Playback
 
-[中文版本](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Play audio through the Platform ES8311 output codec and on-board speaker.
+## What It Does
 
-## Requirements
+Generate a melody and play it through the ES8311 output codec.
 
-- Arduino-ESP32 `3.3.11`, `ESP32P4 Dev Module`, PSRAM enabled, and default
-  `ChipVariant=postv3` (v3.00+, 400 MHz).
-- The Platform ES8311 output codec and on-board speaker.
+## Hardware Required
 
-## Build
+An ESP32-P4 board with PSRAM, a USB data cable and the Platform ES8311 audio path and a connected speaker.
 
-Open `Audio_Playback.ino` in Arduino IDE, or compile it with the documented
-repository FQBN and board options.
+## How to Run
+
+Follow the [Arduino setup](../../README.md), open `Audio_Playback.ino` and upload with the board options defined there.
 
 ## Expected Result
 
-The sketch initializes playback for the Platform output path. It is not a
-microphone example: LCD-5's ES7210 `Mic_Record` topology has not been ported to
-this ES8311 product surface. Compilation does not prove audible playback.
-
-## HIL Checklist
-
-Cold-start with no serial monitor, verify audible playback through the on-board
-speaker, then open UART0 at `115200` and confirm playback continues.
+The serial monitor prints ES8311 playback ready and the speaker repeats the melody.
 
 ## Troubleshooting
 
-Check that the selected board exposes the ES8311 and speaker path. Use a
-separate explicit `ChipVariant=prev3`/360 MHz build for pre-v3/v1.3 silicon.
+The sketch uses the fixed Platform codec and amplifier wiring; playback stops if codec initialization fails.

@@ -22,10 +22,10 @@ ESP32-P4 没有原生 Wi-Fi 射频。Wi-Fi 示例可以通过 ESP-Hosted 把 ESP
 ## CI 能证明什么
 
 ESP-IDF matrix 证明每个直属 P4 示例使用默认 `rev3_x`/`MIN_300` 可在两条声明的 IDF
-通道上编译。Arduino 工作流证明 9 个 sketch 使用默认 `ChipVariant=postv3`
-（v3.00+、400 MHz）profile 编译，并验证分段 package 完整性。pre-v3/v1.3 需要显式
-`rev1_3`/`MIN_100` 或 `prev3`（360 MHz），不同芯片版本系列的输出不可互换。两个工作流
-都不会烧录 P4、烧录 C6、证明关闭 monitor 时的
+通道上编译。统一 Arduino 构建使用默认 `ChipVariant=postv3`
+（v3.00+、400 MHz）配置编译 9 个草图。pre-v3/v1.3 需要显式
+`rev1_3`/`MIN_100` 或 `prev3`（360 MHz），不同芯片版本系列的输出不可互换。工作流
+不会烧录 P4、烧录 C6、证明关闭 monitor 时的
 冷启动、协商 SDIO 链路、连接 AP 或测试网络流量。
 
 ## 硬件验收

@@ -1,55 +1,29 @@
 # GPIO 中断
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-GPIO 中断和消抖示例。
+## 功能
 
-这个示例是 [05_gpio_io](../05_gpio_io/) 之后的下一步。它演示如何在 ISR 中处理 GPIO 边沿、把事件传递到 FreeRTOS 队列，并在普通任务中处理事件。
+将 GPIO 边沿事件从中断传递到任务，并进行软件消抖。
 
-## 难度
+## 硬件需求
 
-入门到中级。
+ESP32-P4 开发板、USB 数据线，以及连接到配置输入的按键或跳线。
 
-## 硬件要求
+## 怎么运行
 
-- 一块 ESP32-P4 开发板。
-- 按键、跳线或其他安全的 3.3 V 输入源。
-
-## 默认引脚
-
-| 信号 | 默认 GPIO |
-| --- | --- |
-| 输入 | GPIO3 |
-
-在 `idf.py menuconfig` 中可以修改输入 GPIO 和消抖时间。
-
-## 接线说明
-
-默认启用了输入上拉。做简单测试时，可以把按键或跳线连接在 GPIO3 和 GND 之间。示例会在上升沿和下降沿都触发，因此按下和松开输入时日志都应更新。
-
-输入只能使用 3.3 V 逻辑。不要把 GPIO 直接连接到 5 V 信号。
-
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。在 Example Configuration 中选择输入 GPIO 和消抖时间。
 
 ```bash
-cd examples/esp-idf/06_gpio_interrupt
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 预期输出
+## 预期现象
 
-当输入电平变化时，监视器会打印事件：
+按下和释放输入时，串口输出电平和时间信息。
 
-```text
-gpio=3 level=0 time=1234 ms
-gpio=3 level=1 time=1456 ms
-```
+## 常见问题
 
-## 可复用内容
-
-- `gpio_install_isr_service()` 和 `gpio_isr_handler_add()`。
-- 使用 `xQueueSendFromISR()` 把 ISR 事件传递到任务。
-- 一个简单的软件消抖模式。
+输入启用上拉并检测双边沿，请按按键情况设置消抖间隔。

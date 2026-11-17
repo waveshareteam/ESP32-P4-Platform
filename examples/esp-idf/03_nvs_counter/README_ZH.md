@@ -1,52 +1,28 @@
 # NVS 计数器
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-这是一个适合初学者的示例，用 NVS flash 保存启动计数。
+## 功能
 
-NVS 通常用于保存少量设置，例如校准值、设备名称、用户偏好或配网状态。
+在 NVS 中保存可跨重启保留的启动计数。
 
-## 难度
+## 硬件需求
 
-入门。
+ESP32-P4 开发板和 USB 数据线。
 
-## 硬件要求
+## 怎么运行
 
-- 一块 ESP32-P4 开发板。
-- USB 线。
-
-不需要外接外设。
-
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。
 
 ```bash
-cd examples/esp-idf/03_nvs_counter
 idf.py set-target esp32p4
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 预期输出
+## 预期现象
 
-串口监视器会打印已保存的启动次数：
+每次复位后，串口显示的 Saved boot count 都会增加。
 
-```text
-Saved boot count: 1
-Press reset. The number should increase after each boot.
-```
+## 常见问题
 
-按下复位键后，计数应递增。
-
-## 重置计数器
-
-烧录前擦除 flash：
-
-```bash
-idf.py -p PORT erase-flash flash monitor
-```
-
-## 可复用内容
-
-- `nvs_flash_init()` 初始化和恢复流程。
-- `nvs_open()`、`nvs_get_u32()`、`nvs_set_u32()` 和 `nvs_commit()` 流程。
-- 持久保存简单设置的模式。
+运行 idf.py erase-flash 会清除计数器及其他 Flash 数据。

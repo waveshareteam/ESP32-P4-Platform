@@ -69,7 +69,7 @@ idf.py -p PORT flash monitor
 所有 monitor 时，应用也必须能正常冷启动；只在启动完成后再以 `115200` 打开开发板
 的 UART0 monitor。如果显示或其他主要功能会等待 monitor，请把它作为启动缺陷报告，
 并附上精确 FQBN 和 board options。参阅
-[Arduino HIL 清单](../examples/arduino/README_ZH.md#串口启动与硬件在环检查)。
+[Arduino HIL 清单](../examples/arduino/README_ZH.md#串口与启动)。
 
 ## 运行时问题
 

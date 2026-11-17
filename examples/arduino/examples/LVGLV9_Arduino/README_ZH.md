@@ -1,33 +1,23 @@
-# LVGL v9 Arduino
+# LVGL v9
 
-[English](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-面向受支持 ESP32-P4 显示和触摸硬件的 Arduino LVGL v9 演示。
+## 功能
 
-## 难度
+运行随仓库提供的 LVGL v9 widgets 示例，并支持显示和触摸。
 
-高级。
+## 硬件需求
 
-## 所需硬件
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及兼容的 DSI 触摸屏。
 
-- ESP32-P4 开发板。
-- 受支持的 DSI 触摸显示屏。
-- 在 Arduino 开发板设置中启用 PSRAM。
+## 怎么运行
 
-## 运行方法
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `LVGLV9_Arduino.ino` 并使用其中的开发板选项上传。上传前通过 `CURRENT_SCREEN` 选择连接的屏幕。
 
-1. 阅读 [../../README_ZH.md](../../README_ZH.md)。
-2. 打开 `LVGLV9_Arduino.ino`。
-3. 选择正确的开发板、端口和 PSRAM 设置。
-4. 如有需要，设置 `CURRENT_SCREEN`。
-5. 上传 sketch。
+## 预期现象
 
-## 预期行为
+显示屏运行 LVGL widgets 界面，并响应可用的触摸输入。
 
-显示屏初始化并运行支持触摸输入的 LVGL 演示。
+## 常见问题
 
-## 故障排查
-
-- 先运行 Arduino `HelloWorld` 以验证显示路径。
-- 先运行 `Drawing_board` 以验证触摸输入。
-- 如果开发板重启，请检查 LVGL 内存和绘制缓冲区设置。
+请配套使用仓库中的 lvgl 和 lv_conf.h；GT911 的两个探测地址均无响应时无法使用触摸。

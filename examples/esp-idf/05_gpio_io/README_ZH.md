@@ -1,52 +1,29 @@
 # GPIO 输入输出
 
-[English Version](./README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-这是一个小型 GPIO 输入/输出示例。
+## 功能
 
-它每秒翻转一次输出引脚，并读取一个输入引脚。如果把输出引脚连接到输入引脚，输入值应跟随输出值变化。
+每秒切换一次输出电平，并读取输入电平。
 
-## 难度
+## 硬件需求
 
-入门。
+ESP32-P4 开发板、USB 数据线，可选用跳线连接配置的输入和输出。
 
-## 硬件要求
+## 怎么运行
 
-- 一块 ESP32-P4 开发板。
-- 可选：一根连接已配置输出和输入引脚的跳线。
-- 可选：如果想看到可视化输出，可使用带限流电阻的 LED。
-
-## 默认引脚
-
-| 信号 | 默认 GPIO |
-| --- | --- |
-| 输出 | GPIO2 |
-| 输入 | GPIO3 |
-
-如果这些引脚与你的开发板冲突，请在 `idf.py menuconfig` 中修改。
-
-## 构建和烧录
+使用[仓库首页](../../../README_ZH.md)列出的 ESP-IDF 版本，在本目录运行以下命令。在 Example Configuration 中选择未被板载外设占用的输入和输出 GPIO。
 
 ```bash
-cd examples/esp-idf/05_gpio_io
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## 预期输出
+## 预期现象
 
-```text
-output=1 input=1
-output=0 input=0
-```
+串口显示输出和输入电平；连接回环跳线后，输入跟随输出变化。
 
-如果没有连接跳线，由于默认启用了输入上拉，输入可能会保持高电平。
+## 常见问题
 
-## 可复用内容
-
-- 使用 `gpio_config()` 配置输入和输出。
-- 使用 `gpio_set_level()` 控制输出。
-- 使用 `gpio_get_level()` 读取输入。
-- 使用 `menuconfig` 选项做板级引脚选择。
+输入默认启用上拉，未接跳线时可能保持高电平。

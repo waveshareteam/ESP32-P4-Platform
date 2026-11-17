@@ -1,27 +1,23 @@
-# AsciiTable
+# ASCII 字符表
 
-[English](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Arduino 显示文本渲染示例。它会在受支持的 DSI 显示屏上绘制 ASCII 表格。
+## 功能
 
-## 难度
+使用 Arduino_GFX 绘制 ASCII 字符表。
 
-初级。
+## 硬件需求
 
-## 所需硬件
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及兼容的 DSI 显示屏。
 
-- ESP32-P4 开发板。
-- 受支持的 DSI 显示屏。
-- 在 Arduino 开发板设置中启用 PSRAM。
+## 怎么运行
 
-## 运行方法
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `AsciiTable.ino` 并使用其中的开发板选项上传。上传前通过 `CURRENT_SCREEN` 选择连接的屏幕。
 
-1. 阅读 [../../README_ZH.md](../../README_ZH.md)。
-2. 打开 `AsciiTable.ino`。
-3. 选择正确的开发板、端口和 PSRAM 设置。
-4. 如有需要，设置 `CURRENT_SCREEN`。
-5. 上传 sketch。
+## 预期现象
 
-## 预期行为
+显示屏按行列排列 ASCII 字符。
 
-显示屏显示由 ASCII 字符构成的行和列。
+## 常见问题
+
+暂无。

@@ -18,7 +18,7 @@ example.
 
 ## ESP-IDF First Run
 
-1. Install an ESP-IDF version listed in [CI.md](CI.md). CI currently checks
+1. Install an ESP-IDF version listed in [CI.md](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/ci.md). CI currently checks
    `v5.5.5` and `v6.0.2`; an example README may declare additional constraints.
 2. Open an ESP-IDF terminal.
 3. Clone this repository.
@@ -60,9 +60,8 @@ is ready.
 
 Most Arduino examples in this repository are display-oriented. They require a
 compatible DSI display configuration and PSRAM. The same
-[Arduino guide](../examples/arduino/README.md) documents the segmented CI
-artifact, split-file flashing, and the required cold-start test with the serial
-monitor closed. Opening a monitor is never a prerequisite for sketch startup.
+[Arduino guide](../examples/arduino/README.md) documents board options, bundled
+libraries and the cold-start check with the serial monitor closed. Opening a monitor is never a prerequisite for sketch startup.
 
 ## Beginner Checklist
 
@@ -80,5 +79,5 @@ monitor closed. Opening a monitor is never a prerequisite for sketch startup.
 - [EXAMPLES_GUIDE.md](EXAMPLES_GUIDE.md): choose an example by difficulty and
   peripheral.
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md): common setup and runtime problems.
-- [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md): repository layout for
+- [PROJECT_STRUCTURE.md](https://github.com/waveshareteam/esp32-repo-template/blob/main/docs/spec.md): repository layout for
   contributors.

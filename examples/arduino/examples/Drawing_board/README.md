@@ -1,32 +1,23 @@
 # Drawing Board
 
-[简体中文](README_ZH.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Arduino drawing example using a DSI display and GT911 touch input.
+## What It Does
 
-## Difficulty
-
-Intermediate.
+Draw on the display using GT911 touch input.
 
 ## Hardware Required
 
-- ESP32-P4 board.
-- Supported DSI touch display.
-- PSRAM enabled in the Arduino board settings.
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI display with GT911 touch.
 
 ## How to Run
 
-1. Read [../../README.md](../../README.md).
-2. Open `Drawing_board.ino`.
-3. Select the correct board, port, and PSRAM setting.
-4. Set `CURRENT_SCREEN` if needed.
-5. Upload the sketch.
+Follow the [Arduino setup](../../README.md), open `Drawing_board.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
-## Expected Behavior
+## Expected Result
 
-The display shows a drawing surface. Touch input draws on the screen.
+Touching the drawing surface paints on the screen.
 
 ## Troubleshooting
 
-- If the display works but touch does not, check the GT911 I2C path.
-- Confirm the selected display configuration matches the physical screen.
+Touch is polled after probing 0x5D and 0x14; if neither address responds, the sketch continues without touch.

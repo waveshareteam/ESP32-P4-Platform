@@ -1,31 +1,23 @@
-# SD Card
+# SD 卡
 
-[English Version](README.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-使用 Platform Arduino 配置访问已插入的 SD 卡。
+## 功能
 
-## 要求
+挂载四线 SDMMC 存储卡，写入并读回测试文件。
 
-- Arduino-ESP32 `3.3.11`、`ESP32P4 Dev Module`、已启用 PSRAM，以及默认
-  `ChipVariant=postv3`（v3.00+、400 MHz）。
-- 已插入且受支持的 SD 卡。
+## 硬件需求
 
-## 构建
+带 PSRAM 的 ESP32-P4 开发板、USB 数据线，以及插入兼容 SDMMC 卡槽的 FAT32 microSD 卡。
 
-在 Arduino IDE 中打开 `SD_Card.ino`，或使用仓库文档中的 FQBN 和 board options
-编译。
+## 怎么运行
 
-## 预期结果
+按 [Arduino 环境说明](../../README_ZH.md)完成配置，打开 `SD_Card.ino` 并使用其中的开发板选项上传。
 
-sketch 报告卡初始化和基本存储操作。编译不能证明开发板上的卡插入、格式化、挂载或
-数据完整性。
+## 预期现象
 
-## HIL 清单
+串口显示存储卡容量和 platform_sd_card.txt 的内容。
 
-关闭串口 monitor 后冷启动，确认卡操作；随后以 `115200` 打开 UART0，确认正常操作
-持续进行。
+## 常见问题
 
-## 故障排查
-
-确认已插入受支持且格式正确的卡。pre-v3/v1.3 开发板需要单独显式使用
-`ChipVariant=prev3`/360 MHz 构建。
+草图使用 Platform 的 SDMMC 接线；挂载失败时会退出 setup。
