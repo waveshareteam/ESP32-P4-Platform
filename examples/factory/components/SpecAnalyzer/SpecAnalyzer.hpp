@@ -37,8 +37,9 @@ namespace esp_brookesia::apps
         static constexpr uint16_t I2S_CHANNELS = 2;       // BSP capture frame layout: L/R interleaved
         static constexpr uint16_t MIC_COUNT = 1;          // Only one microphone is visualized
         static constexpr uint16_t STRIPE_COUNT = 48;      // Bar count for the visualizer
-        static constexpr uint16_t CANVAS_WIDTH = BSP_LCD_H_RES - 2 * factory_ui::GUTTER;
-        static constexpr uint16_t CANVAS_HEIGHT = 760;
+        static constexpr int PANEL_PAD = 24;
+        static constexpr uint16_t CANVAS_WIDTH = factory_ui::WIDTH - 2 * (factory_ui::GUTTER + PANEL_PAD);
+        static constexpr uint16_t CANVAS_HEIGHT = 560;
 
         enum class ViewMode { MIC, BARS, RADIAL, HALO, COUNT };
         static constexpr int MODE_COUNT = static_cast<int>(ViewMode::COUNT);
@@ -46,8 +47,9 @@ namespace esp_brookesia::apps
         lv_obj_t *_root = nullptr;
         lv_obj_t *_canvas;
         lv_obj_t *_mic_label;
-        lv_obj_t *_mode_label = nullptr;
-        lv_obj_t *_dots[MODE_COUNT] = {};
+        lv_obj_t *_mic_level = nullptr;
+        lv_obj_t *_frequency_axis = nullptr;
+        lv_obj_t *_mode_buttons[MODE_COUNT] = {};
         ViewMode _mode = ViewMode::MIC;
         unsigned _label_frames = 0;
         lv_timer_t *_timer;

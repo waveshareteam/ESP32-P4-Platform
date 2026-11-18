@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <math.h>
+#include <string>
 #include <vector>
 #include <unistd.h>
 #ifdef ESP_UTILS_LOG_TAG
@@ -31,20 +32,21 @@ LV_IMG_DECLARE(img_app_calculator);
 
 #define APP_NAME                "Calculator"
 
-// Preserve the reference keypad's circular keys and color roles on the portrait screen.
-static constexpr uint32_t DIGIT_COLOR = 0x1F232C;
+static constexpr uint32_t DIGIT_COLOR = 0x252A34;
 static constexpr uint32_t FUNCTION_COLOR = 0x3A3F4C;
 static constexpr uint32_t OPERATOR_COLOR = 0xFF9F0A;
 static constexpr uint32_t SECONDARY_TEXT_COLOR = 0x9AA0AC;
-static constexpr int KEY_GAP = 24;
-static constexpr int ROW_GAP = 16;
-static constexpr int DISPLAY_GAP = 12;
+static constexpr int KEY_GAP = 14;
+static constexpr int KEY_RADIUS = 24;
+static constexpr int READOUT_PADDING = 24;
+static constexpr int READOUT_GAP = 8;
+static constexpr int KEYPAD_ROWS = 5;
 
 struct KeyRow {
     const char *map[5];
     int count;
 };
-static const KeyRow KEY_ROWS[] = {
+static const KeyRow KEY_ROWS[KEYPAD_ROWS] = {
     {{"C", "/", "x", LV_SYMBOL_BACKSPACE, ""}, 4},
     {{"7", "8", "9", "-", ""}, 4},
     {{"4", "5", "6", "+", ""}, 4},
@@ -71,11 +73,10 @@ static void fit_readout(lv_obj_t *label)
                      0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
     const int width = lv_obj_get_width(lv_obj_get_parent(label));
     const int32_t scale = size.x > width ? std::max<int32_t>(154, width * LV_SCALE_NONE / size.x) : LV_SCALE_NONE;
-    const bool clip_start = size.x * scale / LV_SCALE_NONE > width;
     lv_obj_set_style_transform_scale(label, scale, 0);
-    lv_obj_set_style_transform_pivot_x(label, clip_start ? lv_pct(100) : lv_pct(50), 0);
+    lv_obj_set_style_transform_pivot_x(label, lv_pct(100), 0);
     lv_obj_set_style_transform_pivot_y(label, lv_pct(50), 0);
-    lv_obj_align(label, clip_start ? LV_ALIGN_RIGHT_MID : LV_ALIGN_CENTER, 0, 0);
+    lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
 }
 
 namespace esp_brookesia::apps {
@@ -123,23 +124,26 @@ bool Calculator::run(void)
         visual_area.y1 = factory_ui::STATUS_HEIGHT;
     }
     visual_area.y2 -= factory_ui::GESTURE_INSET;
-    const int width = lv_area_get_width(&visual_area);
+    const int width = lv_area_get_width(&visual_area) - 2 * factory_ui::GUTTER;
     const int height = lv_area_get_height(&visual_area);
-    const int key_size = std::min({132, (width - 2 * factory_ui::GUTTER - 3 * KEY_GAP) / 4,
-                                  (height * 7 / 10 - 4 * ROW_GAP) / 5});
-    if (key_size <= 0) {
+    const int row_gaps = (KEYPAD_ROWS - 1) * KEY_GAP;
+    const int key_height = (height * 2 / 3 - row_gaps) / KEYPAD_ROWS;
+    const int keypad_height = KEYPAD_ROWS * key_height + row_gaps;
+    const int keypad_y = visual_area.y2 + 1 - keypad_height - 16;
+    const int content_x = visual_area.x1 + factory_ui::GUTTER;
+    const int readout_y = visual_area.y1 + 24;
+    const int readout_height = keypad_y - 24 - readout_y;
+    const int line_height = lv_font_get_line_height(LABEL_FONT_BIG);
+    const int formula_y = readout_height - READOUT_PADDING - 2 * line_height - READOUT_GAP;
+    const int history_height = formula_y - READOUT_PADDING - READOUT_GAP;
+    if (width <= 2 * READOUT_PADDING || key_height <= 0 || history_height <= 0) {
         _is_starting = false;
         return false;
     }
-    const int keypad_height = 5 * key_size + 4 * ROW_GAP;
-    const int keypad_y = visual_area.y2 - keypad_height + 1 - 20;
-    const int readout_width = width - 2 * factory_ui::GUTTER;
-    const int display_height = lv_font_get_line_height(LABEL_FONT_BIG);
-    const int readout_y = keypad_y - 32 - 2 * display_height - DISPLAY_GAP;
 
     formula_len = 1;
     lv_obj_t *screen = lv_screen_active();
-    lv_obj_set_style_bg_color(screen, lv_color_black(), 0);
+    lv_obj_set_style_bg_color(screen, lv_color_hex(factory_ui::BACKGROUND), 0);
     lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
     lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
@@ -148,15 +152,17 @@ bool Calculator::run(void)
     for (const auto &keys : KEY_ROWS) {
         auto *row = lv_buttonmatrix_create(screen);
         lv_buttonmatrix_set_map(row, keys.map);
+        if (keys.count == 3) {
+            lv_buttonmatrix_set_button_width(row, 0, 2);
+        }
         lv_obj_set_user_data(row, reinterpret_cast<void *>(static_cast<intptr_t>(first_id)));
-        const int row_width = keys.count * key_size + (keys.count - 1) * KEY_GAP;
-        lv_obj_set_size(row, row_width, key_size);
-        lv_obj_set_pos(row, visual_area.x1 + (width - row_width) / 2, y);
+        lv_obj_set_size(row, width, key_height);
+        lv_obj_set_pos(row, content_x, y);
         lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
         lv_obj_set_style_border_width(row, 0, 0);
         lv_obj_set_style_pad_all(row, 0, 0);
         lv_obj_set_style_pad_column(row, KEY_GAP, 0);
-        lv_obj_set_style_radius(row, LV_RADIUS_CIRCLE, LV_PART_ITEMS);
+        lv_obj_set_style_radius(row, KEY_RADIUS, LV_PART_ITEMS);
         lv_obj_set_style_border_width(row, 0, LV_PART_ITEMS);
         lv_obj_set_style_shadow_width(row, 0, LV_PART_ITEMS);
         lv_obj_set_style_bg_color(row, lv_color_hex(DIGIT_COLOR), LV_PART_ITEMS);
@@ -167,33 +173,39 @@ bool Calculator::run(void)
         lv_obj_add_event_cb(row, keyboard_event_cb, LV_EVENT_DRAW_TASK_ADDED, this);
         lv_obj_add_event_cb(row, keyboard_event_cb, LV_EVENT_VALUE_CHANGED, this);
         first_id += keys.count;
-        y += key_size + ROW_GAP;
+        y += key_height + KEY_GAP;
     }
 
-    const int readout_x = visual_area.x1 + factory_ui::GUTTER;
-    const int history_y = visual_area.y1 + 24;
-    history_label = lv_textarea_create(screen);
+    auto *readout = factory_ui::plain(screen);
+    lv_obj_set_size(readout, width, readout_height);
+    lv_obj_set_pos(readout, content_x, readout_y);
+    lv_obj_set_style_radius(readout, KEY_RADIUS, 0);
+    lv_obj_set_style_bg_color(readout, lv_color_hex(factory_ui::CARD), 0);
+    lv_obj_set_style_bg_opa(readout, LV_OPA_COVER, 0);
+
+    const int text_width = width - 2 * READOUT_PADDING;
+    history_label = lv_textarea_create(readout);
     lv_obj_remove_style_all(history_label);
-    lv_obj_set_size(history_label, readout_width, readout_y - history_y - 12);
-    lv_obj_set_pos(history_label, readout_x, history_y);
+    lv_obj_set_size(history_label, text_width, history_height);
+    lv_obj_set_pos(history_label, READOUT_PADDING, READOUT_PADDING);
     lv_obj_set_style_opa(history_label, LV_OPA_TRANSP, LV_PART_CURSOR);
     lv_obj_set_style_text_color(history_label, lv_color_hex(SECONDARY_TEXT_COLOR), 0);
     lv_obj_set_style_text_font(history_label, LABEL_FONT_SMALL, 0);
-    lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_RIGHT, 0);
     lv_obj_remove_flag(history_label, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_textarea_set_text(history_label, "");
 
-    const auto create_readout = [screen, readout_width, readout_x, display_height](
+    const auto create_readout = [readout, text_width, line_height](
                                     int y, const char *text, const lv_font_t *font, uint32_t color) {
-        auto *container = factory_ui::plain(screen);
-        lv_obj_set_size(container, readout_width, display_height);
-        lv_obj_set_pos(container, readout_x, y);
+        auto *container = factory_ui::plain(readout);
+        lv_obj_set_size(container, text_width, line_height);
+        lv_obj_set_pos(container, READOUT_PADDING, y);
         auto *label = factory_ui::label(container, text, font, color);
-        lv_obj_center(label);
+        lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
         return label;
     };
-    formula_label = create_readout(readout_y, "0", LABEL_FONT_BIG, 0xFFFFFF);
-    result_label = create_readout(readout_y + display_height + DISPLAY_GAP, "= 0",
+    formula_label = create_readout(formula_y, "0", LABEL_FONT_BIG, factory_ui::TEXT);
+    result_label = create_readout(formula_y + line_height + READOUT_GAP, "= 0",
                                   LABEL_FONT_SMALL, SECONDARY_TEXT_COLOR);
 
     _is_starting = false;
@@ -368,11 +380,14 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         auto *task = lv_event_get_draw_task(e);
         auto *descriptor = static_cast<lv_draw_dsc_base_t *>(lv_draw_task_get_draw_dsc(task));
         if (descriptor->part == LV_PART_ITEMS) {
+            const uint32_t color = key_color(first_id + descriptor->id1);
             if (auto *fill = lv_draw_task_get_fill_dsc(task)) {
                 const bool pressed = lv_buttonmatrix_get_selected_button(row) == descriptor->id1 &&
                                      lv_obj_has_state(row, LV_STATE_PRESSED);
-                const lv_color_t color = lv_color_hex(key_color(first_id + descriptor->id1));
-                fill->color = pressed ? lv_color_lighten(color, LV_OPA_30) : color;
+                const lv_color_t base = lv_color_hex(color);
+                fill->color = pressed ? lv_color_lighten(base, LV_OPA_30) : base;
+            } else if (auto *label = lv_draw_task_get_label_dsc(task); label && color == OPERATOR_COLOR) {
+                label->color = lv_color_hex(factory_ui::BACKGROUND);
             }
         }
         return;
@@ -389,7 +404,6 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         bool equal_flag = false;
         double res_num;
         char res_str[32];
-        char history_str[32];
 
         if (lv_obj_get_style_text_font(app->formula_label, LV_PART_MAIN) == LABEL_FONT_SMALL) {
             lv_obj_set_style_text_font(app->formula_label, LABEL_FONT_BIG, 0);
@@ -521,9 +535,12 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         if (equal_flag) {
             lv_obj_set_style_text_font(app->result_label, LABEL_FONT_BIG, 0);
 
-            snprintf(history_str, sizeof(history_str) - 1, "\n%s = %s ", lv_label_get_text(app->formula_label), res_str);
-            lv_textarea_set_cursor_pos(app->history_label, strlen(lv_textarea_get_text(app->history_label)));
-            lv_textarea_add_text(app->history_label, history_str);
+            std::string entry = *lv_textarea_get_text(app->history_label) ? "\n" : "";
+            entry += lv_label_get_text(app->formula_label);
+            entry += " = ";
+            entry += res_str;
+            lv_textarea_set_cursor_pos(app->history_label, LV_TEXTAREA_CURSOR_LAST);
+            lv_textarea_add_text(app->history_label, entry.c_str());
 
             lv_label_set_text_fmt(app->formula_label, "%s", res_str);
             lv_obj_set_style_text_font(app->formula_label, LABEL_FONT_SMALL, 0);

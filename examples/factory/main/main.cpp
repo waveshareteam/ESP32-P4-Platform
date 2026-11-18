@@ -15,7 +15,7 @@
 
 #include "esp_ota_ops.h"
 #include "nvs_flash.h"
-#include "esp_wifi.h"
+#include "ui/wifi_service.hpp"
 
 #include "product_support.h"
 #include "factory_ui.hpp"
@@ -35,12 +35,6 @@ using namespace esp_brookesia::gui;
 using namespace esp_brookesia::systems::phone;
 
 constexpr bool EXAMPLE_SHOW_MEM_INFO = true;
-
-static bool is_wifi_connected()
-{
-    wifi_ap_record_t ap_info;
-    return (esp_wifi_sta_get_ap_info(&ap_info) == ESP_OK);
-}
 
 extern "C" void app_main(void)
 {
@@ -139,6 +133,7 @@ extern "C" void app_main(void)
         ESP_LOGI(ESP_UTILS_LOG_TAG, "Factory launcher ready (%dx%d)",
                  static_cast<int>(lv_display_get_horizontal_resolution(disp)),
                  static_cast<int>(lv_display_get_vertical_resolution(disp)));
+        if (!factory_wifi::start()) ESP_LOGE(ESP_UTILS_LOG_TAG, "Wi-Fi worker unavailable");
 
         /* Create a timer to update the clock */
         lv_timer_create([](lv_timer_t *t) {
@@ -156,7 +151,7 @@ extern "C" void app_main(void)
                 "Refresh status bar failed"
             );
 
-            bool connected = is_wifi_connected();
+            const bool connected = factory_wifi::snapshot().ip[0] != '\0';
             StatusBar::WifiState wifi_state = connected ?
                 StatusBar::WifiState::SIGNAL_3 :
                 StatusBar::WifiState::DISCONNECTED;

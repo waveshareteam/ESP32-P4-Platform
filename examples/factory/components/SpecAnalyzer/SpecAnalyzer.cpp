@@ -12,6 +12,7 @@
 #include "SpecAnalyzer.hpp"
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <numbers>
 #define APP_NAME "SpecAnalyzer"
 
@@ -24,6 +25,7 @@ LV_IMG_DECLARE(img_app_specanalyzer);
 namespace esp_brookesia::apps {
 
 static constexpr const char *MODE_NAMES[] = {"Mic Test", "Bars", "Radial", "Halo"};
+static constexpr uint32_t PLOT_BACKGROUND = 0x101620;
 
 SpecAnalyzer *SpecAnalyzer::_instance = nullptr;
 
@@ -65,10 +67,59 @@ bool SpecAnalyzer::run(void)
 {
     ESP_UTILS_LOGD("Run");
 
-    _root = factory_ui::plain(lv_scr_act());
-    lv_obj_set_size(_root, factory_ui::WIDTH, factory_ui::HEIGHT);
-    lv_obj_set_style_bg_color(_root, lv_color_black(), 0);
-    lv_obj_set_style_bg_opa(_root, LV_OPA_COVER, 0);
+    const auto view = factory_ui::page(lv_screen_active(), "Spectrum", nullptr, nullptr);
+    _root = view.root;
+    lv_obj_remove_flag(view.content, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_remove_flag(_root, LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_add_event_cb(_root, view_gesture_cb, LV_EVENT_GESTURE, this);
+
+    const auto panel = [content = view.content](int height, int pad) {
+        auto *object = factory_ui::plain(content);
+        lv_obj_set_size(object, lv_pct(100), height);
+        lv_obj_set_style_bg_color(object, lv_color_hex(factory_ui::CARD), 0);
+        lv_obj_set_style_bg_opa(object, LV_OPA_COVER, 0);
+        lv_obj_set_style_radius(object, 24, 0);
+        lv_obj_set_style_pad_all(object, pad, 0);
+        return object;
+    };
+    auto *tabs = panel(84, 8);
+    lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_column(tabs, 8, 0);
+    for (int i = 0; i < MODE_COUNT; ++i) {
+        auto *target = factory_ui::plain(tabs);
+        _mode_buttons[i] = target;
+        lv_obj_set_height(target, lv_pct(100));
+        lv_obj_set_flex_grow(target, 1);
+        lv_obj_set_style_radius(target, 16, 0);
+        lv_obj_set_style_bg_color(target, lv_color_hex(0x1B3553), LV_STATE_CHECKED);
+        lv_obj_set_style_bg_opa(target, LV_OPA_COVER, LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(target, lv_color_hex(factory_ui::PRESSED), LV_STATE_PRESSED);
+        lv_obj_set_style_bg_opa(target, LV_OPA_COVER, LV_STATE_PRESSED);
+        lv_obj_add_flag(target, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_user_data(target, reinterpret_cast<void *>(static_cast<intptr_t>(i)));
+        lv_obj_add_event_cb(target, view_page_cb, LV_EVENT_CLICKED, this);
+        lv_obj_center(factory_ui::label(target, MODE_NAMES[i], &lv_font_montserrat_24));
+    }
+
+    auto *meter = panel(124, PANEL_PAD);
+    factory_ui::label(meter, "Microphone", &lv_font_montserrat_28);
+    _mic_label = factory_ui::label(meter, "-- dBFS", &lv_font_montserrat_28, factory_ui::HINT);
+    lv_obj_align(_mic_label, LV_ALIGN_TOP_RIGHT, 0, 0);
+    _mic_level = lv_bar_create(meter);
+    lv_obj_remove_style_all(_mic_level);
+    lv_obj_set_size(_mic_level, lv_pct(100), 12);
+    lv_obj_align(_mic_level, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+    lv_bar_set_range(_mic_level, -90, 0);
+    lv_bar_set_value(_mic_level, -90, LV_ANIM_OFF);
+    lv_obj_set_style_radius(_mic_level, 6, LV_PART_MAIN);
+    lv_obj_set_style_radius(_mic_level, 6, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_color(_mic_level, lv_color_hex(0x343846), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(_mic_level, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_bg_color(_mic_level, lv_color_hex(factory_ui::ACCENT), LV_PART_INDICATOR);
+    lv_obj_set_style_bg_opa(_mic_level, LV_OPA_COVER, LV_PART_INDICATOR);
+
+    auto *plot = panel(CANVAS_HEIGHT + 124, PANEL_PAD);
+    factory_ui::label(plot, "Frequency spectrum", &lv_font_montserrat_28);
 
     // Prefer PSRAM for the large canvas buffer and fall back to SRAM if PSRAM is exhausted.
     size_t buf_size = CANVAS_WIDTH * CANVAS_HEIGHT * sizeof(uint16_t);
@@ -87,7 +138,7 @@ bool SpecAnalyzer::run(void)
 
     // Draw into an LVGL canvas so the FFT task only updates numeric buffers and the
     // GUI timer owns all rendering work on the LVGL thread.
-    _canvas = lv_canvas_create(_root);
+    _canvas = lv_canvas_create(plot);
     if (!_canvas) {
         ESP_UTILS_LOGE("Canvas creation failed!");
         close();
@@ -95,40 +146,15 @@ bool SpecAnalyzer::run(void)
     }
     lv_obj_set_size(_canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
     lv_canvas_set_buffer(_canvas, _draw_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_COLOR_FORMAT_RGB565);
-    lv_canvas_fill_bg(_canvas, lv_color_black(), LV_OPA_COVER);
-    lv_obj_center(_canvas);
-    lv_obj_add_flag(_root, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_remove_flag(_root, LV_OBJ_FLAG_GESTURE_BUBBLE);
-    lv_obj_add_event_cb(_root, view_gesture_cb, LV_EVENT_GESTURE, this);
+    lv_canvas_fill_bg(_canvas, lv_color_hex(PLOT_BACKGROUND), LV_OPA_COVER);
+    lv_obj_set_y(_canvas, 44);
 
-    _mode_label = factory_ui::label(_root, "", &lv_font_montserrat_32);
-    lv_obj_set_style_bg_color(_mode_label, lv_color_hex(0x222222), 0);
-    lv_obj_set_style_bg_opa(_mode_label, LV_OPA_70, 0);
-    lv_obj_set_style_radius(_mode_label, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_pad_hor(_mode_label, 24, 0);
-    lv_obj_set_style_pad_ver(_mode_label, 10, 0);
-    lv_obj_align(_mode_label, LV_ALIGN_TOP_MID, 0, factory_ui::STATUS_HEIGHT + 52);
-    _mic_label = factory_ui::label(_root, "MIC  -- dBFS", &lv_font_montserrat_28, factory_ui::HINT);
-    lv_obj_align(_mic_label, LV_ALIGN_TOP_MID, 0, factory_ui::STATUS_HEIGHT + 174);
-
-    auto *pager = factory_ui::plain(_root);
-    lv_obj_set_size(pager, LV_SIZE_CONTENT, 64);
-    lv_obj_set_flex_flow(pager, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(pager, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_align(pager, LV_ALIGN_BOTTOM_MID, 0, -factory_ui::GESTURE_INSET - 52);
-    for (int i = 0; i < MODE_COUNT; ++i) {
-        auto *target = factory_ui::plain(pager);
-        lv_obj_set_size(target, 64, 64);
-        lv_obj_add_flag(target, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_add_flag(target, LV_OBJ_FLAG_GESTURE_BUBBLE);
-        lv_obj_set_user_data(target, reinterpret_cast<void *>(static_cast<intptr_t>(i)));
-        lv_obj_add_event_cb(target, view_page_cb, LV_EVENT_CLICKED, this);
-        _dots[i] = factory_ui::plain(target);
-        lv_obj_set_height(_dots[i], 10);
-        lv_obj_set_style_radius(_dots[i], LV_RADIUS_CIRCLE, 0);
-        lv_obj_set_style_bg_color(_dots[i], lv_color_white(), 0);
-        lv_obj_center(_dots[i]);
-    }
+    _frequency_axis = factory_ui::plain(plot);
+    lv_obj_set_size(_frequency_axis, lv_pct(100), 26);
+    lv_obj_align(_frequency_axis, LV_ALIGN_BOTTOM_MID, 0, 4);
+    factory_ui::label(_frequency_axis, "Low frequency", &lv_font_montserrat_22, factory_ui::HINT);
+    auto *high = factory_ui::label(_frequency_axis, "High frequency", &lv_font_montserrat_22, factory_ui::HINT);
+    lv_obj_align(high, LV_ALIGN_TOP_RIGHT, 0, 0);
     showMode(static_cast<int>(ViewMode::MIC));
 
     // Initialize the ESP-DSP radix-2 FFT tables once before the audio task starts.
@@ -206,8 +232,8 @@ bool SpecAnalyzer::close(void)
     }
 
     if (_root) lv_obj_delete(_root);
-    _root = _canvas = _mode_label = _mic_label = nullptr;
-    memset(_dots, 0, sizeof(_dots));
+    _root = _canvas = _mic_label = _mic_level = _frequency_axis = nullptr;
+    memset(_mode_buttons, 0, sizeof(_mode_buttons));
 
     if (_draw_buf) {
         free(_draw_buf);
@@ -314,16 +340,12 @@ void SpecAnalyzer::showMode(int index)
     index = (index + MODE_COUNT) % MODE_COUNT;
     _mode = static_cast<ViewMode>(index);
     _label_frames = 0;
-    lv_label_set_text(_mode_label, MODE_NAMES[index]);
-    if (_mode == ViewMode::MIC) {
-        lv_obj_remove_flag(_mic_label, LV_OBJ_FLAG_HIDDEN);
-    } else {
-        lv_obj_add_flag(_mic_label, LV_OBJ_FLAG_HIDDEN);
-    }
+    lv_obj_set_flag(_frequency_axis, LV_OBJ_FLAG_HIDDEN, _mode == ViewMode::RADIAL || _mode == ViewMode::HALO);
 
     for (int i = 0; i < MODE_COUNT; ++i) {
-        lv_obj_set_width(_dots[i], i == index ? 26 : 10);
-        lv_obj_set_style_bg_opa(_dots[i], i == index ? LV_OPA_COVER : LV_OPA_40, 0);
+        lv_obj_set_state(_mode_buttons[i], LV_STATE_CHECKED, i == index);
+        lv_obj_set_style_text_color(lv_obj_get_child(_mode_buttons[i], 0),
+                                    lv_color_hex(i == index ? factory_ui::ACCENT : factory_ui::TEXT), 0);
     }
 }
 
@@ -367,9 +389,13 @@ void SpecAnalyzer::drawBars(lv_layer_t &layer, const float *levels, bool mic_tes
 {
     constexpr int pitch = (CANVAS_WIDTH - 40) / STRIPE_COUNT;
     constexpr int left = (CANVAS_WIDTH - pitch * STRIPE_COUNT) / 2;
-    const int baseline = mic_test ? CANVAS_HEIGHT * 54 / 100 : CANVAS_HEIGHT * 65 / 100;
-    const int amplitude = mic_test ? 270 : 390;
+    const int baseline = mic_test ? CANVAS_HEIGHT - 32 : CANVAS_HEIGHT * 7 / 10;
+    const int amplitude = baseline - 32;
 
+    for (int i = 1; i <= 4; ++i) {
+        const int y = baseline - amplitude * i / 4;
+        drawArea(layer, {left, y, CANVAS_WIDTH - left - 1, y}, lv_color_hex(0x2A3242));
+    }
     drawArea(layer, {left, baseline + 3, CANVAS_WIDTH - left - 1, baseline + 4}, lv_color_hex(0x404040));
     for (int i = 0; i < STRIPE_COUNT; ++i) {
         const int h = 4 + static_cast<int>(levels[i] * amplitude);
@@ -456,15 +482,19 @@ void SpecAnalyzer::timer_cb(lv_timer_t *timer)
         peak = fmaxf(levels[i], peak - 0.003f - peak * 0.008f);
     }
 
-    lv_canvas_fill_bg(app->_canvas, lv_color_black(), LV_OPA_COVER);
+    if (app->_label_frames++ % 6 == 0) {
+        const auto color = lv_color_hex(dbfs >= -1 ? 0xFF9800 : factory_ui::ACCENT);
+        lv_label_set_text_fmt(app->_mic_label, "%d dBFS", dbfs);
+        lv_obj_set_style_text_color(app->_mic_label, color, 0);
+        lv_obj_set_style_bg_color(app->_mic_level, color, LV_PART_INDICATOR);
+    }
+    lv_bar_set_value(app->_mic_level, dbfs, LV_ANIM_OFF);
+
+    lv_canvas_fill_bg(app->_canvas, lv_color_hex(PLOT_BACKGROUND), LV_OPA_COVER);
     lv_layer_t layer;
     lv_canvas_init_layer(app->_canvas, &layer);
     switch (app->_mode) {
     case ViewMode::MIC:
-        if (app->_label_frames++ % 6 == 0) {
-            lv_label_set_text_fmt(app->_mic_label, "MIC  %d dBFS", dbfs);
-            lv_obj_set_style_text_color(app->_mic_label, lv_color_hex(dbfs >= -1 ? 0xFF9800 : 0x8E929E), 0);
-        }
         app->drawBars(layer, levels, true);
         break;
     case ViewMode::BARS:

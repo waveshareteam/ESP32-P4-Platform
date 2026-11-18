@@ -19,7 +19,7 @@ constexpr int GESTURE_INSET = 30;
 constexpr int SWIPE_DISTANCE = 50;
 constexpr int SWIPE_ANGLE = 60;
 constexpr int GUTTER = 32;
-constexpr int CONTENT_TOP = 192;
+constexpr int CONTENT_TOP = 164;
 constexpr uint32_t BACKGROUND = 0x0C0D12;
 constexpr uint32_t CARD = 0x1C1D24;
 constexpr uint32_t PRESSED = 0x2C2D38;
@@ -66,10 +66,11 @@ Row row(lv_obj_t *parent, const void *icon_source, const char *title, const char
 ControlPage display(lv_obj_t *parent, int brightness, lv_event_cb_t back, lv_event_cb_t changed, void *context);
 ControlPage sound(lv_obj_t *parent, int volume, lv_event_cb_t back, lv_event_cb_t changed, void *context);
 
-enum class PlayerAction { PREVIOUS, PLAY_PAUSE, NEXT, TRACKS };
+enum class PlayerAction { PREVIOUS, PLAY_PAUSE, NEXT };
 class PlayerView {
 public:
     lv_obj_t *create(lv_obj_t *parent, lv_event_cb_t action, void *context);
+    void add_track(const char *name, lv_event_cb_t action, void *context);
     void title(const char *name, int index, int count);
     void playing(bool active);
     void message(const char *text);
@@ -81,5 +82,7 @@ private:
     lv_obj_t *_state = nullptr;
     lv_obj_t *_elapsed = nullptr;
     lv_obj_t *_play = nullptr;
+    lv_obj_t *_tracks = nullptr;
+    lv_obj_t *_selected_track = nullptr;
 };
 } // namespace factory_ui

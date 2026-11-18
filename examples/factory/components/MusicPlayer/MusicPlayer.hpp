@@ -27,7 +27,6 @@ private:
     file_iterator_instance_t *_file_iterator = nullptr;
     factory_ui::PlayerView _view;
     lv_obj_t *_player = nullptr;
-    lv_obj_t *_tracks = nullptr;
     lv_timer_t *_timer = nullptr;
     size_t _selected = 0;
     bool _player_started = false;
@@ -37,10 +36,9 @@ private:
     uint64_t _elapsed_ms = 0;
     int64_t _last_tick_us = 0;
     bool play_selected();
-    void show_tracks();
-    void hide_tracks();
     void refresh_title();
     static void action_cb(lv_event_t *event);
+    static void track_cb(lv_event_t *event);
     static void tick_cb(lv_timer_t *timer);
 };
 } // namespace esp_brookesia::apps

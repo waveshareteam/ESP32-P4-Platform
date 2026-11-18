@@ -57,10 +57,13 @@ bool Drawpanel::run(void)
     area.y2 -= factory_ui::GESTURE_INSET;
     const int width = lv_area_get_width(&area);
     const int height = lv_area_get_height(&area);
-    ESP_UTILS_CHECK_FALSE_RETURN(width > 0 && height > 0, false, "Invalid canvas geometry");
+    lv_area_t toolbar_area = area;
+    toolbar_area.y1 = area.y2 + 1 - height / 10;
+    const int canvas_height = toolbar_area.y1 - area.y1;
+    ESP_UTILS_CHECK_FALSE_RETURN(width > 0 && canvas_height > 0, false, "Invalid canvas geometry");
 
     if (!_draw_buf) {
-        _draw_buf = lv_draw_buf_create(width, height, LV_COLOR_FORMAT_RGB565, LV_STRIDE_AUTO);
+        _draw_buf = lv_draw_buf_create(width, canvas_height, LV_COLOR_FORMAT_RGB565, LV_STRIDE_AUTO);
         ESP_UTILS_CHECK_NULL_RETURN(_draw_buf, false, "Create canvas buffer failed");
     }
 
@@ -79,7 +82,7 @@ bool Drawpanel::run(void)
     lv_obj_add_event_cb(_canvas, canvas_event_cb, LV_EVENT_ALL, this);
     clearCanvas();
 
-    createToolbar();
+    createToolbar(toolbar_area);
 
     return true;
 }
@@ -141,35 +144,34 @@ bool Drawpanel::resume()
     return true;
 }
 
-void Drawpanel::createToolbar(void)
+void Drawpanel::createToolbar(const lv_area_t &area)
 {
-    static const uint32_t colors[] = {0x000000, 0xE53935, 0xFB8C00, 0x43A047, 0x1E88E5, 0x8E24AA};
-    constexpr int swatch_size = 60;
+    static constexpr uint32_t colors[] = {0x000000, 0xE53935, 0xFB8C00, 0x43A047, 0x1E88E5, 0x8E24AA};
+    constexpr int TILE_RADIUS = 16;
+    const int height = lv_area_get_height(&area);
+    const int tile_height = height * 2 / 3;
 
-    lv_obj_t *bar = lv_obj_create(lv_scr_act());
-    lv_obj_remove_style_all(bar);
-    lv_obj_set_size(bar, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-    lv_obj_set_style_bg_color(bar, lv_color_hex(0xEEEEEE), 0);
-    lv_obj_set_style_bg_opa(bar, LV_OPA_90, 0);
-    lv_obj_set_style_radius(bar, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_pad_all(bar, 12, 0);
-    lv_obj_set_style_pad_column(bar, 14, 0);
+    lv_obj_t *bar = factory_ui::plain(lv_scr_act());
+    lv_obj_set_size(bar, lv_area_get_width(&area), height);
+    lv_obj_set_pos(bar, area.x1, area.y1);
+    lv_obj_set_style_bg_color(bar, lv_color_hex(factory_ui::CARD), 0);
+    lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, 0);
+    lv_obj_set_style_pad_hor(bar, factory_ui::GUTTER, 0);
+    lv_obj_set_style_pad_column(bar, 12, 0);
     lv_obj_set_flex_flow(bar, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(bar, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_remove_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
-    // Keep the palette above the gesture strip.
-    lv_obj_align(bar, LV_ALIGN_BOTTOM_MID, 0, -factory_ui::GESTURE_INSET - 20);
 
     for (uint32_t color : colors) {
-        lv_obj_t *swatch = lv_obj_create(bar);
-        lv_obj_remove_style_all(swatch);
-        lv_obj_set_size(swatch, swatch_size, swatch_size);
-        lv_obj_set_style_radius(swatch, LV_RADIUS_CIRCLE, 0);
+        lv_obj_t *swatch = factory_ui::plain(bar);
+        lv_obj_set_size(swatch, 0, tile_height);
+        lv_obj_set_flex_grow(swatch, 1);
+        lv_obj_set_style_radius(swatch, TILE_RADIUS, 0);
         lv_obj_set_style_bg_color(swatch, lv_color_hex(color), 0);
         lv_obj_set_style_bg_opa(swatch, LV_OPA_COVER, 0);
-        lv_obj_set_style_outline_color(swatch, lv_color_hex(0x9E9E9E), 0);
-        lv_obj_set_style_outline_pad(swatch, 2, 0);
-        lv_obj_set_style_outline_width(swatch, 0, 0);
+        lv_obj_set_style_border_color(swatch, lv_color_hex(0x747783), 0);
+        lv_obj_set_style_border_width(swatch, color == 0 ? 2 : 0, 0);
+        lv_obj_set_style_outline_color(swatch, lv_color_white(), 0);
+        lv_obj_set_style_outline_pad(swatch, 3, 0);
         lv_obj_set_style_outline_width(swatch, 3, LV_STATE_CHECKED);
         lv_obj_add_flag(swatch, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(swatch, swatch_event_cb, LV_EVENT_CLICKED, this);
@@ -180,15 +182,14 @@ void Drawpanel::createToolbar(void)
     }
 
     lv_obj_t *clear = lv_button_create(bar);
-    lv_obj_set_size(clear, swatch_size, swatch_size);
-    lv_obj_set_style_radius(clear, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_bg_color(clear, lv_color_white(), 0);
+    lv_obj_set_size(clear, 0, tile_height);
+    lv_obj_set_flex_grow(clear, 1);
+    lv_obj_set_style_radius(clear, TILE_RADIUS, 0);
+    lv_obj_set_style_bg_color(clear, lv_color_hex(0x383D49), 0);
+    lv_obj_set_style_bg_color(clear, lv_color_hex(0x4D5361), LV_STATE_PRESSED);
     lv_obj_set_style_shadow_width(clear, 0, 0);
     lv_obj_add_event_cb(clear, clear_event_cb, LV_EVENT_CLICKED, this);
-    lv_obj_t *icon = lv_label_create(clear);
-    lv_label_set_text(icon, LV_SYMBOL_TRASH);
-    lv_obj_set_style_text_color(icon, lv_color_hex(0x424242), 0);
-    lv_obj_set_style_text_font(icon, &lv_font_montserrat_28, 0);
+    lv_obj_t *icon = factory_ui::label(clear, LV_SYMBOL_TRASH, &lv_font_montserrat_28);
     lv_obj_center(icon);
 }
 

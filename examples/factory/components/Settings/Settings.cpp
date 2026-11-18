@@ -8,15 +8,9 @@
 #include "factory_ui.hpp"
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
-#include "esp_event.h"
-#include "esp_netif.h"
-#include "esp_sntp.h"
-#include "esp_wifi.h"
 #include "esp_app_desc.h"
 #include <cstdio>
 #include <stdlib.h>
-#include <sys/time.h>
-#include <time.h>
 #ifdef ESP_UTILS_LOG_TAG
 #undef ESP_UTILS_LOG_TAG
 #endif
@@ -36,44 +30,6 @@ LV_IMG_DECLARE(img_app_settings);
 
 namespace esp_brookesia::apps
 {
-    static bool s_time_sync_started = false;
-    static bool s_time_synced = false;
-
-    static void time_sync_notification_cb(struct timeval *tv)
-    {
-        (void)tv;
-        setenv("TZ", "CST-8", 1);
-        tzset();
-        s_time_synced = true;
-        ESP_UTILS_LOGI("SNTP time synced, timezone CST-8 applied");
-    }
-
-    static void start_time_sync_once()
-    {
-        if (s_time_sync_started || esp_sntp_enabled()) {
-            return;
-        }
-
-        // Time sync is started lazily after Wi-Fi obtains an IP address, which avoids
-        // SNTP retries before the network stack is ready.
-        esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
-        esp_sntp_setservername(0, "ntp.aliyun.com");
-        esp_sntp_set_time_sync_notification_cb(time_sync_notification_cb);
-        esp_sntp_init();
-        s_time_sync_started = true;
-        ESP_UTILS_LOGI("SNTP time sync started");
-    }
-
-    static void wifi_time_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
-    {
-        (void)arg;
-        (void)event_data;
-
-        if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-            start_time_sync_once();
-        }
-    }
-
     Settings *Settings::_instance = nullptr;
 
     Settings *Settings::requestInstance(bool use_status_bar, bool use_navigation_bar)
@@ -98,9 +54,8 @@ namespace esp_brookesia::apps
     void Settings::create_settings_ui()
     {
         lv_obj_clean(lv_scr_act());
-        wifi_ap_record_t current = {};
-        const char *wifi = esp_wifi_sta_get_ap_info(&current) == ESP_OK ?
-            reinterpret_cast<const char *>(current.ssid) : "Not connected";
+        const auto wifi = factory_wifi::snapshot();
+        const char *network = wifi.ip[0] ? wifi.ssid : wifi.enabled ? "Not connected" : "Off";
         char volume[8];
         char brightness[8];
         char firmware[48];
@@ -108,9 +63,21 @@ namespace esp_brookesia::apps
         snprintf(brightness, sizeof(brightness), "%d%%", product_display_brightness_get());
         snprintf(firmware, sizeof(firmware), "Version %s", esp_app_get_description()->version);
         auto view = factory_ui::page(lv_scr_act(), "Settings", nullptr, this);
-        factory_ui::row(view.content, &WIFI, "Wi-Fi", wifi, event_handler_cb, this, 1);
-        factory_ui::row(view.content, &sound, "Sound", volume, event_handler_cb, this, 2);
-        factory_ui::row(view.content, &backlights, "Display", brightness, event_handler_cb, this, 3);
+        factory_ui::row(view.content, &WIFI, "Wi-Fi", network, event_handler_cb, this, 1);
+        auto *levels = factory_ui::plain(view.content);
+        lv_obj_set_size(levels, lv_pct(100), 142);
+        lv_obj_set_flex_flow(levels, LV_FLEX_FLOW_ROW);
+        lv_obj_set_style_pad_column(levels, 16, 0);
+        auto add_level = [&](const void *icon, const char *name, const char *value, intptr_t id) {
+            auto tile = factory_ui::row(levels, icon, name, value, event_handler_cb, this, id);
+            lv_obj_set_style_pad_all(tile.object, 18, 0);
+            lv_obj_set_style_pad_column(tile.object, 12, 0);
+            lv_obj_set_width(tile.object, 0);
+            lv_obj_set_height(tile.object, lv_pct(100));
+            lv_obj_set_flex_grow(tile.object, 1);
+        };
+        add_level(&sound, "Sound", volume, 2);
+        add_level(&backlights, "Display", brightness, 3);
         factory_ui::row(view.content, &info, "About", firmware, event_handler_cb, this, 4);
         list1 = view.root;
     }
@@ -136,7 +103,7 @@ namespace esp_brookesia::apps
     {
         const char *page_name = static_cast<const char *>(user_data);
         Settings *instance = Settings::requestInstance(true, false);
-        if (instance && page_name)
+        if (instance && instance->list1 && page_name)
         {
             instance->open_page(page_name);
         }
@@ -159,8 +126,13 @@ namespace esp_brookesia::apps
         if (strcmp(page_name, "WLAN") == 0)
         {
             active_page = ActivePage::Wlan;
-            auto wlan = WlanPage::requestInstance(true, false);
-            wlan->run();
+            wlan.open(lv_screen_active(), [](void *context) {
+                auto *settings = static_cast<Settings *>(context);
+                if (settings->active_page == ActivePage::Wlan) {
+                    settings->wlan.close();
+                    settings->run();
+                }
+            }, this);
         }
         else if (strcmp(page_name, "Sound") == 0)
         {
@@ -237,7 +209,7 @@ namespace esp_brookesia::apps
         switch (active_page)
         {
         case ActivePage::Wlan:
-            WlanPage::requestInstance(true, false)->close();
+            wlan.close();
             break;
         case ActivePage::Sound:
             SoundPage::requestInstance(true, false)->close();
@@ -260,8 +232,6 @@ namespace esp_brookesia::apps
     bool Settings::init()
     {
         ESP_UTILS_LOGD("Init");
-        initWifi();
-
         return true;
     }
 
@@ -283,68 +253,4 @@ namespace esp_brookesia::apps
         return true;
     }
 
-    esp_err_t Settings::initWifi()
-    {
-        static bool netif_initialized = false;
-        static bool event_loop_initialized = false;
-        static bool wifi_initialized = false;
-        static bool time_event_handler_registered = false;
-        static esp_netif_t *sta_netif = nullptr;
-
-        if (!netif_initialized) {
-            esp_err_t ret = esp_netif_init();
-            if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                ESP_UTILS_LOGE("esp_netif_init failed: %s", esp_err_to_name(ret));
-                return ret;
-            }
-            netif_initialized = true;
-        }
-
-        if (!event_loop_initialized) {
-            esp_err_t ret = esp_event_loop_create_default();
-            if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE) {
-                ESP_UTILS_LOGE("esp_event_loop_create_default failed: %s", esp_err_to_name(ret));
-                return ret;
-            }
-            event_loop_initialized = true;
-        }
-
-        if (!sta_netif) {
-            sta_netif = esp_netif_create_default_wifi_sta();
-            if (!sta_netif) {
-                ESP_UTILS_LOGE("esp_netif_create_default_wifi_sta failed");
-                return ESP_FAIL;
-            }
-        }
-
-        if (!wifi_initialized) {
-            wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-            esp_err_t ret = esp_wifi_init(&cfg);
-            if (ret != ESP_OK) {
-                ESP_UTILS_LOGE("esp_wifi_init failed: %s", esp_err_to_name(ret));
-                return ret;
-            }
-            wifi_initialized = true;
-        }
-
-        if (!time_event_handler_registered) {
-            esp_err_t ret = esp_event_handler_register(
-                IP_EVENT,
-                IP_EVENT_STA_GOT_IP,
-                &wifi_time_event_handler,
-                nullptr);
-            if (ret != ESP_OK) {
-                ESP_UTILS_LOGE("Register time sync event handler failed: %s", esp_err_to_name(ret));
-                return ret;
-            }
-            time_event_handler_registered = true;
-        }
-
-        esp_err_t ret = esp_wifi_set_mode(WIFI_MODE_STA);
-        if (ret != ESP_OK) {
-            ESP_UTILS_LOGW("esp_wifi_set_mode returned: %s", esp_err_to_name(ret));
-        }
-
-        return ESP_OK;
-    }
 } // namespace esp_brookesia::apps

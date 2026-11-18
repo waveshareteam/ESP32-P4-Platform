@@ -8,7 +8,6 @@ idf_component_register(
     PRIV_REQUIRES
         app_update
         nvs_flash
-        esp_wifi
         draw
         SpecAnalyzer
         MusicPlayer

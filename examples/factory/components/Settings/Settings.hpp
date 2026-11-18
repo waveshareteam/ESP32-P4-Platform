@@ -59,7 +59,7 @@ namespace esp_brookesia::apps
         void event_handler(lv_event_t *e);
         void open_page(const char *page_name);
 
-        esp_err_t initWifi();
+        WlanPage wlan;
         
     private:
         static Settings *_instance;

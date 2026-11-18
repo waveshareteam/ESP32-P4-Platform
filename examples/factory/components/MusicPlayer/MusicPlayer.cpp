@@ -21,6 +21,16 @@ MusicPlayer *MusicPlayer::requestInstance(bool status, bool navigation)
 }
 MusicPlayer::MusicPlayer(bool status, bool navigation) : App(factory_ui::screen_config("MusicPlayer", &img_app_musicplayer), factory_ui::app_config(status, navigation)) {}
 MusicPlayer::~MusicPlayer() {}
+
+static std::string track_name(file_iterator_instance_t *iterator, size_t index)
+{
+    const char *file = file_iterator_get_name_from_index(iterator, index);
+    std::string name = file ? file : "Music";
+    auto extension = name.find_last_of('.');
+    if (extension != std::string::npos) name.resize(extension);
+    return name;
+}
+
 bool MusicPlayer::run()
 {
     if (product_player_init() != ESP_OK) return false;
@@ -34,6 +44,10 @@ bool MusicPlayer::run()
     _elapsed_ms = 0;
     _want_playing = _seen_playing = _last_playing = false;
     _player = _view.create(lv_screen_active(), action_cb, this);
+    const size_t count = file_iterator_get_count(_file_iterator);
+    for (size_t i = 0; i < count; ++i) {
+        _view.add_track(track_name(_file_iterator, i).c_str(), track_cb, this);
+    }
     refresh_title();
     _last_tick_us = esp_timer_get_time();
     _timer = lv_timer_create(tick_cb, 250, this);
@@ -42,11 +56,8 @@ bool MusicPlayer::run()
 
 void MusicPlayer::refresh_title()
 {
-    const char *file = file_iterator_get_name_from_index(_file_iterator, _selected);
-    std::string name = file ? file : "Music";
-    auto extension = name.find_last_of('.');
-    if (extension != std::string::npos) name.resize(extension);
-    _view.title(name.c_str(), static_cast<int>(_selected), static_cast<int>(file_iterator_get_count(_file_iterator)));
+    _view.title(track_name(_file_iterator, _selected).c_str(), static_cast<int>(_selected),
+                static_cast<int>(file_iterator_get_count(_file_iterator)));
 }
 
 bool MusicPlayer::play_selected()
@@ -95,10 +106,15 @@ void MusicPlayer::action_cb(lv_event_t *event)
             self->play_selected();
         }
         break;
-    case factory_ui::PlayerAction::TRACKS:
-        self->show_tracks();
-        break;
     }
+}
+
+void MusicPlayer::track_cb(lv_event_t *event)
+{
+    auto *self = static_cast<MusicPlayer *>(lv_event_get_user_data(event));
+    auto *track = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
+    self->_selected = reinterpret_cast<uintptr_t>(lv_obj_get_user_data(track));
+    self->play_selected();
 }
 
 void MusicPlayer::tick_cb(lv_timer_t *timer)
@@ -125,33 +141,8 @@ void MusicPlayer::tick_cb(lv_timer_t *timer)
     }
 }
 
-void MusicPlayer::show_tracks()
-{
-    if (_tracks) return;
-    auto list = factory_ui::page(lv_screen_active(), "Tracks", [](lv_event_t *event) {
-        lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->hide_tracks(); }, lv_event_get_user_data(event));
-    }, this);
-    _tracks = list.root;
-    const size_t count = file_iterator_get_count(_file_iterator);
-    for (size_t i = 0; i < count; ++i) {
-        factory_ui::row(list.content, LV_SYMBOL_AUDIO, file_iterator_get_name_from_index(_file_iterator, i),
-                        i == _selected ? "Selected" : "On-device music", [](lv_event_t *event) {
-            auto *self = static_cast<MusicPlayer *>(lv_event_get_user_data(event));
-            auto *button = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
-            self->_selected = static_cast<size_t>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(button)));
-            self->play_selected();
-            lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->hide_tracks(); }, self);
-        }, this, static_cast<intptr_t>(i));
-    }
-}
-void MusicPlayer::hide_tracks()
-{
-    if (_tracks) lv_obj_delete(_tracks);
-    _tracks = nullptr;
-}
 bool MusicPlayer::back()
 {
-    if (_tracks) { hide_tracks(); return true; }
     return notifyCoreClosed();
 }
 bool MusicPlayer::close()
@@ -163,7 +154,6 @@ bool MusicPlayer::close()
     _player_started = false;
     product_file_instance_del(_file_iterator);
     _file_iterator = nullptr;
-    hide_tracks();
     if (_player) lv_obj_delete(_player);
     _player = nullptr;
     _view.clear();
