@@ -4,6 +4,7 @@
  */
 #include "factory_ui.hpp"
 #include <cstdio>
+#include <cstring>
 #include <initializer_list>
 
 namespace factory_ui {
@@ -236,7 +237,11 @@ lv_obj_t *PlayerView::create(lv_obj_t *parent, lv_event_cb_t action, void *conte
     lv_obj_set_flex_flow(readout, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(readout, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     _state = label(readout, "Ready to play", &lv_font_montserrat_24, HINT);
+    lv_obj_set_width(_state, lv_pct(68));
+    lv_label_set_long_mode(_state, LV_LABEL_LONG_DOT);
     _elapsed = label(readout, "00:00", &lv_font_montserrat_28);
+    lv_obj_set_width(_elapsed, lv_pct(30));
+    lv_obj_set_style_text_align(_elapsed, LV_TEXT_ALIGN_RIGHT, 0);
 
     auto *controls = plain(player);
     lv_obj_set_size(controls, lv_pct(100), 80);
@@ -301,13 +306,19 @@ void PlayerView::title(const char *name, int index, int count)
 }
 void PlayerView::playing(bool active)
 {
-    lv_label_set_text(_play, active ? LV_SYMBOL_PAUSE : LV_SYMBOL_PLAY);
-    lv_label_set_text(_state, active ? "Playing" : "Paused");
+    const char *symbol = active ? LV_SYMBOL_PAUSE : LV_SYMBOL_PLAY;
+    if (std::strcmp(lv_label_get_text(_play), symbol) != 0) lv_label_set_text(_play, symbol);
+    message(active ? "Playing" : "Paused");
 }
-void PlayerView::message(const char *text) { lv_label_set_text(_state, text); }
+void PlayerView::message(const char *text)
+{
+    if (std::strcmp(lv_label_get_text(_state), text) != 0) lv_label_set_text(_state, text);
+}
 void PlayerView::elapsed(uint32_t seconds)
 {
-    lv_label_set_text_fmt(_elapsed, "%02u:%02u", static_cast<unsigned>(seconds / 60), static_cast<unsigned>(seconds % 60));
+    char text[16];
+    std::snprintf(text, sizeof(text), "%02u:%02u", static_cast<unsigned>(seconds / 60), static_cast<unsigned>(seconds % 60));
+    if (std::strcmp(lv_label_get_text(_elapsed), text) != 0) lv_label_set_text(_elapsed, text);
 }
 void PlayerView::clear()
 {

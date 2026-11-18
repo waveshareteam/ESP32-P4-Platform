@@ -2,7 +2,6 @@
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
 #include "esp_task.h"
-#include "esp_heap_caps.h"
 
 #ifdef ESP_UTILS_LOG_TAG
 #   undef ESP_UTILS_LOG_TAG
@@ -11,6 +10,7 @@
 #include "esp_lib_utils.h"
 #include "SpecAnalyzer.hpp"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <numbers>
@@ -39,12 +39,11 @@ SpecAnalyzer *SpecAnalyzer::requestInstance(bool use_status_bar, bool use_naviga
 
 SpecAnalyzer::SpecAnalyzer(bool use_status_bar, bool use_navigation_bar) :
     App(factory_ui::screen_config(APP_NAME, &img_app_specanalyzer), factory_ui::app_config(use_status_bar, use_navigation_bar)),
-    _canvas(nullptr),
+    _plot(nullptr),
     _mic_label(nullptr),
     _timer(nullptr),
     _audio_task_handle(nullptr),
-    _audio_task_running(false),
-    _draw_buf(nullptr)
+    _audio_task_running(false)
 {
     // Clear DSP state so the first rendered frame starts from silence.
     memset(_raw_data, 0, sizeof(_raw_data));
@@ -54,7 +53,7 @@ SpecAnalyzer::SpecAnalyzer(bool use_status_bar, bool use_navigation_bar) :
     memset(_display_spectrum, 0, sizeof(_display_spectrum));
     memset(_peak, 0, sizeof(_peak));
     for (auto &channel : _smooth_spectrum) {
-        std::fill_n(channel, STRIPE_COUNT, -90.0f);
+        std::fill_n(channel, STRIPE_COUNT, MIC_FLOOR);
     }
 }
 
@@ -103,14 +102,15 @@ bool SpecAnalyzer::run(void)
 
     auto *meter = panel(124, PANEL_PAD);
     factory_ui::label(meter, "Microphone", &lv_font_montserrat_28);
-    _mic_label = factory_ui::label(meter, "-- dBFS", &lv_font_montserrat_28, factory_ui::HINT);
+    _mic_label = factory_ui::label(meter, "", &lv_font_montserrat_28, factory_ui::ACCENT);
+    lv_label_set_text_fmt(_mic_label, "%d dBFS", MIC_FLOOR);
     lv_obj_align(_mic_label, LV_ALIGN_TOP_RIGHT, 0, 0);
     _mic_level = lv_bar_create(meter);
     lv_obj_remove_style_all(_mic_level);
     lv_obj_set_size(_mic_level, lv_pct(100), 12);
     lv_obj_align(_mic_level, LV_ALIGN_BOTTOM_LEFT, 0, 0);
-    lv_bar_set_range(_mic_level, -90, 0);
-    lv_bar_set_value(_mic_level, -90, LV_ANIM_OFF);
+    lv_bar_set_range(_mic_level, MIC_FLOOR, 0);
+    lv_bar_set_value(_mic_level, MIC_FLOOR, LV_ANIM_OFF);
     lv_obj_set_style_radius(_mic_level, 6, LV_PART_MAIN);
     lv_obj_set_style_radius(_mic_level, 6, LV_PART_INDICATOR);
     lv_obj_set_style_bg_color(_mic_level, lv_color_hex(0x343846), LV_PART_MAIN);
@@ -118,36 +118,15 @@ bool SpecAnalyzer::run(void)
     lv_obj_set_style_bg_color(_mic_level, lv_color_hex(factory_ui::ACCENT), LV_PART_INDICATOR);
     lv_obj_set_style_bg_opa(_mic_level, LV_OPA_COVER, LV_PART_INDICATOR);
 
-    auto *plot = panel(CANVAS_HEIGHT + 124, PANEL_PAD);
+    auto *plot = panel(PLOT_HEIGHT + 124, PANEL_PAD);
     factory_ui::label(plot, "Frequency spectrum", &lv_font_montserrat_28);
 
-    // Prefer PSRAM for the large canvas buffer and fall back to SRAM if PSRAM is exhausted.
-    size_t buf_size = CANVAS_WIDTH * CANVAS_HEIGHT * sizeof(uint16_t);
-    _draw_buf = static_cast<uint16_t *>(heap_caps_malloc(buf_size, MALLOC_CAP_SPIRAM));
-
-    if (!_draw_buf) {
-        ESP_UTILS_LOGE("PSRAM allocation failed! Using fallback SRAM");
-        _draw_buf = static_cast<uint16_t *>(malloc(buf_size));
-    }
-
-    if (!_draw_buf) {
-        ESP_UTILS_LOGE("Canvas buffer allocation failed!");
-        close();
-        return false;
-    }
-
-    // Draw into an LVGL canvas so the FFT task only updates numeric buffers and the
-    // GUI timer owns all rendering work on the LVGL thread.
-    _canvas = lv_canvas_create(plot);
-    if (!_canvas) {
-        ESP_UTILS_LOGE("Canvas creation failed!");
-        close();
-        return false;
-    }
-    lv_obj_set_size(_canvas, CANVAS_WIDTH, CANVAS_HEIGHT);
-    lv_canvas_set_buffer(_canvas, _draw_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_COLOR_FORMAT_RGB565);
-    lv_canvas_fill_bg(_canvas, lv_color_hex(PLOT_BACKGROUND), LV_OPA_COVER);
-    lv_obj_set_y(_canvas, 44);
+    _plot = factory_ui::plain(plot);
+    lv_obj_set_size(_plot, PLOT_WIDTH, PLOT_HEIGHT);
+    lv_obj_set_y(_plot, 44);
+    lv_obj_set_style_bg_color(_plot, lv_color_hex(PLOT_BACKGROUND), 0);
+    lv_obj_set_style_bg_opa(_plot, LV_OPA_COVER, 0);
+    lv_obj_add_event_cb(_plot, plot_draw_cb, LV_EVENT_DRAW_MAIN, this);
 
     _frequency_axis = factory_ui::plain(plot);
     lv_obj_set_size(_frequency_axis, lv_pct(100), 26);
@@ -194,10 +173,15 @@ bool SpecAnalyzer::back(void)
 
 bool SpecAnalyzer::startCapture()
 {
-    for (auto &channel : _smooth_spectrum) {
-        std::fill_n(channel, STRIPE_COUNT, -90.0f);
+    // Music playback can leave the shared I2S bus at a different rate or slot format.
+    if (const auto err = product_codec_dev_resume(); err != ESP_OK) {
+        ESP_UTILS_LOGE("Restore microphone format failed: %s", esp_err_to_name(err));
+        return false;
     }
-    _mic_dbfs = -90;
+    for (auto &channel : _smooth_spectrum) {
+        std::fill_n(channel, STRIPE_COUNT, MIC_FLOOR);
+    }
+    _mic_dbfs = MIC_FLOOR;
     memset(_peak, 0, sizeof(_peak));
     _audio_task_running = true;
     if (xTaskCreatePinnedToCore(audio_fft_task, "audio_fft", 8 * 1024, this, 5,
@@ -232,13 +216,10 @@ bool SpecAnalyzer::close(void)
     }
 
     if (_root) lv_obj_delete(_root);
-    _root = _canvas = _mic_label = _mic_level = _frequency_axis = nullptr;
+    _root = _plot = _mic_label = _mic_level = _frequency_axis = nullptr;
     memset(_mode_buttons, 0, sizeof(_mode_buttons));
-
-    if (_draw_buf) {
-        free(_draw_buf);
-        _draw_buf = nullptr;
-    }
+    _mode = _drawn_mode = ViewMode::COUNT;
+    _label_dbfs = MIC_FLOOR;
 
     return true;
 }
@@ -274,17 +255,14 @@ void SpecAnalyzer::audio_fft_task(void *pvParameters)
             portMAX_DELAY
         );
 
-        if (ret != ESP_OK || bytes_read < N_SAMPLES * sizeof(int16_t)) {
+        if (ret != ESP_OK || bytes_read != sizeof(app->_raw_data)) {
             ESP_UTILS_LOGW("I2S read error: %d, bytes: %d", ret, bytes_read);
             continue;
         }
 
-        const size_t samples_read = bytes_read / sizeof(int16_t);
-        const bool has_interleaved_channels = samples_read >= (N_SAMPLES * I2S_CHANNELS);
         float square_sum = 0;
         for (int i = 0; i < N_SAMPLES; i++) {
-            size_t sample_index = has_interleaved_channels ? (i * I2S_CHANNELS) : i;
-            const float sample = app->_raw_data[sample_index] / 32768.0f;
+            const float sample = app->_raw_data[i * I2S_CHANNELS] / 32768.0f;
             app->_audio_buffer[0][i] = sample;
             square_sum += sample * sample;
         }
@@ -338,6 +316,7 @@ void SpecAnalyzer::audio_fft_task(void *pvParameters)
 void SpecAnalyzer::showMode(int index)
 {
     index = (index + MODE_COUNT) % MODE_COUNT;
+    if (static_cast<int>(_mode) == index) return;
     _mode = static_cast<ViewMode>(index);
     _label_frames = 0;
     lv_obj_set_flag(_frequency_axis, LV_OBJ_FLAG_HIDDEN, _mode == ViewMode::RADIAL || _mode == ViewMode::HALO);
@@ -347,6 +326,7 @@ void SpecAnalyzer::showMode(int index)
         lv_obj_set_style_text_color(lv_obj_get_child(_mode_buttons[i], 0),
                                     lv_color_hex(i == index ? factory_ui::ACCENT : factory_ui::TEXT), 0);
     }
+    if (_timer) lv_timer_ready(_timer);
 }
 
 void SpecAnalyzer::view_gesture_cb(lv_event_t *event)
@@ -385,42 +365,140 @@ static void drawArea(lv_layer_t &layer, const lv_area_t &area, lv_color_t color,
     lv_draw_rect(&layer, &rect, &area);
 }
 
-void SpecAnalyzer::drawBars(lv_layer_t &layer, const float *levels, bool mic_test) const
+int SpecAnalyzer::barBaseline(bool mic_test)
 {
-    constexpr int pitch = (CANVAS_WIDTH - 40) / STRIPE_COUNT;
-    constexpr int left = (CANVAS_WIDTH - pitch * STRIPE_COUNT) / 2;
-    const int baseline = mic_test ? CANVAS_HEIGHT - 32 : CANVAS_HEIGHT * 7 / 10;
+    return mic_test ? PLOT_HEIGHT - 32 : PLOT_HEIGHT * 7 / 10;
+}
+
+void SpecAnalyzer::invalidateBars(const BandPixels *bands, bool mic_test)
+{
+    const int baseline = barBaseline(mic_test);
+    lv_area_t area;
+    lv_obj_get_coords(_plot, &area);
+
+    // Bound the number of dirty rectangles so an active spectrum cannot overflow
+    // LVGL's invalidation buffer. Untouched bars and the static grid stay intact.
+    constexpr int group_size = 6;
+    static_assert(STRIPE_COUNT % group_size == 0);
+    for (int start = 0; start < STRIPE_COUNT; start += group_size) {
+        lv_area_t dirty = {PLOT_WIDTH, PLOT_HEIGHT, -1, -1};
+        for (int i = start; i < start + group_size; ++i) {
+            const auto &old = _bands[i];
+            const auto &next = bands[i];
+            if (old == next) continue;
+
+            const int x = BAR_LEFT + i * BAR_PITCH;
+            dirty.x1 = std::min<int>(dirty.x1, x);
+            dirty.x2 = x + BAR_PITCH - 3;
+            if (old.level != next.level) {
+                dirty.y1 = std::min<int>(dirty.y1, baseline - 4 - std::max(old.level, next.level));
+                dirty.y2 = std::max<int>(dirty.y2, baseline - 4 - std::min(old.level, next.level));
+            }
+            if (old.peak != next.peak) {
+                dirty.y1 = std::min<int>(dirty.y1, baseline - 7 - std::max(old.peak, next.peak));
+                dirty.y2 = std::max<int>(dirty.y2, baseline - 5 - std::min(old.peak, next.peak));
+            }
+        }
+        if (dirty.x1 <= dirty.x2) {
+            lv_area_move(&dirty, area.x1, area.y1);
+            lv_obj_invalidate_area(_plot, &dirty);
+        }
+    }
+    if (mic_test) return;
+
+    // The faint reflection below the baseline changes independently of the bars.
+    lv_area_t reflection = {PLOT_WIDTH, PLOT_HEIGHT, -1, -1};
+    for (int i = 0; i < STRIPE_COUNT; ++i) {
+        const int old_end = (4 + _bands[i].level) / 3;
+        const int next_end = (4 + bands[i].level) / 3;
+        if (old_end == next_end) continue;
+        const int x = BAR_LEFT + i * BAR_PITCH;
+        reflection.x1 = std::min<int>(reflection.x1, x);
+        reflection.x2 = x + BAR_PITCH - 3;
+        reflection.y1 = std::min<int>(reflection.y1, baseline + 8 + std::min(old_end, next_end));
+        reflection.y2 = std::max<int>(reflection.y2, baseline + 7 + std::max(old_end, next_end));
+    }
+    if (reflection.x1 <= reflection.x2) {
+        lv_area_move(&reflection, area.x1, area.y1);
+        lv_obj_invalidate_area(_plot, &reflection);
+    }
+}
+
+void SpecAnalyzer::invalidateRadial(const BandPixels *bands, bool halo)
+{
+    bool changed = false;
+    int radius = 0;
+    for (int i = 0; i < STRIPE_COUNT; i += halo ? 1 : 2) {
+        const auto &old = _bands[i];
+        const auto &next = bands[i];
+        changed |= old != next;
+        radius = std::max<int>(radius, std::max({old.level, old.peak, next.level, next.peak}));
+    }
+    if (!changed) return;
+
+    // Include both frames so the old outer peaks and antialiased edges are cleared.
+    radius += RADIAL_AMPLITUDE + 16;
+    lv_area_t area;
+    lv_obj_get_coords(_plot, &area);
+    const int x = area.x1 + PLOT_WIDTH / 2;
+    const int y = area.y1 + PLOT_HEIGHT / 2;
+    const lv_area_t dirty = {x - radius, y - radius, x + radius, y + radius};
+    lv_obj_invalidate_area(_plot, &dirty);
+}
+
+void SpecAnalyzer::drawBars(lv_layer_t &layer, const lv_area_t &area, bool mic_test) const
+{
+    const int left = area.x1 + BAR_LEFT;
+    const int right = area.x2 - BAR_LEFT;
+    const int baseline = barBaseline(mic_test);
     const int amplitude = baseline - 32;
 
     for (int i = 1; i <= 4; ++i) {
-        const int y = baseline - amplitude * i / 4;
-        drawArea(layer, {left, y, CANVAS_WIDTH - left - 1, y}, lv_color_hex(0x2A3242));
+        const int y = area.y1 + baseline - amplitude * i / 4;
+        if (y >= layer._clip_area.y1 && y <= layer._clip_area.y2) {
+            drawArea(layer, {left, y, right, y}, lv_color_hex(0x2A3242));
+        }
     }
-    drawArea(layer, {left, baseline + 3, CANVAS_WIDTH - left - 1, baseline + 4}, lv_color_hex(0x404040));
-    for (int i = 0; i < STRIPE_COUNT; ++i) {
-        const int h = 4 + static_cast<int>(levels[i] * amplitude);
-        const int x = left + i * pitch;
-        const int right = x + pitch - 3;
-        drawArea(layer, {x, baseline - h, right, baseline}, bandColor(i, STRIPE_COUNT));
-        const int peak = baseline - 5 - static_cast<int>(_peak[0][i] * amplitude);
-        drawArea(layer, {x, peak - 2, right, peak}, lv_color_white());
+    const int base_y = area.y1 + baseline;
+    drawArea(layer, {left, base_y + 3, right, base_y + 4}, lv_color_hex(0x404040));
+    const int first = std::max<int>(0, (layer._clip_area.x1 - left) / BAR_PITCH);
+    const int last = std::min<int>(STRIPE_COUNT - 1, (layer._clip_area.x2 - left) / BAR_PITCH);
+    for (int i = first; i <= last; ++i) {
+        const int h = 4 + _bands[i].level;
+        const int x = left + i * BAR_PITCH;
+        const int end = x + BAR_PITCH - 3;
+        drawArea(layer, {x, base_y - h, end, base_y}, bandColor(i, STRIPE_COUNT));
+        const int peak = base_y - 5 - _bands[i].peak;
+        drawArea(layer, {x, peak - 2, end, peak}, lv_color_white());
         if (!mic_test) {
-            drawArea(layer, {x, baseline + 7, right, baseline + 7 + h / 3}, bandColor(i, STRIPE_COUNT, 28));
+            drawArea(layer, {x, base_y + 7, end, base_y + 7 + h / 3}, bandColor(i, STRIPE_COUNT, 28));
         }
     }
 }
 
-void SpecAnalyzer::drawRadial(lv_layer_t &layer, const float *levels, bool halo) const
+void SpecAnalyzer::drawRadial(lv_layer_t &layer, const lv_area_t &area, bool halo) const
 {
-    constexpr int size = std::min(CANVAS_WIDTH, CANVAS_HEIGHT);
-    constexpr int cx = CANVAS_WIDTH / 2;
-    constexpr int cy = CANVAS_HEIGHT / 2;
-    constexpr float base = size * 0.22f;
-    constexpr float amplitude = size * 0.22f;
+    struct Direction {
+        float x;
+        float y;
+    };
+    constexpr int direction_count = 2 * STRIPE_COUNT;
+    static const auto directions = [] {
+        std::array<Direction, direction_count> result;
+        constexpr float step = 2 * std::numbers::pi_v<float> / direction_count;
+        for (int i = 0; i < direction_count; ++i) {
+            const float angle = i * step - std::numbers::pi_v<float> / 2;
+            result[i] = {cosf(angle), sinf(angle)};
+        }
+        return result;
+    }();
 
-    const auto point = [](float angle, float radius) -> lv_point_precise_t {
-        return {static_cast<lv_value_precise_t>(lroundf(cx + cosf(angle) * radius)),
-                static_cast<lv_value_precise_t>(lroundf(cy + sinf(angle) * radius))};
+    const int cx = area.x1 + PLOT_WIDTH / 2;
+    const int cy = area.y1 + PLOT_HEIGHT / 2;
+    constexpr int base = RADIAL_AMPLITUDE;
+    const auto point = [cx, cy](const Direction &direction, int radius) -> lv_point_precise_t {
+        return {static_cast<lv_value_precise_t>(lroundf(cx + direction.x * radius)),
+                static_cast<lv_value_precise_t>(lroundf(cy + direction.y * radius))};
     };
     lv_draw_line_dsc_t line;
     lv_draw_line_dsc_init(&line);
@@ -429,40 +507,67 @@ void SpecAnalyzer::drawRadial(lv_layer_t &layer, const float *levels, bool halo)
     line.round_start = line.round_end = 1;
 
     if (!halo) {
-        const int radius = size / 8 + static_cast<int>(levels[0] * size / 16);
+        const int radius = PLOT_HEIGHT / 8 + _bands[0].level * PLOT_HEIGHT / (16 * RADIAL_AMPLITUDE);
         drawArea(layer, {cx - radius, cy - radius, cx + radius, cy + radius}, lv_color_hex(0x123341), LV_RADIUS_CIRCLE);
         drawArea(layer, {cx - radius + 5, cy - radius + 5, cx + radius - 5, cy + radius - 5},
                  lv_color_hex(0x091C29), LV_RADIUS_CIRCLE);
     }
 
-    const int points = halo ? 2 * STRIPE_COUNT : STRIPE_COUNT;
-    const float step = 2 * std::numbers::pi_v<float> / points;
+    const int direction_stride = halo ? 1 : 2;
+    const int points = direction_count / direction_stride;
     const auto band_at = [points, halo](int i) {
-        i %= points;
         const int mirrored = std::min(i, points - i - 1);
         return halo ? mirrored : mirrored * 2;
     };
     for (int i = 0; i < points; ++i) {
         const int band = band_at(i);
-        const float angle = i * step - std::numbers::pi_v<float> / 2;
-        const float next = angle + step;
+        const auto &direction = directions[i * direction_stride];
         line.color = bandColor(band, STRIPE_COUNT);
-        line.p1 = point(angle, base + (halo ? levels[band] * amplitude : 0.0f));
-        line.p2 = halo ? point(next, base + levels[band_at(i + 1)] * amplitude)
-                       : point(angle, base + 8 + levels[band] * amplitude);
-        lv_draw_line(&layer, &line);
-
         if (halo) {
+            const int next = i + 1 < points ? i + 1 : 0;
+            const int next_band = band_at(next);
+            line.p1 = point(direction, base + _bands[band].level);
+            line.p2 = point(directions[next], base + _bands[next_band].level);
+            lv_draw_line(&layer, &line);
+
             auto peak = line;
             peak.color = bandColor(band, STRIPE_COUNT, 46);
             peak.width = 2;
-            peak.p1 = point(angle, base + 12 + _peak[0][band] * amplitude);
-            peak.p2 = point(next, base + 12 + _peak[0][band_at(i + 1)] * amplitude);
+            peak.p1 = point(direction, base + 12 + _bands[band].peak);
+            peak.p2 = point(directions[next], base + 12 + _bands[next_band].peak);
             lv_draw_line(&layer, &peak);
         } else {
-            const auto peak = point(angle, base + 12 + _peak[0][band] * amplitude);
+            line.p1 = point(direction, base);
+            line.p2 = point(direction, base + 8 + _bands[band].level);
+            lv_draw_line(&layer, &line);
+
+            const auto peak = point(direction, base + 12 + _bands[band].peak);
             drawArea(layer, {peak.x - 2, peak.y - 2, peak.x + 2, peak.y + 2}, lv_color_white(), LV_RADIUS_CIRCLE);
         }
+    }
+}
+
+void SpecAnalyzer::plot_draw_cb(lv_event_t *event)
+{
+    auto *app = static_cast<SpecAnalyzer *>(lv_event_get_user_data(event));
+    auto &layer = *lv_event_get_layer(event);
+    lv_area_t area;
+    lv_obj_get_coords(app->_plot, &area);
+    switch (app->_drawn_mode) {
+    case ViewMode::MIC:
+        app->drawBars(layer, area, true);
+        break;
+    case ViewMode::BARS:
+        app->drawBars(layer, area, false);
+        break;
+    case ViewMode::RADIAL:
+        app->drawRadial(layer, area, false);
+        break;
+    case ViewMode::HALO:
+        app->drawRadial(layer, area, true);
+        break;
+    case ViewMode::COUNT:
+        break;
     }
 }
 
@@ -476,40 +581,44 @@ void SpecAnalyzer::timer_cb(lv_timer_t *timer)
     dbfs = app->_mic_dbfs;
     portEXIT_CRITICAL(&app->_input_lock);
 
+    const bool mic_test = app->_mode == ViewMode::MIC;
+    const bool bars = mic_test || app->_mode == ViewMode::BARS;
+    const int amplitude = bars ? barBaseline(mic_test) - 32 : RADIAL_AMPLITUDE;
+    BandPixels bands[STRIPE_COUNT];
     for (int i = 0; i < STRIPE_COUNT; ++i) {
-        levels[i] = powf(std::clamp((levels[i] + 90.0f) / 90.0f, 0.0f, 1.0f), 0.8f);
+        const float normalized = std::clamp((levels[i] + 90.0f) / 90.0f, 0.0f, 1.0f);
+        const float level = normalized > 0.0f ? powf(normalized, 0.8f) : 0.0f;
         float &peak = app->_peak[0][i];
-        peak = fmaxf(levels[i], peak - 0.003f - peak * 0.008f);
+        peak = fmaxf(level, peak - 0.003f - peak * 0.008f);
+        bands[i] = {static_cast<int16_t>(level * amplitude), static_cast<int16_t>(peak * amplitude)};
     }
 
-    if (app->_label_frames++ % 6 == 0) {
-        const auto color = lv_color_hex(dbfs >= -1 ? 0xFF9800 : factory_ui::ACCENT);
+    const int previous_dbfs = lv_bar_get_value(app->_mic_level);
+    if (previous_dbfs != dbfs) {
+        const bool clipping = dbfs >= -1;
+        if (clipping != (previous_dbfs >= -1)) {
+            lv_obj_set_style_bg_color(app->_mic_level, lv_color_hex(clipping ? 0xFF9800 : factory_ui::ACCENT),
+                                      LV_PART_INDICATOR);
+        }
+        lv_bar_set_value(app->_mic_level, dbfs, LV_ANIM_OFF);
+    }
+    if (app->_label_frames++ % 6 == 0 && app->_label_dbfs != dbfs) {
         lv_label_set_text_fmt(app->_mic_label, "%d dBFS", dbfs);
-        lv_obj_set_style_text_color(app->_mic_label, color, 0);
-        lv_obj_set_style_bg_color(app->_mic_level, color, LV_PART_INDICATOR);
+        if ((dbfs >= -1) != (app->_label_dbfs >= -1)) {
+            lv_obj_set_style_text_color(app->_mic_label, lv_color_hex(dbfs >= -1 ? 0xFF9800 : factory_ui::ACCENT), 0);
+        }
+        app->_label_dbfs = dbfs;
     }
-    lv_bar_set_value(app->_mic_level, dbfs, LV_ANIM_OFF);
 
-    lv_canvas_fill_bg(app->_canvas, lv_color_hex(PLOT_BACKGROUND), LV_OPA_COVER);
-    lv_layer_t layer;
-    lv_canvas_init_layer(app->_canvas, &layer);
-    switch (app->_mode) {
-    case ViewMode::MIC:
-        app->drawBars(layer, levels, true);
-        break;
-    case ViewMode::BARS:
-        app->drawBars(layer, levels, false);
-        break;
-    case ViewMode::RADIAL:
-        app->drawRadial(layer, levels, false);
-        break;
-    case ViewMode::HALO:
-        app->drawRadial(layer, levels, true);
-        break;
-    case ViewMode::COUNT:
-        break;
+    if (app->_mode != app->_drawn_mode) {
+        app->_drawn_mode = app->_mode;
+        lv_obj_invalidate(app->_plot);
+    } else if (bars) {
+        app->invalidateBars(bands, mic_test);
+    } else {
+        app->invalidateRadial(bands, app->_mode == ViewMode::HALO);
     }
-    lv_canvas_finish_layer(app->_canvas, &layer);
+    memcpy(app->_bands, bands, sizeof(bands));
 }
 
 } // namespace esp_brookesia::apps

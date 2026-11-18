@@ -136,14 +136,20 @@ esp_err_t product_codec_set_fs(uint32_t rate, uint32_t bits_cfg, i2s_slot_mode_t
     }
     if (record_dev_handle) {
         ret |= esp_codec_dev_close(record_dev_handle);
-        ret |= esp_codec_dev_set_in_gain(record_dev_handle, PRODUCT_CODEC_DEFAULT_ADC_VOLUME);
     }
 
     if (play_dev_handle) {
         ret |= esp_codec_dev_open(play_dev_handle, &fs);
     }
     if (record_dev_handle) {
-        ret |= esp_codec_dev_open(record_dev_handle, &fs);
+        esp_err_t record_status = esp_codec_dev_open(record_dev_handle, &fs);
+        if (record_status == ESP_OK) {
+            record_status = esp_codec_dev_set_in_gain(record_dev_handle, PRODUCT_CODEC_DEFAULT_ADC_VOLUME);
+            if (record_status == ESP_OK) {
+                record_status = product_codec_mic_boost_set(PRODUCT_CODEC_MIC_BOOST_DB);
+            }
+        }
+        if (ret == ESP_OK) ret = record_status;
     }
     return ret;
 }
@@ -161,6 +167,16 @@ esp_err_t product_codec_volume_set(int volume, int *volume_set)
 int product_codec_volume_get(void)
 {
     return _vloume_intensity;
+}
+
+esp_err_t product_codec_mic_boost_set(int gain_db)
+{
+    // ES8311 ADC_VOLUME (0x17) uses 0xBF for unity and 0.5 dB per step.
+    const int adc_volume_reg = 0x17;
+    const int adc_volume_unity = 0xBF;
+    ESP_RETURN_ON_FALSE(record_dev_handle, ESP_ERR_INVALID_STATE, TAG, "Recording codec unavailable");
+    ESP_RETURN_ON_FALSE(gain_db >= 0 && gain_db <= 32, ESP_ERR_INVALID_ARG, TAG, "Invalid microphone boost");
+    return esp_codec_dev_write_reg(record_dev_handle, adc_volume_reg, adc_volume_unity + 2 * gain_db);
 }
 
 esp_err_t product_codec_mute_set(bool enable)
@@ -201,7 +217,7 @@ esp_err_t product_codec_init(void)
     record_dev_handle = bsp_audio_codec_microphone_init();
     assert((record_dev_handle) && "record_dev_handle not initialized");
 
-    product_codec_set_fs(PRODUCT_CODEC_DEFAULT_SAMPLE_RATE, PRODUCT_CODEC_DEFAULT_BIT_WIDTH, PRODUCT_CODEC_DEFAULT_CHANNEL);
+    ESP_RETURN_ON_ERROR(product_codec_dev_resume(), TAG, "Configure audio codec failed");
 
     _is_audio_init = true;
 

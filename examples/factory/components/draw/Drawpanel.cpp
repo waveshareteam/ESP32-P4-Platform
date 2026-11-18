@@ -7,6 +7,7 @@
 #include "factory_phone.hpp"
 #include "factory_ui.hpp"
 #include "lvgl.h"
+#include <algorithm>
 #ifdef ESP_UTILS_LOG_TAG
 #   undef ESP_UTILS_LOG_TAG
 #endif
@@ -54,7 +55,6 @@ bool Drawpanel::run(void)
             area.y1 < factory_ui::STATUS_HEIGHT) {
         area.y1 = factory_ui::STATUS_HEIGHT;
     }
-    area.y2 -= factory_ui::GESTURE_INSET;
     const int width = lv_area_get_width(&area);
     const int height = lv_area_get_height(&area);
     ESP_UTILS_CHECK_FALSE_RETURN(width > 0 && height > 0, false, "Invalid canvas geometry");
@@ -188,7 +188,7 @@ void Drawpanel::createToolbar(int canvas_width)
     lv_obj_t *icon = factory_ui::label(clear, LV_SYMBOL_TRASH, &lv_font_montserrat_28, 0x424242);
     lv_obj_center(icon);
 
-    lv_obj_align_to(bar, _canvas, LV_ALIGN_BOTTOM_MID, 0, -bottom_gap);
+    lv_obj_align_to(bar, _canvas, LV_ALIGN_BOTTOM_MID, 0, -factory_ui::GESTURE_INSET - bottom_gap);
 }
 
 void Drawpanel::clearCanvas(void)
@@ -200,22 +200,52 @@ void Drawpanel::clearCanvas(void)
 
 void Drawpanel::drawSegment(const lv_point_t &from, const lv_point_t &to)
 {
+    constexpr int32_t stroke_width = 8;
     lv_layer_t layer;
     lv_canvas_init_layer(_canvas, &layer);
 
-    lv_draw_line_dsc_t dsc;
-    lv_draw_line_dsc_init(&dsc);
-    dsc.color = _pen_color;
-    dsc.width = 8;
-    dsc.round_start = 1;
-    dsc.round_end = 1;
-    dsc.p1.x = from.x;
-    dsc.p1.y = from.y;
-    dsc.p2.x = to.x;
-    dsc.p2.y = to.y;
-    lv_draw_line(&layer, &dsc);
+    lv_area_t dirty;
+    if (from.x == to.x && from.y == to.y) {
+        // The software renderer skips lines whose endpoints coincide.
+        constexpr int32_t radius = stroke_width / 2;
+        dirty = {from.x - radius, from.y - radius, from.x + radius - 1, from.y + radius - 1};
+        lv_draw_fill_dsc_t dot;
+        lv_draw_fill_dsc_init(&dot);
+        dot.color = _pen_color;
+        dot.radius = LV_RADIUS_CIRCLE;
+        lv_draw_fill(&layer, &dot, &dirty);
+    } else {
+        lv_draw_line_dsc_t line;
+        lv_draw_line_dsc_init(&line);
+        line.color = _pen_color;
+        line.width = stroke_width;
+        line.round_start = 1;
+        line.round_end = 1;
+        line.p1.x = from.x;
+        line.p1.y = from.y;
+        line.p2.x = to.x;
+        line.p2.y = to.y;
+        lv_draw_line(&layer, &line);
 
+        // Match LVGL's line bounds to include antialiasing and rounded ends.
+        dirty = {std::min(from.x, to.x) - stroke_width, std::min(from.y, to.y) - stroke_width,
+                 std::max(from.x, to.x) + stroke_width, std::max(from.y, to.y) + stroke_width};
+    }
+
+    // Finish rasterizing without the canvas helper invalidating its entire image.
+    lv_display_t *display = lv_obj_get_display(_canvas);
+    lv_display_enable_invalidation(display, false);
     lv_canvas_finish_layer(_canvas, &layer);
+    lv_display_enable_invalidation(display, true);
+
+    lv_area_t canvas_coords;
+    lv_obj_get_coords(_canvas, &canvas_coords);
+    lv_area_move(&dirty, canvas_coords.x1, canvas_coords.y1);
+    dirty.x1 = std::max(dirty.x1, canvas_coords.x1);
+    dirty.y1 = std::max(dirty.y1, canvas_coords.y1);
+    dirty.x2 = std::min(dirty.x2, canvas_coords.x2);
+    dirty.y2 = std::min(dirty.y2, canvas_coords.y2);
+    lv_obj_invalidate_area(_canvas, &dirty);
 }
 
 void Drawpanel::canvas_event_cb(lv_event_t *e)
@@ -230,7 +260,7 @@ void Drawpanel::canvas_event_cb(lv_event_t *e)
         app->_stroke_active = false;
         return;
     }
-    if (code != LV_EVENT_PRESSED && code != LV_EVENT_PRESSING) {
+    if (code != LV_EVENT_PRESSED && (code != LV_EVENT_PRESSING || !app->_stroke_active)) {
         return;
     }
 
@@ -249,10 +279,13 @@ void Drawpanel::canvas_event_cb(lv_event_t *e)
     point.x -= coords.x1;
     point.y -= coords.y1;
 
-    if (code == LV_EVENT_PRESSED || !app->_stroke_active) {
-        // A tap leaves a dot; a drag continues from it
+    if (code == LV_EVENT_PRESSED) {
+        // Reserve bottom-edge presses for the system's swipe-up gesture.
+        app->_stroke_active = lv_area_get_height(&coords) - point.y >= factory_ui::GESTURE_INSET;
+        if (!app->_stroke_active) {
+            return;
+        }
         app->drawSegment(point, point);
-        app->_stroke_active = true;
     } else if (point.x != app->_last_point.x || point.y != app->_last_point.y) {
         app->drawSegment(app->_last_point, point);
     }

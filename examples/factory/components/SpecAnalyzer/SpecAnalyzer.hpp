@@ -38,19 +38,32 @@ namespace esp_brookesia::apps
         static constexpr uint16_t MIC_COUNT = 1;          // Only one microphone is visualized
         static constexpr uint16_t STRIPE_COUNT = 48;      // Bar count for the visualizer
         static constexpr int PANEL_PAD = 24;
-        static constexpr uint16_t CANVAS_WIDTH = factory_ui::WIDTH - 2 * (factory_ui::GUTTER + PANEL_PAD);
-        static constexpr uint16_t CANVAS_HEIGHT = 560;
+        static constexpr int PLOT_WIDTH = factory_ui::WIDTH - 2 * (factory_ui::GUTTER + PANEL_PAD);
+        static constexpr int PLOT_HEIGHT = 560;
+        static constexpr int BAR_PITCH = (PLOT_WIDTH - 40) / STRIPE_COUNT;
+        static constexpr int BAR_LEFT = (PLOT_WIDTH - BAR_PITCH * STRIPE_COUNT) / 2;
+        static constexpr int RADIAL_AMPLITUDE = PLOT_HEIGHT * 22 / 100;
+        static constexpr int MIC_FLOOR = -90;
 
         enum class ViewMode { MIC, BARS, RADIAL, HALO, COUNT };
         static constexpr int MODE_COUNT = static_cast<int>(ViewMode::COUNT);
 
+        struct BandPixels {
+            int16_t level;
+            int16_t peak;
+            bool operator==(const BandPixels &) const = default;
+        };
+
         lv_obj_t *_root = nullptr;
-        lv_obj_t *_canvas;
+        lv_obj_t *_plot;
         lv_obj_t *_mic_label;
         lv_obj_t *_mic_level = nullptr;
         lv_obj_t *_frequency_axis = nullptr;
         lv_obj_t *_mode_buttons[MODE_COUNT] = {};
-        ViewMode _mode = ViewMode::MIC;
+        ViewMode _mode = ViewMode::COUNT;
+        ViewMode _drawn_mode = ViewMode::COUNT;
+        BandPixels _bands[STRIPE_COUNT] = {};
+        int _label_dbfs = MIC_FLOOR;
         unsigned _label_frames = 0;
         lv_timer_t *_timer;
         TaskHandle_t _audio_task_handle;
@@ -66,15 +79,17 @@ namespace esp_brookesia::apps
         float _peak[MIC_COUNT][STRIPE_COUNT];                                     // Peak marker position
         float _smooth_spectrum[MIC_COUNT][STRIPE_COUNT];                          // Smoothed display values
         portMUX_TYPE _input_lock = portMUX_INITIALIZER_UNLOCKED;
-        int _mic_dbfs = -90;
-
-        uint16_t *_draw_buf; // PSRAM-preferred RGB565 canvas buffer
+        int _mic_dbfs = MIC_FLOOR;
 
         bool startCapture();
         void stopCapture();
         void showMode(int index);
-        void drawBars(lv_layer_t &layer, const float *levels, bool mic_test) const;
-        void drawRadial(lv_layer_t &layer, const float *levels, bool halo) const;
+        void invalidateBars(const BandPixels *bands, bool mic_test);
+        void invalidateRadial(const BandPixels *bands, bool halo);
+        void drawBars(lv_layer_t &layer, const lv_area_t &area, bool mic_test) const;
+        void drawRadial(lv_layer_t &layer, const lv_area_t &area, bool halo) const;
+        static int barBaseline(bool mic_test);
+        static void plot_draw_cb(lv_event_t *event);
         static void view_gesture_cb(lv_event_t *event);
         static void view_page_cb(lv_event_t *event);
         static void audio_fft_task(void *pvParameters);

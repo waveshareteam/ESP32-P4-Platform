@@ -6,9 +6,9 @@
 #include "factory_phone.hpp"
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstring>
-#include <math.h>
 #include <string>
 #include <vector>
 #include <unistd.h>
@@ -41,6 +41,9 @@ static constexpr int KEY_RADIUS = 24;
 static constexpr int READOUT_PADDING = 24;
 static constexpr int READOUT_GAP = 8;
 static constexpr int KEYPAD_ROWS = 5;
+// Keep keypad input within the precision of a double.
+static constexpr int MAX_NUMBER_DIGITS = 15;
+static constexpr int MAX_FORMULA_CHARS = 64;
 
 struct KeyRow {
     const char *map[5];
@@ -77,6 +80,19 @@ static void fit_readout(lv_obj_t *label)
     lv_obj_set_style_transform_pivot_x(label, lv_pct(100), 0);
     lv_obj_set_style_transform_pivot_y(label, lv_pct(50), 0);
     lv_obj_align(label, LV_ALIGN_RIGHT_MID, 0, 0);
+}
+
+static void format_result(double value, char *out, size_t size)
+{
+    if (!std::isfinite(value)) {
+        std::snprintf(out, size, "Error");
+        return;
+    }
+
+    std::snprintf(out, size, "%.15g", value == 0 ? 0.0 : value);
+    if (std::strchr(out, 'e')) {
+        std::snprintf(out, size, "%.9g", value);
+    }
 }
 
 namespace esp_brookesia::apps {
@@ -233,20 +249,10 @@ bool Calculator::close(void)
 bool Calculator::isStartZero(void)
 {
     const char *text = lv_label_get_text(formula_label);
-    int text_len = strlen(text);
-
-    if ((text_len == 1) && (text[0] == '0')) {
-        // LOG_I(TAG, "start 0");
-        return true;
-    }
-    if ((text[text_len - 1] == '0') &&
-            (text[text_len - 2] > '9') &&
-            (text[text_len - 2] < '0')) {
-        // LOG_I(TAG, "start 0");
-        return true;
-    }
-
-    return false;
+    const int text_len = strlen(text);
+    return text_len > 0 && text[text_len - 1] == '0' &&
+           (text_len == 1 || (text[text_len - 2] != '.' &&
+                              !std::isdigit(static_cast<unsigned char>(text[text_len - 2]))));
 }
 
 bool Calculator::isStartNum(void)
@@ -293,6 +299,17 @@ bool Calculator::isLegalDot(void)
     return true;
 }
 
+int Calculator::numberDigits(void)
+{
+    const char *text = lv_label_get_text(formula_label);
+    int digits = 0;
+    for (int i = static_cast<int>(strlen(text)) - 1;
+            i >= 0 && (std::isdigit(static_cast<unsigned char>(text[i])) || text[i] == '.'); --i) {
+        digits += text[i] != '.';
+    }
+    return digits;
+}
+
 double Calculator::calculate(const char *input)
 {
     std::vector<double> stk;
@@ -306,11 +323,11 @@ double Calculator::calculate(const char *input)
         if (input[i] == '.') {
             dot_flag = true;
             dot_len = 0;
-        } else if (isdigit(input[i])) {
+        } else if (std::isdigit(static_cast<unsigned char>(input[i]))) {
             if (!dot_flag) {
-                num = num * 10 + input[i] - '0';
+                num = num * 10 + (input[i] - '0');
             } else {
-                num += (input[i] - '0') / pow(10.0, ++dot_len);
+                num += (input[i] - '0') / std::pow(10.0, ++dot_len);
             }
         } else if (input[i] == '%') {
             num /= 100.0;
@@ -331,7 +348,7 @@ double Calculator::calculate(const char *input)
                 if (num != 0) {
                     stk.back() /= num;
                 } else {
-                    return 0;
+                    return NAN;
                 }
             }
             num = 0;
@@ -353,15 +370,15 @@ double Calculator::calculate(const char *input)
                 if (num != 0) {
                     stk.back() /= num;
                 } else {
-                    return 0;
+                    return NAN;
                 }
             }
             num = 0;
         }
     }
 
-    for (int i = 0; i < stk.size(); i++) {
-        num += stk.at(i);
+    for (double term : stk) {
+        num += term;
     }
     // LOG_I(TAG, "cal: %s = %f", input, num);
 
@@ -402,7 +419,6 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         const char *key = lv_buttonmatrix_get_button_text(row, selected);
         bool calculate_flag = false;
         bool equal_flag = false;
-        double res_num;
         char res_str[32];
 
         if (lv_obj_get_style_text_font(app->formula_label, LV_PART_MAIN) == LABEL_FONT_SMALL) {
@@ -444,12 +460,8 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         case 7:
         case 11:
         case 15:
-            // Need number or percent
-            if (app->isStartPercent() ||
-                    app->isStartNum()) {
-                // Firstly input "+, -"
-                if (((btn_id == 7) || (btn_id == 11)) &&
-                        (app->isStartZero())) {
+            if (app->formula_len < MAX_FORMULA_CHARS && (app->isStartPercent() || app->isStartNum())) {
+                if ((btn_id == 7 || btn_id == 11) && app->formula_len == 1 && app->isStartZero()) {
                     // Remove "0"
                     lv_label_cut_text(
                         app->formula_label,
@@ -478,7 +490,10 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         case 13:
         case 14:
         case 16:
-            // Remove First "0"
+            if (app->formula_len >= MAX_FORMULA_CHARS || app->numberDigits() >= MAX_NUMBER_DIGITS ||
+                    app->isStartPercent()) {
+                break;
+            }
             if (app->isStartZero()) {
                 lv_label_cut_text(
                     app->formula_label,
@@ -486,19 +501,12 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
                     1
                 );
             }
-            // Except "%"
-            if (!app->isStartPercent()) {
-                lv_label_ins_text(
-                    app->formula_label,
-                    app->formula_len++,
-                    key
-                );
-                calculate_flag = true;
-            }
+            lv_label_ins_text(app->formula_label, app->formula_len++, key);
+            calculate_flag = true;
             break;
         // "."
         case 17:
-            if (app->isLegalDot() && app->isStartNum()) {
+            if (app->formula_len < MAX_FORMULA_CHARS && app->isLegalDot() && app->isStartNum()) {
                 lv_label_ins_text(
                     app->formula_label,
                     app->formula_len++,
@@ -513,21 +521,8 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
         if (calculate_flag) {
             lv_obj_set_style_text_font(app->formula_label, LABEL_FONT_BIG, 0);
 
-            res_num = app->calculate(lv_label_get_text(app->formula_label));
-            if (int(res_num) == res_num) {
-                snprintf(res_str, sizeof(res_str) - 1, "%ld", long(res_num));
-            } else {
-                // Limit decimal places to fit small screens
-                snprintf(res_str, sizeof(res_str) - 1, "%.3f", res_num);
-                // Remove trailing zeros
-                char *end = res_str + strlen(res_str) - 1;
-                while (end > res_str && *end == '0') {
-                    *end-- = '\0';
-                }
-                if (end > res_str && *end == '.') {
-                    *end = '\0';
-                }
-            }
+            const double result = app->calculate(lv_label_get_text(app->formula_label));
+            format_result(result, res_str, sizeof(res_str));
             lv_label_set_text_fmt(app->result_label, "= %s", res_str);
             lv_obj_set_style_text_font(app->result_label, LABEL_FONT_SMALL, 0);
         }
@@ -542,9 +537,11 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
             lv_textarea_set_cursor_pos(app->history_label, LV_TEXTAREA_CURSOR_LAST);
             lv_textarea_add_text(app->history_label, entry.c_str());
 
-            lv_label_set_text_fmt(app->formula_label, "%s", res_str);
+            // Only numbers the keypad can enter become the next editable formula.
+            const bool can_continue = std::strchr(res_str, 'e') == nullptr && std::strcmp(res_str, "Error") != 0;
+            lv_label_set_text(app->formula_label, can_continue ? res_str : "0");
             lv_obj_set_style_text_font(app->formula_label, LABEL_FONT_SMALL, 0);
-            app->formula_len = strlen(res_str);
+            app->formula_len = strlen(lv_label_get_text(app->formula_label));
         }
         lv_obj_set_style_text_color(app->formula_label,
                                     lv_color_hex(equal_flag ? SECONDARY_TEXT_COLOR : 0xFFFFFF), 0);

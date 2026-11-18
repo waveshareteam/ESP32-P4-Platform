@@ -113,7 +113,7 @@ extern "C" void app_main(void)
 
         auto app2 = esp_brookesia::apps::Calculator::requestInstance(true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app2), "Start Calculator failed");
-        auto app = esp_brookesia::apps::Drawpanel::requestInstance(true);
+        auto app = esp_brookesia::apps::Drawpanel::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app), "Start Drawpanel failed");
 
         auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance(true);

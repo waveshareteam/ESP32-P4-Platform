@@ -34,6 +34,7 @@ namespace esp_brookesia::apps
         bool isStartNum(void);
         bool isStartPercent(void);
         bool isLegalDot(void);
+        int numberDigits(void);
         double calculate(const char *input);
 
         int formula_len;

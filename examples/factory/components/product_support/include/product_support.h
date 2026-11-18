@@ -22,6 +22,7 @@ extern "C" {
 #define PRODUCT_CODEC_DEFAULT_SAMPLE_RATE    (16000)
 #define PRODUCT_CODEC_DEFAULT_BIT_WIDTH      (16)
 #define PRODUCT_CODEC_DEFAULT_ADC_VOLUME     (24.0)
+#define PRODUCT_CODEC_MIC_BOOST_DB            (18)
 #define PRODUCT_CODEC_DEFAULT_CHANNEL        (2)
 #define PRODUCT_CODEC_DEFAULT_VOLUME         (80)
 
@@ -66,6 +67,9 @@ esp_err_t product_codec_volume_set(int volume, int *volume_set);
  *   - volume: volume get
  */
 int product_codec_volume_get(void);
+
+/** Set the ES8311 ADC digital volume in dB, with 0 dB as unity gain. */
+esp_err_t product_codec_mic_boost_set(int gain_db);
 
 /**
  * @brief Stop I2S function.

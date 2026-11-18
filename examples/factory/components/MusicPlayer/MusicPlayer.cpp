@@ -129,8 +129,8 @@ void MusicPlayer::tick_cb(lv_timer_t *timer)
     const bool playing = state == AUDIO_PLAYER_STATE_PLAYING;
     if (playing && self->_last_playing) self->_elapsed_ms += (now - self->_last_tick_us) / 1000;
     self->_last_tick_us = now;
+    if (playing != self->_last_playing) self->_view.playing(playing);
     self->_last_playing = playing;
-    self->_view.playing(playing);
     self->_view.elapsed(static_cast<uint32_t>(self->_elapsed_ms / 1000));
     if (playing) self->_seen_playing = true;
     if (state == AUDIO_PLAYER_STATE_IDLE && self->_seen_playing && self->_want_playing) {
