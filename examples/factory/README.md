@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Run the reference Brookesia icon launcher on the 800 x 1280 rectangular portrait display, with calculator, drawing, spectrum, music, camera, video and settings apps. The music view shows the bundled audio file names and provides playback, pause, track selection and a playlist.
+Run the reference Brookesia icon launcher on a rectangular portrait display. Calculator, Draw, Spectrum, Music, Video and Settings use layouts adapted from the Knob factory UI.
 
 ## Hardware Required
 
@@ -12,7 +12,7 @@ An ESP32-P4 board with PSRAM and the display, codec, camera and storage required
 
 ## How to Run
 
-Use the factory ESP-IDF version in [product.json](../../.github/product.json), select the actual LCD in menuconfig and build in this directory. The existing defaults select rev3_x silicon, a 10.1-inch 800 x 1280 display and 32 MB flash.
+Use the factory ESP-IDF version in [product.json](../../.github/product.json) and select the attached LCD and the board's flash capacity in menuconfig. The defaults are a rev3_x chip, the 800 x 1280 10.1-DSI-TOUCH-A and 32 MB flash. For the 720 x 1280 7-DSI-TOUCH-A, select that panel in the BSP configuration.
 
 ```bash
 idf.py set-target esp32p4
@@ -22,11 +22,11 @@ idf.py build flash monitor
 
 ## Expected Result
 
-The launcher shows four icons per page over the Brookesia wallpaper, with horizontal paging and press animations; settings uses blue controls, while camera and video retain their full-screen views. The images below are software-rendered UI previews.
+Swipe up from the bottom edge to return to the launcher. In Brookesia views, hold after swiping up to open recent apps; use a page title with a back arrow to return from a settings or playlist subpage.
 
-| Launcher | Settings |
+| Launcher preview | Brightness control preview |
 | --- | --- |
-| ![800 x 1280 factory home](../../docs/images/factory-home-800x1280.png) | ![800 x 1280 factory settings](../../docs/images/factory-settings-800x1280.png) |
+| ![800 x 1280 factory home](../../docs/images/factory-home-800x1280.png) | ![720 x 1280 brightness control](../../docs/images/factory-display-720x1280.png) |
 
 ## Troubleshooting
 

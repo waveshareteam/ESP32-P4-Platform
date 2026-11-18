@@ -4,7 +4,7 @@
 
 ## 功能
 
-在 800×1280 直角竖屏上运行参考工程的 Brookesia 图标桌面，提供计算器、画板、频谱、音乐、摄像头、视频和设置应用。音乐页直接显示内置音频的文件名，并提供播放、暂停、切歌和曲目列表。
+在直角竖屏运行参考工程的 Brookesia 图标桌面。计算器、画板、频谱、音乐、视频和设置沿用旋钮出厂工程的界面布局，并按竖屏尺寸调整。
 
 ## 硬件需求
 
@@ -12,7 +12,7 @@
 
 ## 怎么运行
 
-使用 [product.json](../../.github/product.json) 中指定的出厂工程 ESP-IDF 版本，在 menuconfig 选择实际 LCD 后于本目录构建。现有默认配置选择 rev3_x 芯片、10.1 英寸 800 x 1280 显示屏和 32 MB Flash。
+使用 [product.json](../../.github/product.json) 中指定的出厂工程 ESP-IDF 版本，在 menuconfig 选择 LCD 和实际 Flash 容量。默认配置为 rev3_x 芯片、800×1280 的 10.1-DSI-TOUCH-A 和 32 MB Flash。连接 720×1280 的 7-DSI-TOUCH-A 时，在 BSP 配置中选择对应面板。
 
 ```bash
 idf.py set-target esp32p4
@@ -22,11 +22,11 @@ idf.py build flash monitor
 
 ## 预期现象
 
-桌面在 Brookesia 壁纸上每页显示四个图标，支持横向翻页和按压动画；设置页使用蓝色控件，摄像头和视频保持全屏预览。下图为软件渲染的界面预览。
+从屏幕底边向上划可返回桌面。在 Brookesia 页面中，上划后停留可打开最近任务；设置和曲目列表的子页可点带返回箭头的标题回到上一级。
 
-| 启动器 | 设置 |
+| 启动器预览 | 亮度调节预览 |
 | --- | --- |
-| ![800×1280 出厂主页](../../docs/images/factory-home-800x1280.png) | ![800×1280 出厂设置](../../docs/images/factory-settings-800x1280.png) |
+| ![800×1280 出厂主页](../../docs/images/factory-home-800x1280.png) | ![720×1280 亮度调节](../../docs/images/factory-display-720x1280.png) |
 
 ## 常见问题
 

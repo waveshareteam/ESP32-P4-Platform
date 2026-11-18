@@ -40,7 +40,7 @@ generated output:
 | `examples/esp-idf/14_lvgl_demo_v9/components/lvgl_demo_support` | Product glue for the LVGL demo, including display behavior and local helpers where applicable |
 | `examples/esp-idf/17_simple_video_server/components/example_video_common` | Shared video initialization/JPEG helper with target-conditional sources |
 | `examples/esp-idf/18_esp_brookesia_phone/components` | Vendored Brookesia application stack used by the phone demo, including local override paths |
-| `examples/factory/components/factory_ui` | Shared LVGL portrait views; the dark-card and blue-control style follows the [Knob factory UI](https://github.com/waveshareteam/ESP32-P4-Knob-Touch-AMOLED-1.75/tree/7671170de4f5fe04ae9c9a9273f6b6119eb7fb0b/examples/factory), with rectangular 800 x 1280 geometry |
+| `examples/factory/components/factory_ui` | Shared LVGL portrait views; the dark-card and blue-control style follows the [Knob factory UI](https://github.com/waveshareteam/ESP32-P4-Knob-Touch-AMOLED-1.75/tree/7671170de4f5fe04ae9c9a9273f6b6119eb7fb0b/examples/factory), with rectangular 720 x 1280 and 800 x 1280 layouts |
 | `examples/factory/components/json` | Bridges Brookesia's json dependency to the managed IDF 6 cJSON component |
 
 The former local BSP copies are removed. Reusable board support comes

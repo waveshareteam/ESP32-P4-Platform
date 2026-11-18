@@ -38,7 +38,7 @@ Hosted 运行时相关变更还须完成
 | `examples/esp-idf/14_lvgl_demo_v9/components/lvgl_demo_support` | LVGL demo 的产品 glue，适用时包含显示行为和本地 helper |
 | `examples/esp-idf/17_simple_video_server/components/example_video_common` | 带 target 条件源文件的共享视频初始化/JPEG helper |
 | `examples/esp-idf/18_esp_brookesia_phone/components` | Phone demo 使用的 Brookesia 应用栈，包含本地 override path |
-| `examples/factory/components/factory_ui` | 800×1280 竖屏的 LVGL 公共界面；沿用 [Knob 出厂 UI](https://github.com/waveshareteam/ESP32-P4-Knob-Touch-AMOLED-1.75/tree/7671170de4f5fe04ae9c9a9273f6b6119eb7fb0b/examples/factory) 的深色卡片与蓝色控件风格，按矩形重新排版 |
+| `examples/factory/components/factory_ui` | 720×1280 和 800×1280 竖屏的 LVGL 公共界面；沿用 [Knob 出厂 UI](https://github.com/waveshareteam/ESP32-P4-Knob-Touch-AMOLED-1.75/tree/7671170de4f5fe04ae9c9a9273f6b6119eb7fb0b/examples/factory) 的深色卡片与蓝色控件风格，按矩形重新排版 |
 | `examples/factory/components/json` | 为 Brookesia 的 json 依赖接入 IDF 6 托管 cJSON 组件 |
 
 原有本地 BSP 副本已移除。可复用的板级支持来自在线
