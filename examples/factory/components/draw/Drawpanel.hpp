@@ -62,7 +62,7 @@ private:
     lv_point_t _last_point = {};
     bool _stroke_active = false;
 
-    void createToolbar(const lv_area_t &area);
+    void createToolbar(int canvas_width);
     void clearCanvas(void);
     void drawSegment(const lv_point_t &from, const lv_point_t &to);
     static void canvas_event_cb(lv_event_t *e);
