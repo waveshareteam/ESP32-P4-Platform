@@ -12,7 +12,9 @@
 #include "./ui/AboutPage.hpp"
 #include "./ui/DisplayPage.hpp"
 #include "./ui/SoundPage.hpp"
+#if CONFIG_ESP_WIFI_REMOTE_ENABLED && CONFIG_ESP_HOSTED_ENABLED
 #include "./ui/WlanPage.hpp"
+#endif
 
 namespace esp_brookesia::apps
 {
@@ -59,7 +61,9 @@ namespace esp_brookesia::apps
         void event_handler(lv_event_t *e);
         void open_page(const char *page_name);
 
+#if CONFIG_ESP_WIFI_REMOTE_ENABLED && CONFIG_ESP_HOSTED_ENABLED
         WlanPage wlan;
+#endif
         
     private:
         static Settings *_instance;

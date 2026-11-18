@@ -25,6 +25,9 @@ inline esp_brookesia::systems::phone::Stylesheet factory_stylesheet()
     status.main.text_font = gui::StyleFont::SIZE(24);
     status.flags.enable_battery_icon = 0;
     status.flags.enable_battery_label = 0;
+#if !CONFIG_ESP_HOSTED_ENABLED || !CONFIG_ESP_WIFI_REMOTE_ENABLED
+    status.flags.enable_wifi_icon = 0;
+#endif
     status.icon_common_size = gui::StyleSize::SQUARE(32);
     style.display.flags.enable_navigation_bar = 0;
     auto &gesture = style.manager.gesture;

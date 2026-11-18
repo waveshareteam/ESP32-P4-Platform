@@ -14,8 +14,19 @@
 #include "esp_lib_utils.h"
 
 #include "esp_ota_ops.h"
+#include "esp_event.h"
+#include "esp_netif.h"
 #include "nvs_flash.h"
+
+#if CONFIG_ESP_HOSTED_ENABLED && CONFIG_ESP_WIFI_REMOTE_ENABLED
 #include "ui/wifi_service.hpp"
+#endif
+#if CONFIG_EXAMPLE_USE_INTERNAL_ETHERNET
+#include "Ethernet.hpp"
+#endif
+#if CONFIG_FACTORY_ENABLE_XIAOZHI
+#include "XiaozhiApp.hpp"
+#endif
 
 #include "product_support.h"
 #include "factory_ui.hpp"
@@ -56,9 +67,15 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(bsp_spiffs_mount());
     ESP_LOGI(ESP_UTILS_LOG_TAG, "SPIFFS mount successfully");
 
+#if CONFIG_FACTORY_ENABLE_AUDIO
     ESP_ERROR_CHECK(product_codec_init());
-
     ESP_ERROR_CHECK(product_codec_volume_set(PRODUCT_CODEC_DEFAULT_VOLUME, NULL));
+#endif
+
+#if (CONFIG_ESP_HOSTED_ENABLED && CONFIG_ESP_WIFI_REMOTE_ENABLED) || CONFIG_EXAMPLE_USE_INTERNAL_ETHERNET
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+#endif
 
     ESP_UTILS_LOGI("Display ESP-Brookesia phone demo");
 
@@ -116,16 +133,28 @@ extern "C" void app_main(void)
         auto app = esp_brookesia::apps::Drawpanel::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app), "Start Drawpanel failed");
 
+#if CONFIG_FACTORY_ENABLE_AUDIO
         auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance(true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app1), "Start SpecAnalyzer failed");
         auto app5 = esp_brookesia::apps::MusicPlayer::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app5), "Start MusicPlayer failed");
+#endif
         auto camera_app = esp_brookesia::apps::Camera::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(camera_app), "Start Camera failed");
+#if CONFIG_FACTORY_ENABLE_SD_CARD
         auto video_player_app = esp_brookesia::apps::VideoPlayer::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(video_player_app), "Start VideoPlayer failed");
+#endif
         auto app6 = esp_brookesia::apps::Settings::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app6), "Start Settings failed");
+#if CONFIG_EXAMPLE_USE_INTERNAL_ETHERNET
+        auto *ethernet = esp_brookesia::apps::Ethernet::requestInstance();
+        ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(ethernet), "Install Ethernet failed");
+#endif
+#if CONFIG_FACTORY_ENABLE_XIAOZHI
+        auto *xiaozhi = esp_brookesia::apps::XiaozhiApp::requestInstance(true, false);
+        ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(xiaozhi), "Install Xiaozhi failed");
+#endif
 
         factory_launcher_wallpaper(phone->getDisplay().getMainScreenObject());
 
@@ -133,7 +162,12 @@ extern "C" void app_main(void)
         ESP_LOGI(ESP_UTILS_LOG_TAG, "Factory launcher ready (%dx%d)",
                  static_cast<int>(lv_display_get_horizontal_resolution(disp)),
                  static_cast<int>(lv_display_get_vertical_resolution(disp)));
+#if CONFIG_ESP_HOSTED_ENABLED && CONFIG_ESP_WIFI_REMOTE_ENABLED
         if (!factory_wifi::start()) ESP_LOGE(ESP_UTILS_LOG_TAG, "Wi-Fi worker unavailable");
+#endif
+#if CONFIG_EXAMPLE_USE_INTERNAL_ETHERNET
+        if (!factory_ethernet::start()) ESP_LOGE(ESP_UTILS_LOG_TAG, "Ethernet worker unavailable");
+#endif
 
         /* Create a timer to update the clock */
         lv_timer_create([](lv_timer_t *t) {
@@ -151,6 +185,7 @@ extern "C" void app_main(void)
                 "Refresh status bar failed"
             );
 
+#if CONFIG_ESP_HOSTED_ENABLED && CONFIG_ESP_WIFI_REMOTE_ENABLED
             const bool connected = factory_wifi::snapshot().ip[0] != '\0';
             StatusBar::WifiState wifi_state = connected ?
                 StatusBar::WifiState::SIGNAL_3 :
@@ -160,6 +195,7 @@ extern "C" void app_main(void)
                 phone->getDisplay().getStatusBar()->setWifiIconState(wifi_state),
                 "Refresh status bar failed"
             );
+#endif
         }, 1000, phone);
     }
 

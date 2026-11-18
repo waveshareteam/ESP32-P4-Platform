@@ -8,6 +8,10 @@ idf_component_register(
     PRIV_REQUIRES
         app_update
         nvs_flash
+        esp_event
+        esp_netif
+        Ethernet
+        XiaozhiApp
         draw
         SpecAnalyzer
         MusicPlayer

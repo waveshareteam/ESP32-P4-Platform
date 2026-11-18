@@ -54,16 +54,19 @@ namespace esp_brookesia::apps
     void Settings::create_settings_ui()
     {
         lv_obj_clean(lv_scr_act());
-        const auto wifi = factory_wifi::snapshot();
-        const char *network = wifi.ip[0] ? wifi.ssid : wifi.enabled ? "Not connected" : "Off";
-        char volume[8];
         char brightness[8];
         char firmware[48];
-        snprintf(volume, sizeof(volume), "%d%%", product_codec_volume_get());
         snprintf(brightness, sizeof(brightness), "%d%%", product_display_brightness_get());
         snprintf(firmware, sizeof(firmware), "Version %s", esp_app_get_description()->version);
         auto view = factory_ui::page(lv_scr_act(), "Settings", nullptr, this);
+#if CONFIG_ESP_WIFI_REMOTE_ENABLED && CONFIG_ESP_HOSTED_ENABLED
+        const auto wifi = factory_wifi::snapshot();
+        const char *network = wifi.ip[0] ? wifi.ssid : wifi.enabled ? "Not connected" : "Off";
         factory_ui::row(view.content, &WIFI, "Wi-Fi", network, event_handler_cb, this, 1);
+#endif
+#if CONFIG_FACTORY_ENABLE_AUDIO
+        char volume[8];
+        snprintf(volume, sizeof(volume), "%d%%", product_codec_volume_get());
         auto *levels = factory_ui::plain(view.content);
         lv_obj_set_size(levels, lv_pct(100), 142);
         lv_obj_set_flex_flow(levels, LV_FLEX_FLOW_ROW);
@@ -78,6 +81,9 @@ namespace esp_brookesia::apps
         };
         add_level(&sound, "Sound", volume, 2);
         add_level(&backlights, "Display", brightness, 3);
+#else
+        factory_ui::row(view.content, &backlights, "Display", brightness, event_handler_cb, this, 3);
+#endif
         factory_ui::row(view.content, &info, "About", firmware, event_handler_cb, this, 4);
         list1 = view.root;
     }
@@ -125,6 +131,7 @@ namespace esp_brookesia::apps
 
         if (strcmp(page_name, "WLAN") == 0)
         {
+#if CONFIG_ESP_WIFI_REMOTE_ENABLED && CONFIG_ESP_HOSTED_ENABLED
             active_page = ActivePage::Wlan;
             wlan.open(lv_screen_active(), [](void *context) {
                 auto *settings = static_cast<Settings *>(context);
@@ -133,12 +140,15 @@ namespace esp_brookesia::apps
                     settings->run();
                 }
             }, this);
+#endif
         }
         else if (strcmp(page_name, "Sound") == 0)
         {
+#if CONFIG_FACTORY_ENABLE_AUDIO
             active_page = ActivePage::Sound;
             auto sound = SoundPage::requestInstance(true, false);
             sound->run();
+#endif
         }
         else if (strcmp(page_name, "Display") == 0)
         {
@@ -209,7 +219,9 @@ namespace esp_brookesia::apps
         switch (active_page)
         {
         case ActivePage::Wlan:
+#if CONFIG_ESP_WIFI_REMOTE_ENABLED && CONFIG_ESP_HOSTED_ENABLED
             wlan.close();
+#endif
             break;
         case ActivePage::Sound:
             SoundPage::requestInstance(true, false)->close();

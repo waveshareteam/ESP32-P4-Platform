@@ -13,3 +13,8 @@ project(esp-brookesia)
 # variadic-comma diagnostics. Other components keep the IDF 6.1 default.
 idf_component_get_property(FACTORY_BOOST_LIBRARY espressif__esp-boost COMPONENT_LIB)
 target_compile_options(${FACTORY_BOOST_LIBRARY} PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:-std=gnu++23>")
+
+# The pinned MCP SDK uses a bounded strncpy, which GCC 15 reports at -O2.
+# Match the Knob build and keep the diagnostic enabled as a warning.
+idf_component_get_property(FACTORY_MCP_LIBRARY espressif__mcp-c-sdk COMPONENT_LIB)
+target_compile_options(${FACTORY_MCP_LIBRARY} PRIVATE "-Wno-error=stringop-truncation")

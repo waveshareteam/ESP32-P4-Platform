@@ -55,6 +55,7 @@ dist/
 .env.*
 
 # Firmware binaries and archives generated locally
+/firmware/.candidates/
 *.elf
 *.map
 *.uf2
