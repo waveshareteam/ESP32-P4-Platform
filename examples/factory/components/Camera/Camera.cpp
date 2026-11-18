@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "Camera.hpp"
+#include "factory_media_status.hpp"
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
 
@@ -129,20 +130,13 @@ namespace esp_brookesia::apps
         lv_obj_clean(lv_scr_act());
         lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
         lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
-        _status_label = lv_label_create(lv_scr_act());
-        lv_label_set_text(_status_label, "Camera");
-        lv_obj_set_width(_status_label, BSP_LCD_H_RES);
-        lv_obj_set_style_text_align(_status_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-        lv_obj_set_style_text_font(_status_label, &lv_font_montserrat_30, LV_PART_MAIN);
-        lv_obj_set_style_text_color(_status_label, lv_color_white(), LV_PART_MAIN);
-        lv_obj_align(_status_label, LV_ALIGN_CENTER, 0, 0);
+        factory_ui::show_media_status(_status_view, LV_SYMBOL_IMAGE, "Opening camera");
         bsp_display_unlock();
 
         if (!startPreview()) {
             bsp_display_lock(-1);
-            if (_status_label) {
-                lv_label_set_text(_status_label, "camera error");
-            }
+            factory_ui::show_media_status(_status_view, LV_SYMBOL_WARNING, "Camera unavailable",
+                                          "Could not start camera preview. Reopen Camera to retry.");
             bsp_display_unlock();
         }
 
@@ -163,9 +157,9 @@ namespace esp_brookesia::apps
         requestStopPreview();
 
         bsp_display_lock(-1);
-        if (_status_label) {
-            lv_obj_del(_status_label);
-            _status_label = nullptr;
+        if (_status_view) {
+            lv_obj_delete(_status_view);
+            _status_view = nullptr;
         }
         bsp_display_unlock();
         return true;
@@ -193,6 +187,11 @@ namespace esp_brookesia::apps
     bool Camera::resume()
     {
         ESP_UTILS_LOGD("Resume");
+        factory_ui::show_media_status(_status_view, LV_SYMBOL_IMAGE, "Opening camera");
+        if (!startPreview()) {
+            factory_ui::show_media_status(_status_view, LV_SYMBOL_WARNING, "Camera unavailable",
+                                          "Could not start camera preview. Reopen Camera to retry.");
+        }
         return true;
     }
 
@@ -499,9 +498,7 @@ namespace esp_brookesia::apps
             return false;
         }
 
-        int dx = abs((int)points[0].x - (int)_touch_start_x);
-        int dy = abs((int)points[0].y - (int)_touch_start_y);
-        return dx > SWIPE_EXIT_THRESHOLD || dy > SWIPE_EXIT_THRESHOLD;
+        return factory_ui::is_bottom_swipe_up(_touch_start_x, _touch_start_y, points[0].x, points[0].y);
     }
 
     esp_err_t Camera::handleFrame()
@@ -615,7 +612,19 @@ namespace esp_brookesia::apps
         }
 
         if (request_close) {
-            notifyCoreClosed();
+            if (bsp_display_lock(-1) == ESP_OK) {
+                notifyCoreClosed();
+                bsp_display_unlock();
+            }
+        } else if (ret != ESP_OK && bsp_display_lock(-1) == ESP_OK) {
+            // A hardware or capture error may occur after the preview task starts.
+            // The view may already have been closed while this task was unwinding.
+            if (_status_view) {
+                factory_ui::show_media_status(_status_view, LV_SYMBOL_WARNING, "Camera unavailable",
+                                              "Check the CSI camera connection, then reopen Camera.");
+                lv_obj_invalidate(lv_obj_get_screen(_status_view));
+            }
+            bsp_display_unlock();
         }
 
         vTaskDelete(NULL);

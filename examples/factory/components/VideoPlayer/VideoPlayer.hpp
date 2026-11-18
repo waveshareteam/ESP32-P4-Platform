@@ -8,6 +8,7 @@
 #include "esp_lcd_touch.h"
 #include "esp_lcd_types.h"
 #include "sdkconfig.h"
+#include <atomic>
 #include <dirent.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +37,6 @@ namespace esp_brookesia::apps
     private:
         static VideoPlayer *_instance;
 
-        static constexpr int SWIPE_EXIT_THRESHOLD = 180;
 
         lv_display_t *display = nullptr;
         esp_lcd_panel_handle_t display_panel = nullptr;
@@ -55,6 +55,7 @@ namespace esp_brookesia::apps
         bool sd_mounted = false;
         bool dummy_enabled = false;
         bool lvgl_paused = false;
+        std::atomic_bool rendered_frame{false};
         bool touch_active = false;
         uint16_t touch_start_x = 0;
         uint16_t touch_start_y = 0;
@@ -68,8 +69,9 @@ namespace esp_brookesia::apps
         char **avi_file_list = nullptr;
         int avi_file_count = 0;
 
-        lv_obj_t *status_label = nullptr;
+        lv_obj_t *status_view = nullptr;
 
+        void showPlaybackError();
         esp_err_t getAviFileList(const char *dir_path);
         esp_err_t initDisplayBypass();
         void deinitDisplayBypass();

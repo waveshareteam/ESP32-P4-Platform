@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "factory_phone.hpp"
+#include <algorithm>
 #include <cctype>
 #include <cstdio>
 #include <cstring>
@@ -24,30 +25,58 @@ using namespace esp_brookesia::systems;
 
 LV_IMG_DECLARE(img_app_calculator);
 
-#define KEYBOARD_H_PERCENT      70
 #define KEYBOARD_FONT           &lv_font_montserrat_48
-#define KEYBOARD_SPECIAL_COLOR  lv_color_hex(factory_ui::ACCENT)
-#define KEYBOARD_BG_COLOR       lv_color_hex(factory_ui::BACKGROUND)
-
-#define LABEL_PAD               24
 #define LABEL_FONT_SMALL        &lv_font_montserrat_28
 #define LABEL_FONT_BIG          &lv_font_montserrat_48
-#define LABEL_COLOR             lv_color_hex(factory_ui::ACCENT)
-#define LABEL_FORMULA_LEN_MAX   256
 
 #define APP_NAME                "Calculator"
 
-static const char *keyboard_map[] = {
-    "C", "/", "x", LV_SYMBOL_BACKSPACE, "\n",
-    "7", "8", "9", "-", "\n",
-    "4", "5", "6", "+", "\n",
-    "1", "2", "3", "%", "\n",
-    "0", ".", "=", ""
+// Preserve the reference keypad's circular keys and color roles on the portrait screen.
+static constexpr uint32_t DIGIT_COLOR = 0x1F232C;
+static constexpr uint32_t FUNCTION_COLOR = 0x3A3F4C;
+static constexpr uint32_t OPERATOR_COLOR = 0xFF9F0A;
+static constexpr uint32_t SECONDARY_TEXT_COLOR = 0x9AA0AC;
+static constexpr int KEY_GAP = 24;
+static constexpr int ROW_GAP = 16;
+static constexpr int DISPLAY_GAP = 12;
+
+struct KeyRow {
+    const char *map[5];
+    int count;
+};
+static const KeyRow KEY_ROWS[] = {
+    {{"C", "/", "x", LV_SYMBOL_BACKSPACE, ""}, 4},
+    {{"7", "8", "9", "-", ""}, 4},
+    {{"4", "5", "6", "+", ""}, 4},
+    {{"1", "2", "3", "%", ""}, 4},
+    {{"0", ".", "=", ""}, 3},
 };
 
-static constexpr lv_style_selector_t KEYBOARD_ITEMS_DEFAULT =
-    static_cast<lv_style_selector_t>(LV_PART_ITEMS) |
-    static_cast<lv_style_selector_t>(LV_STATE_DEFAULT);
+static uint32_t key_color(int id)
+{
+    switch (id) {
+    case 0: case 3:
+        return FUNCTION_COLOR;
+    case 1: case 2: case 7: case 11: case 15: case 18:
+        return OPERATOR_COLOR;
+    default:
+        return DIGIT_COLOR;
+    }
+}
+
+static void fit_readout(lv_obj_t *label)
+{
+    lv_point_t size;
+    lv_text_get_size(&size, lv_label_get_text(label), lv_obj_get_style_text_font(label, LV_PART_MAIN),
+                     0, 0, LV_COORD_MAX, LV_TEXT_FLAG_NONE);
+    const int width = lv_obj_get_width(lv_obj_get_parent(label));
+    const int32_t scale = size.x > width ? std::max<int32_t>(154, width * LV_SCALE_NONE / size.x) : LV_SCALE_NONE;
+    const bool clip_start = size.x * scale / LV_SCALE_NONE > width;
+    lv_obj_set_style_transform_scale(label, scale, 0);
+    lv_obj_set_style_transform_pivot_x(label, clip_start ? lv_pct(100) : lv_pct(50), 0);
+    lv_obj_set_style_transform_pivot_y(label, lv_pct(50), 0);
+    lv_obj_align(label, clip_start ? LV_ALIGN_RIGHT_MID : LV_ALIGN_CENTER, 0, 0);
+}
 
 namespace esp_brookesia::apps {
 
@@ -89,121 +118,83 @@ bool Calculator::run(void)
     _is_starting = true;
 
     auto visual_area = getVisualArea();
-    _width = lv_area_get_width(&visual_area);
-    _height = lv_area_get_height(&visual_area);
-
-    if (_width == 0 || _height == 0) {
+    if (getActiveConfig().status_bar_visual_mode == phone::StatusBar::VisualMode::SHOW_FIXED &&
+            visual_area.y1 < factory_ui::STATUS_HEIGHT) {
+        visual_area.y1 = factory_ui::STATUS_HEIGHT;
+    }
+    visual_area.y2 -= factory_ui::GESTURE_INSET;
+    const int width = lv_area_get_width(&visual_area);
+    const int height = lv_area_get_height(&visual_area);
+    const int key_size = std::min({132, (width - 2 * factory_ui::GUTTER - 3 * KEY_GAP) / 4,
+                                  (height * 7 / 10 - 4 * ROW_GAP) / 5});
+    if (key_size <= 0) {
         _is_starting = false;
         return false;
     }
+    const int keypad_height = 5 * key_size + 4 * ROW_GAP;
+    const int keypad_y = visual_area.y2 - keypad_height + 1 - 20;
+    const int readout_width = width - 2 * factory_ui::GUTTER;
+    const int display_height = lv_font_get_line_height(LABEL_FONT_BIG);
+    const int readout_y = keypad_y - 32 - 2 * display_height - DISPLAY_GAP;
 
     formula_len = 1;
+    lv_obj_t *screen = lv_screen_active();
+    lv_obj_set_style_bg_color(screen, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(screen, LV_OPA_COVER, 0);
+    lv_obj_remove_flag(screen, LV_OBJ_FLAG_SCROLLABLE);
 
-    int keyboard_h = (int)(_height * KEYBOARD_H_PERCENT / 100.0);
-    int label_h = _height - keyboard_h;
-    int text_h = label_h - 2 * LABEL_PAD;
+    int first_id = 0;
+    int y = keypad_y;
+    for (const auto &keys : KEY_ROWS) {
+        auto *row = lv_buttonmatrix_create(screen);
+        lv_buttonmatrix_set_map(row, keys.map);
+        lv_obj_set_user_data(row, reinterpret_cast<void *>(static_cast<intptr_t>(first_id)));
+        const int row_width = keys.count * key_size + (keys.count - 1) * KEY_GAP;
+        lv_obj_set_size(row, row_width, key_size);
+        lv_obj_set_pos(row, visual_area.x1 + (width - row_width) / 2, y);
+        lv_obj_set_style_bg_opa(row, LV_OPA_TRANSP, 0);
+        lv_obj_set_style_border_width(row, 0, 0);
+        lv_obj_set_style_pad_all(row, 0, 0);
+        lv_obj_set_style_pad_column(row, KEY_GAP, 0);
+        lv_obj_set_style_radius(row, LV_RADIUS_CIRCLE, LV_PART_ITEMS);
+        lv_obj_set_style_border_width(row, 0, LV_PART_ITEMS);
+        lv_obj_set_style_shadow_width(row, 0, LV_PART_ITEMS);
+        lv_obj_set_style_bg_color(row, lv_color_hex(DIGIT_COLOR), LV_PART_ITEMS);
+        lv_obj_set_style_bg_opa(row, LV_OPA_COVER, LV_PART_ITEMS);
+        lv_obj_set_style_text_color(row, lv_color_white(), LV_PART_ITEMS);
+        lv_obj_set_style_text_font(row, KEYBOARD_FONT, LV_PART_ITEMS);
+        lv_obj_add_flag(row, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
+        lv_obj_add_event_cb(row, keyboard_event_cb, LV_EVENT_DRAW_TASK_ADDED, this);
+        lv_obj_add_event_cb(row, keyboard_event_cb, LV_EVENT_VALUE_CHANGED, this);
+        first_id += keys.count;
+        y += key_size + ROW_GAP;
+    }
 
-    lv_obj_set_style_bg_color(lv_scr_act(), KEYBOARD_BG_COLOR, 0);
-
-    keyboard = lv_btnmatrix_create(lv_scr_act());
-    lv_btnmatrix_set_map(keyboard, keyboard_map);
-    lv_btnmatrix_set_btn_width(keyboard, 18, 1);
-    lv_obj_set_size(keyboard, _width, keyboard_h);
-    lv_obj_set_style_text_font(keyboard, KEYBOARD_FONT, 0);
-    lv_obj_set_style_bg_color(keyboard, KEYBOARD_BG_COLOR, 0);
-
-    lv_obj_set_pos(keyboard, visual_area.x1, visual_area.y1 + label_h);
-    lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::CARD), LV_PART_ITEMS);
-    lv_obj_set_style_text_color(keyboard, lv_color_white(), LV_PART_ITEMS);
-    lv_obj_set_style_radius(keyboard, 20, LV_PART_ITEMS);
-    lv_obj_set_style_shadow_width(keyboard, 0, LV_PART_ITEMS);
-    lv_obj_set_style_border_width(keyboard, 0, LV_PART_ITEMS);
-    lv_obj_set_style_pad_all(keyboard, 16, LV_PART_MAIN);
-    lv_obj_set_style_pad_hor(keyboard, factory_ui::GUTTER, LV_PART_MAIN);
-    lv_obj_set_style_pad_gap(keyboard, 16, LV_PART_MAIN);
-
-    lv_obj_add_event_cb(keyboard, keyboard_event_cb, LV_EVENT_ALL, this);
-    lv_obj_add_flag(keyboard, LV_OBJ_FLAG_SEND_DRAW_TASK_EVENTS);
-    lv_btnmatrix_set_btn_ctrl(keyboard, 18, LV_BTNMATRIX_CTRL_CHECKED);
-    lv_obj_set_style_border_width(keyboard, 0, 0);
-    lv_obj_set_style_radius(keyboard, 0, 0);
-
-    // Set special colors for operator buttons (C, /, x, <, -, +, %)
-    lv_obj_set_style_text_color(keyboard, lv_color_hex(factory_ui::TEXT), KEYBOARD_ITEMS_DEFAULT);
-    lv_obj_set_style_bg_color(keyboard, lv_color_hex(factory_ui::ACCENT),
-        static_cast<lv_style_selector_t>(LV_PART_ITEMS) | static_cast<lv_style_selector_t>(LV_STATE_CHECKED));
-    lv_btnmatrix_set_btn_ctrl(keyboard, 0, LV_BTNMATRIX_CTRL_CUSTOM_1);  // C
-    lv_btnmatrix_set_btn_ctrl(keyboard, 1, LV_BTNMATRIX_CTRL_CUSTOM_1);  // /
-    lv_btnmatrix_set_btn_ctrl(keyboard, 2, LV_BTNMATRIX_CTRL_CUSTOM_1);  // x
-    lv_btnmatrix_set_btn_ctrl(keyboard, 3, LV_BTNMATRIX_CTRL_CUSTOM_1);  // <
-    lv_btnmatrix_set_btn_ctrl(keyboard, 7, LV_BTNMATRIX_CTRL_CUSTOM_1);  // -
-    lv_btnmatrix_set_btn_ctrl(keyboard, 11, LV_BTNMATRIX_CTRL_CUSTOM_1); // +
-    lv_btnmatrix_set_btn_ctrl(keyboard, 15, LV_BTNMATRIX_CTRL_CUSTOM_1); // %
-
-    lv_obj_t *label_obj = lv_obj_create(lv_scr_act());
-    lv_obj_set_size(label_obj, _width, label_h);
-
-    lv_obj_set_pos(label_obj, visual_area.x1, visual_area.y1);
-
-    lv_obj_set_style_radius(label_obj, 0, 0);
-    lv_obj_set_style_border_width(label_obj, 0, 0);
-    lv_obj_set_style_pad_all(label_obj, 0, 0);
-    lv_obj_set_style_pad_hor(label_obj, factory_ui::GUTTER, 0);
-    lv_obj_set_style_bg_color(label_obj, KEYBOARD_BG_COLOR, 0);
-    lv_obj_set_style_text_color(label_obj, lv_color_hex(factory_ui::TEXT), 0);
-    lv_obj_set_style_text_font(label_obj, LABEL_FONT_SMALL, 0);
-    lv_obj_set_flex_flow(label_obj, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(label_obj, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_END);
-    lv_obj_set_style_pad_row(label_obj, LABEL_PAD, 0);
-
-    history_label = lv_textarea_create(label_obj);
-    lv_obj_set_style_radius(history_label, 0, 0);
-    lv_obj_set_style_border_width(history_label, 0, 0);
-    lv_obj_set_style_pad_all(history_label, 0, 0);
-    lv_obj_set_size(history_label, _width - 2 * factory_ui::GUTTER, text_h / 3);
-    lv_obj_set_style_bg_opa(history_label, LV_OPA_TRANSP, 0);
-    lv_obj_add_flag(history_label, LV_OBJ_FLAG_SCROLLABLE);
-
-    lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_RIGHT, 0);
-
+    const int readout_x = visual_area.x1 + factory_ui::GUTTER;
+    const int history_y = visual_area.y1 + 24;
+    history_label = lv_textarea_create(screen);
+    lv_obj_remove_style_all(history_label);
+    lv_obj_set_size(history_label, readout_width, readout_y - history_y - 12);
+    lv_obj_set_pos(history_label, readout_x, history_y);
     lv_obj_set_style_opa(history_label, LV_OPA_TRANSP, LV_PART_CURSOR);
-    lv_obj_set_style_text_color(history_label, lv_color_hex(factory_ui::HINT), 0);
+    lv_obj_set_style_text_color(history_label, lv_color_hex(SECONDARY_TEXT_COLOR), 0);
     lv_obj_set_style_text_font(history_label, LABEL_FONT_SMALL, 0);
+    lv_obj_set_style_text_align(history_label, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_remove_flag(history_label, LV_OBJ_FLAG_CLICK_FOCUSABLE);
     lv_textarea_set_text(history_label, "");
 
-    lv_obj_t *formula_label_obj = lv_obj_create(label_obj);
-    lv_obj_set_size(formula_label_obj, _width - 2 * factory_ui::GUTTER, text_h / 3);
-    lv_obj_set_style_radius(formula_label_obj, 0, 0);
-    lv_obj_set_style_border_width(formula_label_obj, 0, 0);
-    lv_obj_set_style_pad_all(formula_label_obj, 0, 0);
-    lv_obj_set_style_bg_opa(formula_label_obj, LV_OPA_TRANSP, 0);
-
-    formula_label = lv_label_create(formula_label_obj);
-    lv_obj_set_size(formula_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-
-    lv_obj_align(formula_label, LV_ALIGN_RIGHT_MID, 0, 0);
-    lv_obj_set_style_text_align(formula_label, LV_TEXT_ALIGN_RIGHT, 0);
-
-    lv_obj_set_style_text_font(formula_label, LABEL_FONT_BIG, 0);
-    lv_obj_set_style_text_color(formula_label, lv_color_hex(factory_ui::TEXT), 0);
-    lv_label_set_text(formula_label, "0");
-
-    lv_obj_t *result_label_obj = lv_obj_create(label_obj);
-    lv_obj_set_size(result_label_obj, _width - 2 * factory_ui::GUTTER, text_h / 3);
-    lv_obj_set_style_radius(result_label_obj, 0, 0);
-    lv_obj_set_style_border_width(result_label_obj, 0, 0);
-    lv_obj_set_style_pad_all(result_label_obj, 0, 0);
-    lv_obj_set_style_bg_opa(result_label_obj, LV_OPA_TRANSP, 0);
-
-    result_label = lv_label_create(result_label_obj);
-    lv_obj_set_size(result_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-
-    lv_obj_align(result_label, LV_ALIGN_RIGHT_MID, 0, 0);
-    lv_obj_set_style_text_align(result_label, LV_TEXT_ALIGN_RIGHT, 0);
-
-    lv_obj_set_style_text_color(result_label, LABEL_COLOR, 0);
-    lv_obj_set_style_text_font(result_label, LABEL_FONT_SMALL, 0);
-    lv_label_set_text(result_label, "= 0");
+    const auto create_readout = [screen, readout_width, readout_x, display_height](
+                                    int y, const char *text, const lv_font_t *font, uint32_t color) {
+        auto *container = factory_ui::plain(screen);
+        lv_obj_set_size(container, readout_width, display_height);
+        lv_obj_set_pos(container, readout_x, y);
+        auto *label = factory_ui::label(container, text, font, color);
+        lv_obj_center(label);
+        return label;
+    };
+    formula_label = create_readout(readout_y, "0", LABEL_FONT_BIG, 0xFFFFFF);
+    result_label = create_readout(readout_y + display_height + DISPLAY_GAP, "= 0",
+                                  LABEL_FONT_SMALL, SECONDARY_TEXT_COLOR);
 
     _is_starting = false;
     return true;
@@ -370,20 +361,30 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
     lv_event_code_t code = lv_event_get_code(e);
     Calculator *app = (Calculator *)lv_event_get_user_data(e);
 
+    auto *row = lv_event_get_target_obj(e);
+    const int first_id = static_cast<int>(reinterpret_cast<intptr_t>(lv_obj_get_user_data(row)));
+
     if (code == LV_EVENT_DRAW_TASK_ADDED) {
         auto *task = lv_event_get_draw_task(e);
         auto *descriptor = static_cast<lv_draw_dsc_base_t *>(lv_draw_task_get_draw_dsc(task));
-        if (descriptor->part == LV_PART_ITEMS &&
-            lv_buttonmatrix_has_button_ctrl(app->keyboard, descriptor->id1, LV_BTNMATRIX_CTRL_CUSTOM_1)) {
-            if (auto *text = lv_draw_task_get_label_dsc(task)) {
-                text->color = KEYBOARD_SPECIAL_COLOR;
+        if (descriptor->part == LV_PART_ITEMS) {
+            if (auto *fill = lv_draw_task_get_fill_dsc(task)) {
+                const bool pressed = lv_buttonmatrix_get_selected_button(row) == descriptor->id1 &&
+                                     lv_obj_has_state(row, LV_STATE_PRESSED);
+                const lv_color_t color = lv_color_hex(key_color(first_id + descriptor->id1));
+                fill->color = pressed ? lv_color_lighten(color, LV_OPA_30) : color;
             }
         }
         return;
     }
 
     if (code == LV_EVENT_VALUE_CHANGED) {
-        int btn_id = lv_btnmatrix_get_selected_btn(app->keyboard);
+        const uint32_t selected = lv_buttonmatrix_get_selected_button(row);
+        if (selected == LV_BUTTONMATRIX_BUTTON_NONE) {
+            return;
+        }
+        const int btn_id = first_id + selected;
+        const char *key = lv_buttonmatrix_get_button_text(row, selected);
         bool calculate_flag = false;
         bool equal_flag = false;
         double res_num;
@@ -445,7 +446,7 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
                 lv_label_ins_text(
                     app->formula_label,
                     app->formula_len++,
-                    lv_btnmatrix_get_btn_text(app->keyboard, btn_id)
+                    key
                 );
                 if (btn_id == 15) {
                     calculate_flag = true;
@@ -476,7 +477,7 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
                 lv_label_ins_text(
                     app->formula_label,
                     app->formula_len++,
-                    lv_btnmatrix_get_btn_text(app->keyboard, btn_id)
+                    key
                 );
                 calculate_flag = true;
             }
@@ -528,6 +529,13 @@ void Calculator::keyboard_event_cb(lv_event_t *e)
             lv_obj_set_style_text_font(app->formula_label, LABEL_FONT_SMALL, 0);
             app->formula_len = strlen(res_str);
         }
+        lv_obj_set_style_text_color(app->formula_label,
+                                    lv_color_hex(equal_flag ? SECONDARY_TEXT_COLOR : 0xFFFFFF), 0);
+        lv_obj_set_style_text_color(app->result_label,
+                                    lv_color_hex(equal_flag ? 0xFFFFFF : SECONDARY_TEXT_COLOR), 0);
+        lv_obj_update_layout(lv_obj_get_parent(app->formula_label));
+        fit_readout(app->formula_label);
+        fit_readout(app->result_label);
     }
 }
 

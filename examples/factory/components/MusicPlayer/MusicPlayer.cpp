@@ -33,9 +33,7 @@ bool MusicPlayer::run()
     _selected = 0;
     _elapsed_ms = 0;
     _want_playing = _seen_playing = _last_playing = false;
-    _page = _view.create(lv_screen_active(), &img_app_musicplayer, [](lv_event_t *event) {
-        lv_async_call([](void *context) { static_cast<MusicPlayer *>(context)->back(); }, lv_event_get_user_data(event));
-    }, action_cb, this);
+    _player = _view.create(lv_screen_active(), action_cb, this);
     refresh_title();
     _last_tick_us = esp_timer_get_time();
     _timer = lv_timer_create(tick_cb, 250, this);
@@ -166,8 +164,8 @@ bool MusicPlayer::close()
     product_file_instance_del(_file_iterator);
     _file_iterator = nullptr;
     hide_tracks();
-    if (_page.root) lv_obj_delete(_page.root);
-    _page = {};
+    if (_player) lv_obj_delete(_player);
+    _player = nullptr;
     _view.clear();
     return true;
 }

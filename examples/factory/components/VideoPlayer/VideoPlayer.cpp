@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include "VideoPlayer.hpp"
+#include "factory_media_status.hpp"
 #include "lvgl.h"
 #include "esp_brookesia.hpp"
 
@@ -39,6 +40,7 @@ LV_IMG_DECLARE(img_app_vedioplayer);
 
 namespace esp_brookesia::apps
 {
+    static constexpr char VIDEO_DIRECTORY[] = "/sdcard/avi";
 
     VideoPlayer *VideoPlayer::_instance = nullptr;
 
@@ -51,7 +53,7 @@ namespace esp_brookesia::apps
         return _instance;
     }
 
-    VideoPlayer::VideoPlayer(bool use_status_bar, bool use_navigation_bar) : App("VideoPlayer", &img_app_vedioplayer, true, use_status_bar, use_navigation_bar), sd_mounted(false)
+    VideoPlayer::VideoPlayer(bool use_status_bar, bool use_navigation_bar) : App("Video", &img_app_vedioplayer, true, use_status_bar, use_navigation_bar), sd_mounted(false)
     {
         current_buf_idx = 0;
         display = nullptr;
@@ -88,31 +90,32 @@ namespace esp_brookesia::apps
         bsp_display_lock(-1);
         lv_obj_set_style_bg_color(lv_scr_act(), lv_color_black(), LV_PART_MAIN);
         lv_obj_set_style_bg_opa(lv_scr_act(), LV_OPA_COVER, LV_PART_MAIN);
-        status_label = lv_label_create(lv_scr_act());
-        lv_label_set_text(status_label, sd_mounted ? "loading files..." : "sd error");
-        lv_obj_set_style_text_align(status_label, LV_TEXT_ALIGN_CENTER, 0);
-        lv_obj_set_width(status_label, DISPLAY_WIDTH);
-        lv_obj_align(status_label, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_set_style_text_font(status_label, &lv_font_montserrat_20, 0);
+        factory_ui::show_media_status(status_view, LV_SYMBOL_VIDEO, "Loading videos");
         bsp_display_unlock();
 
         if (!sd_mounted)
         {
-            return true;
-        }
-
-        if (getAviFileList("/sdcard/avi") != ESP_OK || avi_file_count == 0)
-        {
             bsp_display_lock(-1);
-            lv_label_set_text(status_label, "avi error");
+            factory_ui::show_media_status(status_view, LV_SYMBOL_SD_CARD, "microSD card unavailable",
+                                          "Insert a readable microSD card, then restart the device.");
             bsp_display_unlock();
             return true;
         }
 
-        bsp_display_lock(-1);
-        lv_obj_del(status_label);
-        status_label = nullptr;
-        bsp_display_unlock();
+        const auto result = getAviFileList(VIDEO_DIRECTORY);
+        if (result != ESP_OK || avi_file_count == 0)
+        {
+            bsp_display_lock(-1);
+            if (result == ESP_ERR_NO_MEM) {
+                factory_ui::show_media_status(status_view, LV_SYMBOL_WARNING, "Cannot load videos",
+                                              "Close other apps or use a card with fewer video files.");
+            } else {
+                factory_ui::show_media_status(status_view, LV_SYMBOL_VIDEO, "No videos",
+                                              "Copy MJPEG AVI files to the avi folder on the microSD card.");
+            }
+            bsp_display_unlock();
+            return true;
+        }
 
         loop_playback = true;
 
@@ -122,9 +125,22 @@ namespace esp_brookesia::apps
         if (ret != pdPASS)
         {
             ESP_LOGE(ESP_UTILS_LOG_TAG, "Create playback task failed");
-            return false;
+            loop_playback = false;
+            showPlaybackError();
         }
         return true;
+    }
+
+    void VideoPlayer::showPlaybackError()
+    {
+        if (bsp_display_lock(-1) == ESP_OK) {
+            if (status_view) {
+                factory_ui::show_media_status(status_view, LV_SYMBOL_WARNING, "Cannot play video",
+                                              "Check that the files use MJPEG video in an AVI container.");
+                lv_obj_invalidate(lv_obj_get_screen(status_view));
+            }
+            bsp_display_unlock();
+        }
     }
 
     bool VideoPlayer::back(void)
@@ -164,10 +180,10 @@ namespace esp_brookesia::apps
         deinitDisplayBypass();
 
         bsp_display_lock(-1);
-        if (status_label)
+        if (status_view)
         {
-            lv_obj_del(status_label);
-            status_label = nullptr;
+            lv_obj_delete(status_view);
+            status_view = nullptr;
         }
         bsp_display_unlock();
 
@@ -259,7 +275,7 @@ namespace esp_brookesia::apps
         int loaded_count = 0;
         rewinddir(dir);
 
-        while ((entry = readdir(dir)) != nullptr)
+        while (loaded_count < count && (entry = readdir(dir)) != nullptr)
         {
             if (entry->d_type == DT_REG)
             {
@@ -284,6 +300,7 @@ namespace esp_brookesia::apps
             }
         }
 
+        avi_file_count = loaded_count;
         closedir(dir);
         return ESP_OK;
     }
@@ -531,6 +548,7 @@ namespace esp_brookesia::apps
             return;
         }
         self->current_buf_idx = next_buf_idx;
+        self->rendered_frame = true;
     }
 
     void VideoPlayer::audioCallback(frame_data_t *data, void *arg)
@@ -581,9 +599,7 @@ namespace esp_brookesia::apps
             return false;
         }
 
-        int dx = abs((int)points[0].x - (int)touch_start_x);
-        int dy = abs((int)points[0].y - (int)touch_start_y);
-        return dx > SWIPE_EXIT_THRESHOLD || dy > SWIPE_EXIT_THRESHOLD;
+        return factory_ui::is_bottom_swipe_up(touch_start_x, touch_start_y, points[0].x, points[0].y);
     }
 
     void VideoPlayer::playTask(void *arg)
@@ -611,9 +627,12 @@ namespace esp_brookesia::apps
         if (avi_player_init(cfg, &self->avi_player_handle) != ESP_OK)
         {
             ESP_LOGE(ESP_UTILS_LOG_TAG, "avi_player_init failed");
+            self->loop_playback = false;
+            self->play_task_handle = nullptr;
             if (self->close_wait_task) {
                 xTaskNotifyGive(self->close_wait_task);
             }
+            self->showPlaybackError();
             vTaskDelete(NULL);
             return;
         }
@@ -623,16 +642,22 @@ namespace esp_brookesia::apps
             ESP_LOGE(ESP_UTILS_LOG_TAG, "initDisplayBypass failed");
             avi_player_deinit(self->avi_player_handle);
             self->avi_player_handle = nullptr;
+            self->deinitDisplayBypass();
+            self->loop_playback = false;
+            self->play_task_handle = nullptr;
             if (self->close_wait_task) {
                 xTaskNotifyGive(self->close_wait_task);
             }
+            self->showPlaybackError();
             vTaskDelete(NULL);
             return;
         }
 
+        bool playback_failed = false;
         // Loop through every AVI file discovered on the SD card until the app closes.
         while (self->loop_playback)
         {
+            self->rendered_frame = false;
             for (int i = 0; i < self->avi_file_count && self->loop_playback; i++)
             {
                 while (self->is_paused && self->loop_playback)
@@ -676,6 +701,11 @@ namespace esp_brookesia::apps
                 }
             }
 
+            if (self->loop_playback && !self->is_paused && !self->rendered_frame) {
+                playback_failed = true;
+                self->loop_playback = false;
+                break;
+            }
             vTaskDelay(pdMS_TO_TICKS(500));
         }
 
@@ -690,9 +720,14 @@ namespace esp_brookesia::apps
             xTaskNotifyGive(self->close_wait_task);
         }
 
-        if (request_close)
+        if (request_close && bsp_display_lock(-1) == ESP_OK)
         {
             self->notifyCoreClosed();
+            bsp_display_unlock();
+        }
+        else if (playback_failed)
+        {
+            self->showPlaybackError();
         }
         
         vTaskDelete(NULL);

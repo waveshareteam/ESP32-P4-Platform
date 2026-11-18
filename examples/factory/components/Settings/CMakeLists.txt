@@ -7,6 +7,7 @@ idf_component_register(
     SRCS  ${PROJ_SRCS_C} ${PROJ_SRCS_CPP}
     INCLUDE_DIRS ${PROJ_SRC}
     REQUIRES factory_ui esp32_p4_platform driver esp_wifi esp_wifi_remote esp_hosted lwip product_support
+    PRIV_REQUIRES esp_app_format esp_hw_support esp_psram spi_flash
 )
 
 set_source_files_properties(

@@ -37,9 +37,8 @@ namespace esp_brookesia::apps
         static constexpr int CAMERA_BUFFER_COUNT = 2;
         static constexpr int PREVIEW_TASK_STACK_SIZE = 8 * 1024;
         static constexpr int PREVIEW_TASK_PRIORITY = 8;
-        static constexpr int SWIPE_EXIT_THRESHOLD = 180;
 
-        lv_obj_t *_status_label = nullptr;
+        lv_obj_t *_status_view = nullptr;
         lv_display_t *_display = nullptr;
         esp_lcd_panel_handle_t _display_panel = nullptr;
         ppa_client_handle_t _ppa_srm_handle = nullptr;

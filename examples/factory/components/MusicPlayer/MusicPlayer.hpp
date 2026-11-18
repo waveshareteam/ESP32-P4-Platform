@@ -26,7 +26,7 @@ private:
     static MusicPlayer *_instance;
     file_iterator_instance_t *_file_iterator = nullptr;
     factory_ui::PlayerView _view;
-    factory_ui::Page _page;
+    lv_obj_t *_player = nullptr;
     lv_obj_t *_tracks = nullptr;
     lv_timer_t *_timer = nullptr;
     size_t _selected = 0;

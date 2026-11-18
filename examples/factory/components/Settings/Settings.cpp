@@ -12,6 +12,8 @@
 #include "esp_netif.h"
 #include "esp_sntp.h"
 #include "esp_wifi.h"
+#include "esp_app_desc.h"
+#include <cstdio>
 #include <stdlib.h>
 #include <sys/time.h>
 #include <time.h>
@@ -99,10 +101,17 @@ namespace esp_brookesia::apps
         wifi_ap_record_t current = {};
         const char *wifi = esp_wifi_sta_get_ap_info(&current) == ESP_OK ?
             reinterpret_cast<const char *>(current.ssid) : "Not connected";
-        auto view = factory_ui::settings(lv_scr_act(), wifi, [](lv_event_t *event) {
-            auto *settings = static_cast<Settings *>(lv_event_get_user_data(event));
-            lv_async_call([](void *context) { static_cast<Settings *>(context)->back(); }, settings);
-        }, event_handler_cb, this);
+        char volume[8];
+        char brightness[8];
+        char firmware[48];
+        snprintf(volume, sizeof(volume), "%d%%", product_codec_volume_get());
+        snprintf(brightness, sizeof(brightness), "%d%%", product_display_brightness_get());
+        snprintf(firmware, sizeof(firmware), "Version %s", esp_app_get_description()->version);
+        auto view = factory_ui::page(lv_scr_act(), "Settings", nullptr, this);
+        factory_ui::row(view.content, &WIFI, "Wi-Fi", wifi, event_handler_cb, this, 1);
+        factory_ui::row(view.content, &sound, "Sound", volume, event_handler_cb, this, 2);
+        factory_ui::row(view.content, &backlights, "Display", brightness, event_handler_cb, this, 3);
+        factory_ui::row(view.content, &info, "About", firmware, event_handler_cb, this, 4);
         list1 = view.root;
     }
 

@@ -6,15 +6,18 @@
 
 #include <cstddef>
 #include <cstdint>
+#include "bsp/display.h"
 #include "lvgl.h"
 
 // The Knob factory application's dark cards and blue controls, laid out for a
 // rectangular portrait display. No circular safe area or rotary input is used.
 namespace factory_ui {
-constexpr int WIDTH = 800;
-constexpr int HEIGHT = 1280;
+constexpr int WIDTH = BSP_LCD_H_RES;
+constexpr int HEIGHT = BSP_LCD_V_RES;
 constexpr int STATUS_HEIGHT = 64;
-constexpr int NAVIGATION_HEIGHT = 80;
+constexpr int GESTURE_INSET = 30;
+constexpr int SWIPE_DISTANCE = 50;
+constexpr int SWIPE_ANGLE = 60;
 constexpr int GUTTER = 32;
 constexpr int CONTENT_TOP = 192;
 constexpr uint32_t BACKGROUND = 0x0C0D12;
@@ -24,6 +27,14 @@ constexpr uint32_t ACCENT = 0x3D9BFF;
 constexpr uint32_t TEXT = 0xFFFFFF;
 constexpr uint32_t HINT = 0x8E929E;
 
+// Full-screen media reads touch directly while the LVGL adapter is paused.
+constexpr bool is_bottom_swipe_up(int start_x, int start_y, int x, int y)
+{
+    const int dx = x >= start_x ? x - start_x : start_x - x;
+    const int up = start_y - y;
+    return HEIGHT - start_y < GESTURE_INSET && up > SWIPE_DISTANCE && up > 1.73205f * dx;
+}
+
 struct Page {
     lv_obj_t *root = nullptr;
     lv_obj_t *content = nullptr;
@@ -32,36 +43,33 @@ struct Page {
 
 struct Row {
     lv_obj_t *object = nullptr;
+    lv_obj_t *title = nullptr;
     lv_obj_t *value = nullptr;
 };
 
-struct Slider {
+struct LevelControl {
     lv_obj_t *object = nullptr;
     lv_obj_t *value = nullptr;
 };
 struct ControlPage {
     Page page;
-    Slider control;
+    LevelControl control;
 };
 
 lv_obj_t *plain(lv_obj_t *parent);
 lv_obj_t *label(lv_obj_t *parent, const char *text, const lv_font_t *font, uint32_t color = TEXT);
 Page page(lv_obj_t *parent, const char *title, lv_event_cb_t back, void *context);
-void section(lv_obj_t *parent, const char *title);
+lv_obj_t *section(lv_obj_t *parent, const char *title);
 lv_obj_t *note(lv_obj_t *parent, const char *text);
-Row row(lv_obj_t *parent, const char *symbol, const char *title, const char *value,
+Row row(lv_obj_t *parent, const void *icon_source, const char *title, const char *value,
         lv_event_cb_t clicked = nullptr, void *context = nullptr, intptr_t id = 0);
-Slider slider(lv_obj_t *parent, const char *title, const char *description, int value, int minimum,
-              int maximum, lv_event_cb_t changed, void *context);
-Page settings(lv_obj_t *parent, const char *wifi, lv_event_cb_t back, lv_event_cb_t selected, void *context);
 ControlPage display(lv_obj_t *parent, int brightness, lv_event_cb_t back, lv_event_cb_t changed, void *context);
 ControlPage sound(lv_obj_t *parent, int volume, lv_event_cb_t back, lv_event_cb_t changed, void *context);
-Page about(lv_obj_t *parent, const char *version, lv_event_cb_t back, void *context);
 
 enum class PlayerAction { PREVIOUS, PLAY_PAUSE, NEXT, TRACKS };
 class PlayerView {
 public:
-    Page create(lv_obj_t *parent, const void *art, lv_event_cb_t back, lv_event_cb_t action, void *context);
+    lv_obj_t *create(lv_obj_t *parent, lv_event_cb_t action, void *context);
     void title(const char *name, int index, int count);
     void playing(bool active);
     void message(const char *text);

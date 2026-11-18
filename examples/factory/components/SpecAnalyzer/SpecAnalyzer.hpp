@@ -38,11 +38,18 @@ namespace esp_brookesia::apps
         static constexpr uint16_t MIC_COUNT = 1;          // Only one microphone is visualized
         static constexpr uint16_t STRIPE_COUNT = 48;      // Bar count for the visualizer
         static constexpr uint16_t CANVAS_WIDTH = BSP_LCD_H_RES - 2 * factory_ui::GUTTER;
-        static constexpr uint16_t CANVAS_HEIGHT = 640;
+        static constexpr uint16_t CANVAS_HEIGHT = 760;
 
-        factory_ui::Page _page;
+        enum class ViewMode { MIC, BARS, RADIAL, HALO, COUNT };
+        static constexpr int MODE_COUNT = static_cast<int>(ViewMode::COUNT);
+
+        lv_obj_t *_root = nullptr;
         lv_obj_t *_canvas;
         lv_obj_t *_mic_label;
+        lv_obj_t *_mode_label = nullptr;
+        lv_obj_t *_dots[MODE_COUNT] = {};
+        ViewMode _mode = ViewMode::MIC;
+        unsigned _label_frames = 0;
         lv_timer_t *_timer;
         TaskHandle_t _audio_task_handle;
         bool _audio_task_running;
@@ -56,9 +63,18 @@ namespace esp_brookesia::apps
         float _display_spectrum[MIC_COUNT][STRIPE_COUNT];                         // Mapped spectrum for bars
         float _peak[MIC_COUNT][STRIPE_COUNT];                                     // Peak marker position
         float _smooth_spectrum[MIC_COUNT][STRIPE_COUNT];                          // Smoothed display values
+        portMUX_TYPE _input_lock = portMUX_INITIALIZER_UNLOCKED;
+        int _mic_dbfs = -90;
 
-        lv_color_t *_draw_buf; // PSRAM-preferred canvas draw buffer
+        uint16_t *_draw_buf; // PSRAM-preferred RGB565 canvas buffer
 
+        bool startCapture();
+        void stopCapture();
+        void showMode(int index);
+        void drawBars(lv_layer_t &layer, const float *levels, bool mic_test) const;
+        void drawRadial(lv_layer_t &layer, const float *levels, bool halo) const;
+        static void view_gesture_cb(lv_event_t *event);
+        static void view_page_cb(lv_event_t *event);
         static void audio_fft_task(void *pvParameters);
         static void timer_cb(lv_timer_t *timer);
     };

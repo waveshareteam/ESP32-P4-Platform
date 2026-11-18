@@ -37,12 +37,9 @@ namespace esp_brookesia::apps
         double calculate(const char *input);
 
         int formula_len;
-        lv_obj_t *keyboard;
         lv_obj_t *history_label;
         lv_obj_t *formula_label;
         lv_obj_t *result_label;
-        uint16_t _height;
-        uint16_t _width;
 
         bool isStarting(void) const
         {

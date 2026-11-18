@@ -71,11 +71,9 @@ private:
     lv_obj_t *available_text;
     std::vector<lv_obj_t *> wifi_btns;
 
-    // Styles are owned by the page and reset when the page closes.
-    lv_style_t style_list;
-    lv_style_t style_list_btn;
-    lv_style_t style_list_text;
-    lv_style_t style_list_btn_pressed;
+    lv_obj_t *state_note = nullptr;
+    lv_obj_t *password_title = nullptr;
+    lv_obj_t *conn_title = nullptr;
 
     // Wi-Fi state machine and background scan task.
     TaskHandle_t wifi_TaskHandle;
@@ -92,7 +90,7 @@ private:
 
     int wifi_index;
     uint8_t *wifi_ssid;
-    uint8_t *wifi_pwd;
+    char wifi_pwd[64] = {};
     uint8_t connection_num = 0;
 
     void CreateWifiUI();
@@ -118,7 +116,6 @@ private:
     static void adjust_content_for_keyboard();
     static void restore_content_padding();
     static void kb_event_cb(lv_event_t *e);
-    static void ta_event_cb(lv_event_t *e);
     static void connection_event_cb(lv_event_t * e);
     static void cancel_event_cb(lv_event_t * e);
     static lv_obj_t* create_labeled_ta(lv_obj_t *parent, const char *label_txt, const char *placeholder);

@@ -36,7 +36,7 @@ void DisplayPage::event_handler_cb(lv_event_t *event)
 {
     auto *self = static_cast<DisplayPage *>(lv_event_get_user_data(event));
     auto *control = static_cast<lv_obj_t *>(lv_event_get_current_target(event));
-    const int value = lv_slider_get_value(control);
+    const int value = lv_arc_get_value(control);
     bsp_display_brightness_set(value);
     lv_label_set_text_fmt(self->label, "%d%%", value);
 }

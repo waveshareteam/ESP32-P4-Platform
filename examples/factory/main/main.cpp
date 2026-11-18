@@ -85,7 +85,7 @@ extern "C" void app_main(void)
 
     /* Configure display */
     lv_display_t *disp = bsp_display_start_with_config(&cfg);
-    (void)disp;
+    ESP_UTILS_CHECK_NULL_EXIT(disp, "Display and touch initialization failed");
     bsp_display_backlight_off();
 
     /* Configure GUI lock */
@@ -117,25 +117,28 @@ extern "C" void app_main(void)
         ESP_UTILS_CHECK_FALSE_EXIT(phone->initAppFromRegistry(inited_apps), "Init app registry failed");
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installAppFromRegistry(inited_apps), "Install app registry failed");
 
-        auto app2 = esp_brookesia::apps::Calculator::requestInstance(true, true);
+        auto app2 = esp_brookesia::apps::Calculator::requestInstance(true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app2), "Start Calculator failed");
-        auto app = esp_brookesia::apps::Drawpanel::requestInstance(true, true);
+        auto app = esp_brookesia::apps::Drawpanel::requestInstance(true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app), "Start Drawpanel failed");
 
-        auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance(true, true);
+        auto app1 = esp_brookesia::apps::SpecAnalyzer::requestInstance(true);
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app1), "Start SpecAnalyzer failed");
-        auto app5 = esp_brookesia::apps::MusicPlayer::requestInstance(true, true);
+        auto app5 = esp_brookesia::apps::MusicPlayer::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app5), "Start MusicPlayer failed");
         auto camera_app = esp_brookesia::apps::Camera::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(camera_app), "Start Camera failed");
         auto video_player_app = esp_brookesia::apps::VideoPlayer::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(video_player_app), "Start VideoPlayer failed");
-        auto app6 = esp_brookesia::apps::Settings::requestInstance(true, true);
+        auto app6 = esp_brookesia::apps::Settings::requestInstance();
         ESP_UTILS_CHECK_FALSE_EXIT(phone->installApp(app6), "Start Settings failed");
 
         factory_launcher_wallpaper(phone->getDisplay().getMainScreenObject());
 
-        bsp_display_backlight_on();
+        ESP_ERROR_CHECK(bsp_display_backlight_on());
+        ESP_LOGI(ESP_UTILS_LOG_TAG, "Factory launcher ready (%dx%d)",
+                 static_cast<int>(lv_display_get_horizontal_resolution(disp)),
+                 static_cast<int>(lv_display_get_vertical_resolution(disp)));
 
         /* Create a timer to update the clock */
         lv_timer_create([](lv_timer_t *t) {
