@@ -4,7 +4,7 @@
 
 ## What It Does
 
-Run the reference Brookesia icon launcher on a rectangular portrait display. Calculator, Draw, Spectrum, Music, Video and Settings use layouts adapted from the Knob factory UI.
+Run the Brookesia icon launcher with apps laid out for the rectangular portrait screen. The factory UI uses a four-column keypad, a full-width drawing canvas, and touch controls adapted from the Knob factory UI.
 
 ## Hardware Required
 
@@ -22,7 +22,7 @@ idf.py build flash monitor
 
 ## Expected Result
 
-Swipe up from the bottom edge to return to the launcher. In Brookesia views, hold after swiping up to open recent apps; use a page title with a back arrow to return from a settings or playlist subpage.
+Swipe up from the bottom edge to return to the launcher, or hold after swiping up in Brookesia views to open recent apps. Open Settings → Wi-Fi to turn on the radio, scan for networks or join an access point while the interface remains usable.
 
 | Launcher preview | Brightness control preview |
 | --- | --- |
