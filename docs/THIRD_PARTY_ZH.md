@@ -13,6 +13,7 @@
 | `examples/arduino/libraries/board_config/gt911.*` 和 `touch.*` | [Espressif LCD 触摸组件](https://github.com/espressif/esp-bsp/tree/442c9b3f21b3fe23dfe2e7470c14b7e74c956048/components/lcd_touch) | 按 Apache-2.0 改编至 Arduino；源码头与同目录 `NOTICE` 保留归属说明。`board_config/` 中其余文件是受仓库许可证约束的 Waveshare 集成代码。 |
 | `examples/arduino/examples/Audio_Playback/es8311*` | [Espressif ES8311 组件 `1.0.0~1`](https://github.com/espressif/esp-bsp/tree/4dabefca0599b2249d356cb6a08268dd5e56bbaf/components/es8311) | 按 Apache-2.0 改编至 Arduino-ESP32 I2C HAL；SPDX 文件头保留归属说明。 |
 | `examples/esp-idf/18_esp_brookesia_phone/components/brookesia_core/` | ESP-Brookesia 核心相关代码 | 示例本地组件；请参阅随附文档和元数据。 |
+| `examples/factory/components/XiaozhiApp/` | [Waveshare 旋钮出厂小智应用](https://github.com/waveshareteam/ESP32-P4-Knob-Touch-AMOLED-1.75/tree/7671170de4f5fe04ae9c9a9273f6b6119eb7fb0b/examples/factory/components/XiaozhiApp) 和 xiaozhi-esp32 | 源码头和 [OGG 解码及提示音许可证](../examples/factory/components/XiaozhiApp/third_party/xiaozhi_esp32/LICENSE) 保留原作者信息。唤醒模型来自 [ESP-SR 2.4.7](https://components.espressif.com/components/espressif/esp-sr/versions/2.4.7/readme)，遵循[乐鑫许可证](licenses/esp-sr.txt)。 |
 
 ## 托管组件
 

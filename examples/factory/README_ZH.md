@@ -4,7 +4,7 @@
 
 ## 功能
 
-在直角竖屏运行 Brookesia 图标桌面。应用采用四列键盘、全宽画布等矩形布局，并根据屏幕调整旋钮出厂工程的交互控件。
+在直角竖屏运行 Brookesia 桌面，按板卡提供音频、Wi-Fi 和 Ethernet 应用。带音频且支持联网的板卡还提供小智语音助手。
 
 ## 硬件需求
 
@@ -12,17 +12,18 @@
 
 ## 怎么运行
 
-使用 [product.json](../../.github/product.json) 中指定的出厂工程 ESP-IDF 版本，在 menuconfig 选择 LCD 和实际 Flash 容量。默认配置为 rev3_x 芯片、800×1280 的 10.1-DSI-TOUCH-A 和 32 MB Flash。连接 720×1280 的 7-DSI-TOUCH-A 时，在 BSP 配置中选择对应面板。
+使用 [product.json](../../.github/product.json) 中指定的 ESP-IDF 版本，按[板卡和屏幕选择配置](../../firmware/README_ZH.md#从源码构建)。下例面向搭配 7-DSI-TOUCH-A 的 Module-DEV-KIT。
 
 ```bash
-idf.py set-target esp32p4
-idf.py menuconfig
-idf.py build flash monitor
+idf.py -B build-module-7 \
+  -D 'SDKCONFIG=build-module-7/sdkconfig' \
+  -D 'SDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.rev3_x.defaults;config/wifi-eth-16.defaults;config/lcd-7-a.defaults' \
+  build
 ```
 
 ## 预期现象
 
-从屏幕底边向上划可返回桌面，在 Brookesia 页面中上划后停留可打开最近任务。通过「设置 → Wi-Fi」打开、扫描或连接网络，操作期间仍可离开设置页。
+从屏幕底边上划可返回桌面。Ethernet 应用显示网线链路、协商速率、DHCP IPv4 和网关。通过 Wi-Fi 或 ETH 联网后打开小智，到 [xiaozhi.me](https://xiaozhi.me/) 输入屏幕上的激活码，即可开始语音对话。
 
 | 启动器预览 | 亮度调节预览 |
 | --- | --- |

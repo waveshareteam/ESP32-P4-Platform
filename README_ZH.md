@@ -9,7 +9,7 @@
   </p>
   <p>
     <a href="https://www.waveshare.com/catalogsearch/result/?q=ESP32-P4">🛒 产品</a> &middot;
-    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/releases/latest">📦 固件</a> &middot;
+    <a href="firmware/">📦 固件</a> &middot;
     <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
     <a href="examples/arduino/examples/">🔧 Arduino</a> &middot;
     <a href="https://docs.waveshare.net/ESP32-P4/">📖 文档</a>
