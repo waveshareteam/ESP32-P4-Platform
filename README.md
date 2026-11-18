@@ -1,211 +1,128 @@
 <div align="center">
-  <h1>Waveshare ESP32-P4 Platform</h1>
-  <p><strong>Examples and bring-up resources for Waveshare ESP32-P4 development boards</strong></p>
+  <h1>ESP32-P4-Platform</h1>
+  <p><strong>Peripheral and multimedia examples for Waveshare ESP32-P4 boards</strong></p>
+  <p><strong>English</strong> | <a href="README_ZH.md">简体中文</a></p>
   <p>
-    <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="assets/products/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="assets/products/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="assets/products/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="assets/products/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="assets/products/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="assets/products/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="assets/products/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="94"></a>
-    <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="assets/products/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="94"></a>
+    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/build.yml"><img alt="Build" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/build.yml/badge.svg"></a>
+    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/releases/latest"><img alt="Latest Release" src="https://img.shields.io/github/v/release/waveshareteam/ESP32-P4-Platform"></a>
+    <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/waveshareteam/ESP32-P4-Platform"></a>
   </p>
   <p>
-    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/esp-idf-examples.yml"><img alt="ESP-IDF examples" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/esp-idf-examples.yml/badge.svg"></a>
-    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml"><img alt="Arduino examples" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml/badge.svg"></a>
-    <a href="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/repository-policy.yml"><img alt="Repository policy" src="https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/repository-policy.yml/badge.svg"></a>
-    <a href="LICENSE.txt"><img alt="Apache-2.0 license" src="https://img.shields.io/github/license/waveshareteam/ESP32-P4-Platform"></a>
+    <a href="https://www.waveshare.com/catalogsearch/result/?q=ESP32-P4">🛒 Product</a> &middot;
+    <a href="firmware/">📦 Firmware</a> &middot;
+    <a href="examples/esp-idf/">🧩 ESP-IDF</a> &middot;
+    <a href="examples/arduino/examples/">🔧 Arduino</a> &middot;
+    <a href="https://docs.waveshare.com/ESP32-P4">📖 Documentation</a>
   </p>
-  <p>
-    <a href="README_CN.md">中文</a> ·
-    <a href="https://docs.waveshare.com/ESP32-P4">🌐 ESP32-P4 Products</a> ·
-    <a href="docs/GETTING_STARTED.md">📚 Product Documentation</a> ·
-    <a href="examples/esp-idf/">🧩 ESP-IDF Examples</a> ·
-    <a href="examples/arduino/">🔧 Arduino Examples</a>
-  </p>
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="docs/images/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-NANO">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="docs/images/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-Module-DEV-KIT">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="docs/images/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-DEV-KIT">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="docs/images/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6">Guide</a>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="docs/images/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-ETH">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="docs/images/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-Pico">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="docs/images/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-POE-ETH">Guide</a>
+    </td>
+    <td align="center" width="25%">
+      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="docs/images/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
+      <a href="https://docs.waveshare.com/ESP32-P4-Core-DEV-KIT">Guide</a>
+    </td>
+  </tr>
+</table>
 </div>
 
 ---
 
 ## ✨ Overview
 
-This repository collects first-party ESP-IDF and Arduino examples for the
-Waveshare ESP32-P4 development board family. The examples cover GPIO, I2C,
-Wi-Fi, Ethernet, SD card, audio codec, display, LVGL, camera, video streaming,
-and ESP-Brookesia UI workflows.
+This repository provides ESP-IDF and Arduino examples plus factory-demo source for the Waveshare ESP32-P4 board family, covering basic peripherals, networking, audio, displays, touch and cameras. Select the actual board and accessories using the product guides above.
 
-Because this is a multi-board platform repository, select your board below and
-use its official product documentation for hardware-specific setup, interfaces,
-and accessories.
-
-The [`firmware/`](firmware/) tree contains the ESP-Brookesia source project and
-prebuilt factory firmware packages. See [Firmware](firmware/README.md) for the
-boundary between them.
-
-## 🤝 Supported Boards
-
-Select a product image to open its store page, or use the documentation link
-below each board for setup and hardware details.
-
-<table>
-  <tr>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-nano.htm"><img src="assets/products/esp32-p4-nano.jpg" alt="ESP32-P4-NANO" width="170"><br><strong>ESP32-P4-NANO</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-NANO">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-module-dev-kit.htm"><img src="assets/products/esp32-p4-module-dev-kit.jpg" alt="ESP32-P4-Module-DEV-KIT" width="170"><br><strong>ESP32-P4-Module-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-Module-DEV-KIT">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-dev-kit.htm"><img src="assets/products/esp32-p4-wifi6-dev-kit.jpg" alt="ESP32-P4-WIFI6-DEV-KIT" width="170"><br><strong>ESP32-P4-WIFI6-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-DEV-KIT">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6.htm"><img src="assets/products/esp32-p4-wifi6.jpg" alt="ESP32-P4-WIFI6" width="170"><br><strong>ESP32-P4-WIFI6</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6">Documentation</a>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-eth.htm"><img src="assets/products/esp32-p4-eth.jpg" alt="ESP32-P4-ETH" width="170"><br><strong>ESP32-P4-ETH</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-ETH">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-pico.htm"><img src="assets/products/esp32-p4-pico.jpg" alt="ESP32-P4-Pico" width="170"><br><strong>ESP32-P4-Pico</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-Pico">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-wifi6-poe-eth.htm"><img src="assets/products/esp32-p4-wifi6-poe-eth.jpg" alt="ESP32-P4-WIFI6-POE-ETH" width="170"><br><strong>ESP32-P4-WIFI6-POE-ETH</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-WIFI6-POE-ETH">Documentation</a>
-    </td>
-    <td align="center" width="25%">
-      <a href="https://www.waveshare.com/esp32-p4-core-dev-kit.htm"><img src="assets/products/esp32-p4-core-dev-kit.jpg" alt="ESP32-P4-Core-DEV-KIT" width="170"><br><strong>ESP32-P4-Core-DEV-KIT</strong></a><br>
-      <a href="https://docs.waveshare.com/ESP32-P4-Core-DEV-KIT">Documentation</a>
-    </td>
-  </tr>
-</table>
-
-## 🗂️ Repository Layout
-
-| Path | Purpose |
+| Feature | Device / interface |
 | --- | --- |
-| [`examples/esp-idf/`](examples/esp-idf/) | First-party ESP-IDF projects |
-| [`examples/arduino/`](examples/arduino/) | First-party Arduino sketches and bundled libraries |
-| [`firmware/`](firmware/) | ESP-Brookesia source firmware and prebuilt factory firmware packages |
-| [`assets/`](assets/) | Product images used by the documentation |
-| [`config/`](config/) | Shared ESP-IDF configuration overlays |
-| [`docs/`](docs/) | Getting-started, example, CI, and maintainer documentation |
-| [`.github/`](.github/) | CI workflows and contribution templates |
+| MCU | ESP32-P4, dual-core RISC-V |
+| Memory | 16 MB or 32 MB Flash and 32 MB PSRAM, depending on the board; see each board's official specifications |
+| Networking | Ethernet and ESP32-C6 remote Wi-Fi, depending on the board |
+| Display and camera | Compatible MIPI-DSI displays and MIPI-CSI cameras, as required by each example |
+| Board support | Managed `waveshare/esp32_p4_platform` component for ESP-IDF; bundled libraries for Arduino |
 
-Start with [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) if this is your
-first time using the repository. See
-[docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for more details about
-where new examples and documentation should live.
 
-## 📚 Documentation
+## 📦 Quick Start
 
-| Document | Audience | Purpose |
-| --- | --- | --- |
-| [ESP32-P4 Product Documentation](https://docs.waveshare.com/ESP32-P4) | All users | Official board setup and hardware documentation |
-| [Getting Started](docs/GETTING_STARTED.md) | Beginners | First build, flash, and monitor workflow |
-| [Examples Guide](docs/EXAMPLES_GUIDE.md) | All users | Choose examples by difficulty and peripheral |
-| [Arduino Guide](examples/arduino/README.md) | Arduino users | Board settings, bundled libraries, and example index |
-| [Firmware](firmware/README.md) | All users | Source firmware and prebuilt factory package boundaries |
-| [ESP32-P4 Revision Config](docs/ESP32P4_REVISION_CONFIG.md) | All users | Use default rev3_x/v3.00+ or explicit legacy rev1_3/pre-v3 profiles |
-| [Troubleshooting](docs/TROUBLESHOOTING.md) | All users | Build, flash, runtime, and peripheral checks |
-| [Continuous Integration](docs/CI.md) | Contributors | GitHub Actions coverage for ESP-IDF and Arduino examples |
-| [Managed Components](docs/COMPONENTS.md) | Contributors | Dependency policy and example-local component classification |
-| [P4 + C6 Hosted Wi-Fi](docs/P4_C6_HOSTED_WIFI.md) | Network users | Version lanes, firmware boundary, and runtime validation |
-| [Example Roadmap](docs/EXAMPLE_ROADMAP.md) | Contributors | Suggested examples that would improve coverage |
-| [Project Structure](docs/PROJECT_STRUCTURE.md) | Contributors | Repository layout and example expectations |
+Start with [00_board_check](examples/esp-idf/00_board_check/) and follow its README to build, flash and inspect the serial log.
 
-## 🚀 Quick Start
+1. Install a framework version from the table below and clone this repository.
+2. Select the silicon profile using the [revision guide](docs/ESP32P4_REVISION_CONFIG.md); v3.x is the default.
+3. Open an example and follow its README to configure the actual peripherals and run it.
 
-### ESP-IDF Examples
+When example firmware has been published, download its `*-combined.zip` from the [latest release](https://github.com/waveshareteam/ESP32-P4-Platform/releases/latest), extract it and follow the included README. Factory-demo source is in [examples/factory](examples/factory/).
 
-1. Install an ESP-IDF version listed in the
-   [CI guide](docs/CI.md). Check the selected example's README for any
-   additional version requirements.
-2. Clone this repository.
-3. Start with [00_board_check](examples/esp-idf/00_board_check/) if you are
-   new to the board or this repository.
-4. Set the target and build:
+## 🧪 Examples
 
-```bash
-cd examples/esp-idf/00_board_check
-idf.py set-target esp32p4
-idf.py build
-```
+### ESP-IDF
 
-5. The default profile is `rev3_x`/`MIN_300` for v3.x silicon. For pre-v3
-   silicon, including v1.3, explicitly select legacy `rev1_3`/`MIN_100` with
-   `SELECTS_REV_LESS_V3`; do not reuse generated `sdkconfig` or binaries
-   between profiles. Read
-   [ESP32-P4 Revision Config](docs/ESP32P4_REVISION_CONFIG.md) before
-   flashing.
-6. Flash and monitor, replacing `PORT` with your serial port:
+| Example | Main feature |
+| --- | --- |
+| [00_board_check](examples/esp-idf/00_board_check/) | Board Check |
+| [01_HowToCreateProject](examples/esp-idf/01_HowToCreateProject/) | How to Create a Project |
+| [02_HelloWorld](examples/esp-idf/02_HelloWorld/) | Hello World |
+| [03_nvs_counter](examples/esp-idf/03_nvs_counter/) | NVS Counter |
+| [04_freertos_tasks](examples/esp-idf/04_freertos_tasks/) | FreeRTOS Tasks |
+| [05_gpio_io](examples/esp-idf/05_gpio_io/) | GPIO Input and Output |
+| [06_gpio_interrupt](examples/esp-idf/06_gpio_interrupt/) | GPIO Interrupt |
+| [07_uart_loopback](examples/esp-idf/07_uart_loopback/) | UART Loopback |
+| [08_i2c_tools](examples/esp-idf/08_i2c_tools/) | I2C Tools |
+| [09_sdmmc](examples/esp-idf/09_sdmmc/) | SDMMC |
+| [10_wifistation](examples/esp-idf/10_wifistation/) | Wi-Fi Station |
+| [11_ethernetbasic](examples/esp-idf/11_ethernetbasic/) | Ethernet Basic |
+| [12_I2SCodec](examples/esp-idf/12_I2SCodec/) | I2S Codec |
+| [13_Displaycolorbar](examples/esp-idf/13_Displaycolorbar/) | Display Color Bar |
+| [14_lvgl_demo_v9](examples/esp-idf/14_lvgl_demo_v9/) | LVGL v9 Demo |
+| [15_eth2ap](examples/esp-idf/15_eth2ap/) | Ethernet to Wi-Fi AP |
+| [16_video_lcd_display](examples/esp-idf/16_video_lcd_display/) | Camera to LCD |
+| [17_simple_video_server](examples/esp-idf/17_simple_video_server/) | Simple Video Server |
+| [18_esp_brookesia_phone](examples/esp-idf/18_esp_brookesia_phone/) | ESP-Brookesia Phone |
+| [19_system_monitor](examples/esp-idf/19_system_monitor/) | System Monitor |
 
-```bash
-idf.py -p PORT flash monitor
-```
+### Arduino
 
-Run `idf.py menuconfig` before building examples that need board-specific
-settings, network credentials, display options, camera sensors, or PHY
-configuration.
+| Example | Main feature |
+| --- | --- |
+| [HelloWorld](examples/arduino/examples/HelloWorld/) | Hello World |
+| [AsciiTable](examples/arduino/examples/AsciiTable/) | ASCII Table |
+| [Drawing_board](examples/arduino/examples/Drawing_board/) | Drawing Board |
+| [GFX_ESPWiFiAnalyzer](examples/arduino/examples/GFX_ESPWiFiAnalyzer/) | Wi-Fi Analyzer |
+| [LVGLV9_Arduino](examples/arduino/examples/LVGLV9_Arduino/) | LVGL v9 |
+| [Camera_Preview](examples/arduino/examples/Camera_Preview/) | Camera Preview |
+| [Camera_ISP_Tuning](examples/arduino/examples/Camera_ISP_Tuning/) | Camera ISP Tuning |
+| [SD_Card](examples/arduino/examples/SD_Card/) | SD Card |
+| [Audio_Playback](examples/arduino/examples/Audio_Playback/) | Audio Playback |
 
-### Arduino Examples
+See the [Arduino setup](examples/arduino/README.md); sketch dependencies are bundled in [examples/arduino/libraries](examples/arduino/libraries/).
 
-The Arduino examples are under [examples/arduino](examples/arduino). Start
-with [examples/arduino/README.md](examples/arduino/README.md) for the
-recommended Arduino-ESP32 core, bundled LVGL version, Arduino_GFX version,
-and the I2C driver compatibility note.
-
-## 🛠️ Toolchains and CI
-
-| Surface | Repository coverage | CI status |
-| --- | --- | --- |
-| ESP-IDF | First-party projects under [`examples/esp-idf/`](examples/esp-idf/) | Built for ESP-IDF `v5.5.5` and `v6.0.2` on target `esp32p4` |
-| Arduino | First-party sketches and bundled libraries under [`examples/arduino/`](examples/arduino/) | Compiled with Arduino-ESP32 `3.3.11`, PSRAM, and default `ChipVariant=postv3` (v3.00+, 400 MHz); legacy pre-v3/v1.3 uses explicit `prev3`/360 MHz; successful builds produce split-file diagnostic artifacts, but still require ESP32-P4 hardware validation |
-
-The [ESP-IDF examples workflow](https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/esp-idf-examples.yml)
-discovers changed projects automatically and also supports manual runs for one
-example or the full matrix. The
-[Arduino examples workflow](https://github.com/waveshareteam/ESP32-P4-Platform/actions/workflows/arduino-examples.yml)
-does the same for the nine first-party sketches while excluding examples
-bundled inside libraries. See [Continuous Integration](docs/CI.md) for details.
-
-## 🧪 Example Index
-
-| No. | Example | Area |
-| --- | --- | --- |
-| 00 | [board_check](examples/esp-idf/00_board_check/) | First-run board and toolchain check |
-| 01 | [HowToCreateProject](examples/esp-idf/01_HowToCreateProject/) | Minimal ESP-IDF project layout |
-| 02 | [HelloWorld](examples/esp-idf/02_HelloWorld/) | Basic ESP-IDF application |
-| 03 | [nvs_counter](examples/esp-idf/03_nvs_counter/) | Persistent settings with NVS |
-| 04 | [freertos_tasks](examples/esp-idf/04_freertos_tasks/) | Tasks and queues |
-| 05 | [gpio_io](examples/esp-idf/05_gpio_io/) | GPIO input/output |
-| 06 | [gpio_interrupt](examples/esp-idf/06_gpio_interrupt/) | GPIO interrupt and debounce |
-| 07 | [uart_loopback](examples/esp-idf/07_uart_loopback/) | UART send/receive loopback |
-| 08 | [i2c_tools](examples/esp-idf/08_i2c_tools/) | I2C scanning and command-line tools |
-| 09 | [sdmmc](examples/esp-idf/09_sdmmc/) | SD card and SDMMC |
-| 10 | [wifistation](examples/esp-idf/10_wifistation/) | Wi-Fi station connection |
-| 11 | [ethernetbasic](examples/esp-idf/11_ethernetbasic/) | Ethernet bring-up |
-| 12 | [I2SCodec](examples/esp-idf/12_I2SCodec/) | I2S audio codec |
-| 13 | [Displaycolorbar](examples/esp-idf/13_Displaycolorbar/) | LCD display color bar |
-| 14 | [lvgl_demo_v9](examples/esp-idf/14_lvgl_demo_v9/) | LVGL v9 display demo |
-| 15 | [eth2ap](examples/esp-idf/15_eth2ap/) | Ethernet-to-AP networking |
-| 16 | [video_lcd_display](examples/esp-idf/16_video_lcd_display/) | Camera video to LCD |
-| 17 | [simple_video_server](examples/esp-idf/17_simple_video_server/) | HTTP camera streaming |
-| 18 | [esp_brookesia_phone](examples/esp-idf/18_esp_brookesia_phone/) | ESP-Brookesia phone UI |
-| 19 | [system_monitor](examples/esp-idf/19_system_monitor/) | Serial diagnostics and runtime monitor |
-
-For a fuller map of ESP-IDF and Arduino examples, see
-[examples/README.md](examples/README.md) and
-[docs/EXAMPLES_GUIDE.md](docs/EXAMPLES_GUIDE.md).
-
-## ✅ ESP-IDF Compatibility Matrix
+### ESP-IDF Board Compatibility
 
 Legend: `✅` means the example is expected to run on that board. `❌` means
 the required peripheral is not available or is not supported by the example.
@@ -238,36 +155,29 @@ the required peripheral is not available or is not supported by the example.
 | 18 | [esp_brookesia_phone](examples/esp-idf/18_esp_brookesia_phone/) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | 19 | [system_monitor](examples/esp-idf/19_system_monitor/) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-## 🤝 Contributing
+## 🛠️ Development Environment
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-before opening a pull request. Useful contributions include:
+| Framework | Version | Examples |
+| --- | --- | ---: |
+| ESP-IDF | `v6.1.1` | 20 |
+| Arduino-ESP32 | `3.3.11` | 9 |
+| Factory-project ESP-IDF | `v6.1.1` | 1 |
 
-- Fixing build issues on a supported board.
-- Adding board-specific notes to an existing example README.
-- Improving setup instructions or troubleshooting notes.
-- Adding focused examples for peripherals that are not covered yet.
+[product.json](.github/product.json) defines the framework versions and Arduino board options; the factory project is built separately.
 
-When reporting problems, please include the board name, ESP-IDF or
-Arduino-ESP32 version, sanitized serial logs, and the exact example path.
-Remove credentials, tokens, private network details, unique device identifiers,
-and local filesystem paths before posting logs publicly.
+## 📚 Resources
 
-For support channel guidance, see [SUPPORT.md](SUPPORT.md).
+- [Getting started](docs/GETTING_STARTED.md)
+- [Example selection and compatibility](docs/EXAMPLES_GUIDE.md)
+- [Third-party code](docs/THIRD_PARTY.md)
+- [Product catalog](https://www.waveshare.com/catalogsearch/result/?q=ESP32-P4)
+- [Wiki](https://docs.waveshare.com/ESP32-P4)
 
-## 🔒 Security
+## 🤝 Support
 
-Do not publish vulnerability details in public issues. Use the actionable
-private reporting channel in [SECURITY.md](SECURITY.md).
-
-## 📦 Third-Party Code
-
-Some examples include third-party components or libraries for convenience,
-including LVGL, Arduino_GFX, ESP-Brookesia-related components, and Espressif
-managed components. See [THIRD_PARTY.md](THIRD_PARTY.md) for the high-level
-inventory and check each bundled component for its own license file.
+- Example or repository problems: [open an issue](https://github.com/waveshareteam/ESP32-P4-Platform/issues/new/choose).
+- Product usage, hardware or order questions: [Waveshare support](https://service.waveshare.com/).
 
 ## 📄 License
 
-This repository is licensed under the Apache License 2.0. See
-[LICENSE.txt](LICENSE.txt) for details.
+Apache License 2.0. See [LICENSE](LICENSE); third-party components retain their own licenses.

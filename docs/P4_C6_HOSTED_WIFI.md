@@ -1,6 +1,6 @@
 # ESP32-P4 + ESP32-C6 Hosted Wi-Fi
 
-[中文版本](P4_C6_HOSTED_WIFI_CN.md)
+[中文版本](P4_C6_HOSTED_WIFI_ZH.md)
 
 ESP32-P4 has no native Wi-Fi radio. The Wi-Fi examples can use an ESP32-C6 as a
 coprocessor through ESP-Hosted and expose the remote interface through
@@ -12,8 +12,7 @@ image will work.
 
 | Surface | Host stack | C6 firmware boundary |
 | --- | --- | --- |
-| ESP-IDF 5.x examples 10 and 15 | `esp_wifi_remote` `0.14.*`; `esp_hosted` `1.4.*` | Use the slave firmware required by the resolved Hosted release |
-| ESP-IDF 6.x examples 10 and 15 | `esp_wifi_remote` `>=1.6,<2.0`; `esp_hosted` `>=2.12,<3.0` | Use the slave firmware required by the resolved Hosted release |
+| ESP-IDF 6.1 examples 10 and 15 | `esp_wifi_remote` `>=1.6,<2.0`; `esp_hosted` `>=2.12,<3.0` | Use the slave firmware required by the resolved Hosted release |
 | ESP-IDF example 17 | Same direct `esp_wifi_remote` lanes; transport dependencies resolve through the selected component graph | Validate the resolved graph and slave image together |
 | Arduino-ESP32 `3.3.11` | Use the dependencies shipped by the selected Arduino core | Do not override one Hosted component independently |
 
@@ -23,13 +22,13 @@ a tested set.
 
 ## What CI Proves
 
-The ESP-IDF matrix proves that every direct P4 example compiles on the two
-declared IDF lanes using default `rev3_x`/`MIN_300`. The Arduino workflow proves
-nine-sketch compilation and segmented-package integrity using default
+The ESP-IDF matrix proves that every direct P4 example compiles on the
+configured ESP-IDF release using default `rev3_x`/`MIN_300`. The shared Arduino build checks
+nine sketches using default
 `ChipVariant=postv3` (v3.00+, 400 MHz). Pre-v3/v1.3 needs explicit
 `rev1_3`/`MIN_100` or `prev3` (360 MHz); do not exchange the resulting build
 outputs across revision families.
-Neither workflow flashes a P4, flashes a C6, proves monitor-free cold startup,
+The workflow does not flash a P4, flashes a C6, proves monitor-free cold startup,
 negotiates the SDIO link, associates with an access point, or tests traffic.
 
 ## Hardware Acceptance

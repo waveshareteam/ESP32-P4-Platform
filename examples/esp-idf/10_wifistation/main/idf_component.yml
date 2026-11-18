@@ -1,18 +1,10 @@
 ## IDF Component Manager Manifest File
 dependencies:
   espressif/esp_wifi_remote:
-    matches:
-      - if: "idf_version >= 6.0"
-        version: ">=1.6,<2.0"
-      - if: "idf_version < 6.0"
-        version: "0.14.*"
+    version: ">=1.6,<2.0"
 
   espressif/esp_hosted:
-    matches:
-      - if: "idf_version >= 6.0"
-        version: ">=2.12,<3.0"
-      - if: "idf_version < 6.0"
-        version: "1.4.*"
+    version: ">=2.12,<3.0"
   ## Required IDF version
   idf:
     version: ">=4.1.0"

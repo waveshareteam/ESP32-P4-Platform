@@ -1,0 +1,24 @@
+menu "Waveshare factory hardware"
+
+    config FACTORY_ENABLE_AUDIO
+        bool "Board has an ES8311 audio codec"
+        default y
+        help
+            Enable the music and spectrum apps and the sound settings page.
+
+    config FACTORY_ENABLE_SD_CARD
+        bool "Board has a microSD slot"
+        default y
+        help
+            Enable the video player, which uses media on a microSD card.
+
+    config FACTORY_ENABLE_XIAOZHI
+        bool "Xiaozhi voice assistant"
+        depends on FACTORY_ENABLE_AUDIO
+        depends on EXAMPLE_USE_INTERNAL_ETHERNET || (ESP_WIFI_REMOTE_ENABLED && ESP_HOSTED_ENABLED)
+        default y
+        select SR_WN_WN9_HIESP
+        help
+            Enable the Xiaozhi voice assistant over a connected Wi-Fi or Ethernet interface.
+
+endmenu

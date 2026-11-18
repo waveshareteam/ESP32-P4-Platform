@@ -1,0 +1,28 @@
+#pragma once
+
+#include "esp_brookesia.hpp"
+#include "lvgl.h"
+namespace esp_brookesia::apps {
+    class Settings;
+}
+namespace esp_brookesia::apps {
+
+class DisplayPage : public systems::phone::App {
+public:
+    static DisplayPage *requestInstance(bool use_status_bar = true, bool use_navigation_bar = true);
+
+    DisplayPage(bool use_status_bar, bool use_navigation_bar);
+    virtual ~DisplayPage();
+
+    bool run() override;
+    bool back() override;
+    bool close() override;
+
+private:
+    static void event_handler_cb(lv_event_t *e);
+    static DisplayPage *_instance;
+    lv_obj_t *label;
+    lv_obj_t *list1;
+};
+
+} // namespace esp_brookesia::apps

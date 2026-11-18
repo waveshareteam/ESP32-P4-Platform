@@ -14,6 +14,7 @@ Desktop.ini
 # ESP-IDF generated files
 build/
 **/build/
+**/build-*/
 managed_components/
 **/managed_components/
 dependencies.lock
@@ -54,6 +55,7 @@ dist/
 .env.*
 
 # Firmware binaries and archives generated locally
+/firmware/.candidates/
 *.elf
 *.map
 *.uf2
@@ -62,5 +64,21 @@ dist/
 *.tar
 *.tar.gz
 
-# Prebuilt factory firmware packages
-!firmware/factory_firmware/**/*.zip
+
+# Shared build and release outputs
+.ci-template/
+**/components/gen_bmgr_codes/
+release-artifacts/
+release-downloads/
+release-dist/
+
+# Local AI coding agent state
+.claude/
+.cursor/
+.codex/
+.gemini/
+.windsurf/
+.continue/
+.roo/
+.cline/
+.aider*

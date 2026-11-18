@@ -1,42 +1,28 @@
 # Hello World
 
-[中文版本](./README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Classic ESP-IDF hello world example for ESP32-P4.
+## What It Does
 
-This example prints chip information, flash size, and heap information, then
-restarts after a countdown. If you are completely new to the board, run
-[00_board_check](../00_board_check/) first because it keeps running and is
-easier to watch in the serial monitor.
-
-## Difficulty
-
-Beginner.
+Run the ESP-IDF hello-world application and print basic chip and memory information.
 
 ## Hardware Required
 
-- One ESP32-P4 board.
-- USB cable.
+An ESP32-P4 board and a USB data cable.
 
-No external peripheral is required.
+## How to Run
 
-## Build and Flash
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory.
 
 ```bash
-cd examples/esp-idf/02_HelloWorld
 idf.py set-target esp32p4
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-Replace `PORT` with your serial port.
+## Expected Result
 
-## Expected Output
+The monitor prints Hello world!, memory statistics and a restart countdown.
 
-The serial monitor should print `Hello world!`, chip information, flash size,
-minimum heap size, and a restart countdown.
+## Troubleshooting
 
-## Notes
-
-- The example intentionally restarts after the countdown.
-- Use this as a basic ESP-IDF smoke test after `00_board_check`.
+The restart after the countdown is intentional.

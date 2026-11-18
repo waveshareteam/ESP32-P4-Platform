@@ -1,0 +1,3 @@
+dependencies:
+  ethernet_init:
+    override_path: "../../../esp-idf/11_ethernetbasic/components/ethernet_init"

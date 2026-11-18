@@ -1,32 +1,23 @@
-# GFX ESP Wi-Fi Analyzer
+# Wi-Fi Analyzer
 
-[简体中文](README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Arduino Wi-Fi scan visualization example using Arduino_GFX.
+## What It Does
 
-## Difficulty
-
-Intermediate.
+Scan nearby Wi-Fi networks and visualize signal levels.
 
 ## Hardware Required
 
-- ESP32-P4 board with Wi-Fi support.
-- Supported DSI display.
-- PSRAM enabled in the Arduino board settings.
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI display and the ESP32-C6 Wi-Fi path.
 
 ## How to Run
 
-1. Read [../../README.md](../../README.md).
-2. Open `GFX_ESPWiFiAnalyzer.ino`.
-3. Select the correct board, port, and PSRAM setting.
-4. Set `CURRENT_SCREEN` if needed.
-5. Upload the sketch.
+Follow the [Arduino setup](../../README.md), open `GFX_ESPWiFiAnalyzer.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
-## Expected Behavior
+## Expected Result
 
-The display shows nearby Wi-Fi networks and their signal levels.
+The display lists detected networks and their signal levels.
 
 ## Troubleshooting
 
-- Confirm your board has Wi-Fi support.
-- Confirm the display initializes with the simpler `HelloWorld` sketch first.
+Wi-Fi initialization and failed scans are retried; the ESP32-C6 path must be available.

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/waveshareteam/esp32-repo-template/v1/schema/product.schema.json",
+  "product": "ESP32-P4-Platform",
+  "product_url": "https://www.waveshare.com/catalogsearch/result/?q=ESP32-P4",
+  "tier": 0,
+  "target": "esp32p4",
+  "esp_idf": {
+    "versions": [
+      "v6.1.1"
+    ]
+  },
+  "arduino": {
+    "core": "3.3.11",
+    "fqbn": "esp32:esp32:esp32p4:PSRAM=enabled,USBMode=default,ChipVariant=postv3,FlashSize=16M,PartitionScheme=app3M_fat9M_16MB"
+  },
+  "factory_firmware": {
+    "esp_idf": "v6.1.1"
+  },
+  "overrides": {
+    "markdown_audit": {
+      "classification_rules": [
+        {
+          "category": "embedded_upstream",
+          "patterns": [
+            "examples/esp-idf/18_esp_brookesia_phone/components/brookesia_core/**",
+            "examples/factory/components/brookesia_core/**"
+          ]
+        },
+        {
+          "category": "first_party_wrapper",
+          "patterns": [
+            "examples/esp-idf/17_simple_video_server/components/example_video_common/README.md",
+            "examples/esp-idf/17_simple_video_server/components/example_video_common/README_ZH.md"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,36 +1,28 @@
-# How To Create Project
+# How to Create a Project
 
-[中文版本](./README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-This is the smallest ESP-IDF project layout in the repository. It is useful
-when you want to understand which files are required before adding real
-application logic.
+## What It Does
 
-## Difficulty
-
-Beginner.
+Provide a minimal ESP-IDF project with an empty application entry point.
 
 ## Hardware Required
 
-- One ESP32-P4 board.
-- USB cable.
+An ESP32-P4 board and a USB data cable.
 
-No external peripheral is required.
+## How to Run
 
-## Build
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory.
 
 ```bash
-cd examples/esp-idf/01_HowToCreateProject
 idf.py set-target esp32p4
-idf.py build
+idf.py build flash monitor
 ```
 
-This example has an empty `app_main()`, so it is mainly a project-structure
-reference. For a more useful first run, use
-[00_board_check](../00_board_check/).
+## Expected Result
 
-## Files to Notice
+The project builds and boots, but its empty app_main() does not print application messages.
 
-- `CMakeLists.txt`: project entry point.
-- `main/CMakeLists.txt`: registers the source file as an ESP-IDF component.
-- `main/main.c`: application entry point.
+## Troubleshooting
+
+Use ../00_board_check/ when you need visible runtime diagnostics.

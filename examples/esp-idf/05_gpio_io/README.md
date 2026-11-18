@@ -1,55 +1,29 @@
-# GPIO IO
+# GPIO Input and Output
 
-[中文版本](./README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Small GPIO input/output example.
+## What It Does
 
-It toggles one output pin once per second and reads one input pin. If you
-connect the output pin to the input pin, the input value should follow the
-output value.
-
-## Difficulty
-
-Beginner.
+Toggle an output once per second and read an input.
 
 ## Hardware Required
 
-- One ESP32-P4 board.
-- Optional jumper wire between the configured output and input pins.
-- Optional LED with resistor if you want visible output.
+An ESP32-P4 board, a USB data cable and an optional jumper between the configured input and output.
 
-## Default Pins
+## How to Run
 
-| Signal | Default GPIO |
-| --- | --- |
-| Output | GPIO2 |
-| Input | GPIO3 |
-
-Change these in `idf.py menuconfig` if the pins conflict with your board.
-
-## Build and Flash
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory. Select unused input and output GPIOs in Example Configuration.
 
 ```bash
-cd examples/esp-idf/05_gpio_io
 idf.py set-target esp32p4
 idf.py menuconfig
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## Expected Output
+## Expected Result
 
-```text
-output=1 input=1
-output=0 input=0
-```
+The monitor prints output and input levels; a loopback jumper makes the input follow the output.
 
-If no jumper is connected, the input may stay high because the default pull-up
-is enabled.
+## Troubleshooting
 
-## What to Reuse
-
-- `gpio_config()` for input and output setup.
-- `gpio_set_level()` for output control.
-- `gpio_get_level()` for input reads.
-- `menuconfig` options for board-specific pin selection.
+The input has a pull-up enabled and may stay high without the jumper.

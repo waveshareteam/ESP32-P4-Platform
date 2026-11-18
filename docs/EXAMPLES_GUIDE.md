@@ -1,6 +1,6 @@
 # Examples Guide
 
-[中文版本](./EXAMPLES_GUIDE_CN.md)
+[中文版本](EXAMPLES_GUIDE_ZH.md)
 
 The repository serves two kinds of users:
 
@@ -84,3 +84,7 @@ friendlier with more small examples. Good next additions include:
 
 When adding a new example, keep it focused on one concept and include a README
 with hardware requirements, build commands, expected output, and known limits.
+
+## Board Compatibility
+
+See the [homepage compatibility matrix](../README.md#esp-idf-board-compatibility) for the complete table of 20 ESP-IDF examples and eight boards.

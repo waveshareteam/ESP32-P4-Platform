@@ -1,28 +1,23 @@
-# AsciiTable
+# ASCII Table
 
-[简体中文](README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Arduino display text rendering example. It draws an ASCII table on a supported
-DSI display.
+## What It Does
 
-## Difficulty
-
-Beginner.
+Render an ASCII character table with Arduino_GFX.
 
 ## Hardware Required
 
-- ESP32-P4 board.
-- Supported DSI display.
-- PSRAM enabled in the Arduino board settings.
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI display.
 
 ## How to Run
 
-1. Read [../../README.md](../../README.md).
-2. Open `AsciiTable.ino`.
-3. Select the correct board, port, and PSRAM setting.
-4. Set `CURRENT_SCREEN` if needed.
-5. Upload the sketch.
+Follow the [Arduino setup](../../README.md), open `AsciiTable.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
-## Expected Behavior
+## Expected Result
 
-The display shows rows and columns of ASCII characters.
+Rows and columns of ASCII characters appear on the display.
+
+## Troubleshooting
+
+None yet.

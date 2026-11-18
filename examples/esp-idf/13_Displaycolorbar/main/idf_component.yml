@@ -1,3 +1,8 @@
 ## IDF Component Manager Manifest File
 dependencies:
   waveshare/esp32_p4_platform: "2.0.1"
+  # ESP32-P4 / IDF 6.1: BSP 2.0.1 uses esp_lvgl_adapter 0.6.x.
+  # Its legacy headers trigger -Werror=cpp with LVGL 9.6 on IDF 6.
+  # Lift this cap after the BSP supports an adapter with LVGL 9.6 headers.
+  lvgl/lvgl:
+    version: ">=9.3,<9.6"

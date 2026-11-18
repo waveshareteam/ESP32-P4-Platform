@@ -1,53 +1,28 @@
 # NVS Counter
 
-[中文版本](./README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Beginner-friendly example that stores a boot counter in NVS flash.
+## What It Does
 
-NVS is the usual place to save small settings such as calibration values,
-device names, user preferences, or provisioning state.
-
-## Difficulty
-
-Beginner.
+Store a persistent boot counter in NVS.
 
 ## Hardware Required
 
-- One ESP32-P4 board.
-- USB cable.
+An ESP32-P4 board and a USB data cable.
 
-No external peripheral is required.
+## How to Run
 
-## Build and Flash
+Use an ESP-IDF version from the [repository README](../../../README.md) and run these commands in this directory.
 
 ```bash
-cd examples/esp-idf/03_nvs_counter
 idf.py set-target esp32p4
-idf.py build
-idf.py -p PORT flash monitor
+idf.py build flash monitor
 ```
 
-## Expected Output
+## Expected Result
 
-The serial monitor prints a saved boot count:
+Saved boot count increases after each reset and is printed in the serial monitor.
 
-```text
-Saved boot count: 1
-Press reset. The number should increase after each boot.
-```
+## Troubleshooting
 
-Press reset and the count should increase.
-
-## Reset the Counter
-
-Erase flash before flashing:
-
-```bash
-idf.py -p PORT erase-flash flash monitor
-```
-
-## What to Reuse
-
-- `nvs_flash_init()` initialization and recovery.
-- `nvs_open()`, `nvs_get_u32()`, `nvs_set_u32()`, and `nvs_commit()` flow.
-- Pattern for saving simple settings persistently.
+Erasing flash with idf.py erase-flash clears the saved counter and other flash data.

@@ -1,32 +1,23 @@
 # SD Card
 
-[中文版本](README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Access an inserted SD card with the Platform Arduino configuration.
+## What It Does
 
-## Requirements
+Mount a four-bit SDMMC card, write a test file and read it back.
 
-- Arduino-ESP32 `3.3.11`, `ESP32P4 Dev Module`, PSRAM enabled, and default
-  `ChipVariant=postv3` (v3.00+, 400 MHz).
-- An inserted, supported SD card.
+## Hardware Required
 
-## Build
+An ESP32-P4 board with PSRAM, a USB data cable and an inserted FAT32 microSD card in the supported SDMMC slot.
 
-Open `SD_Card.ino` in Arduino IDE, or compile it with the documented repository
-FQBN and board options.
+## How to Run
+
+Follow the [Arduino setup](../../README.md), open `SD_Card.ino` and upload with the board options defined there.
 
 ## Expected Result
 
-The sketch reports the card initialization and its basic storage operation.
-Compilation does not prove card insertion, formatting, mounting, or data
-integrity on a board.
-
-## HIL Checklist
-
-Cold-start with the serial monitor closed, verify the card operation, then open
-UART0 at `115200` and confirm normal operation continues.
+The serial monitor prints the card size and the contents of platform_sd_card.txt.
 
 ## Troubleshooting
 
-Confirm that a supported card is inserted and correctly formatted. A pre-v3/v1.3
-board needs an explicit, separate `ChipVariant=prev3`/360 MHz build.
+The sketch uses the Platform SDMMC wiring and returns from setup if mounting fails.

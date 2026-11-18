@@ -1,28 +1,23 @@
-# Arduino Hello World
+# Hello World
 
-[简体中文](README_CN.md)
+[English](README.md) | [简体中文](README_ZH.md)
 
-Minimal Arduino display test for supported ESP32-P4 DSI display setups.
+## What It Does
 
-## Difficulty
-
-Beginner.
+Draw text on a DSI display with Arduino_GFX.
 
 ## Hardware Required
 
-- ESP32-P4 board.
-- Supported DSI display.
-- PSRAM enabled in the Arduino board settings.
+An ESP32-P4 board with PSRAM, a USB data cable and a compatible DSI display.
 
 ## How to Run
 
-1. Read [../../README.md](../../README.md) for Arduino core and library notes.
-2. Open `HelloWorld.ino` in Arduino IDE.
-3. Select the correct ESP32-P4 board and port.
-4. Enable PSRAM.
-5. Set `CURRENT_SCREEN` if your display is not the default.
-6. Upload the sketch.
+Follow the [Arduino setup](../../README.md), open `HelloWorld.ino` and upload with the board options defined there. Select the connected panel with `CURRENT_SCREEN` before uploading.
 
-## Expected Behavior
+## Expected Result
 
-The screen initializes, turns on the backlight, and prints `Hello World!`.
+The display lights up and prints Hello World!.
+
+## Troubleshooting
+
+None yet.
