@@ -4,6 +4,8 @@
 
 [manifest.json](manifest.json) 收录完成实机验证的镜像。下载前核对板型、芯片修订版、Flash 容量和屏幕型号。
 
+[待实测候选固件](candidates/README_ZH.md) 提供 18 个已通过本地构建校验的合并 BIN。[候选 manifest](candidates/manifest.json) 列出了八款板卡和各屏幕对应的镜像。
+
 | 板卡 | 网络 | Flash | 出厂配置 |
 | --- | --- | ---: | --- |
 | [ESP32-P4-NANO](https://docs.waveshare.com/ESP32-P4-NANO) | Wi-Fi + ETH | 16 MB | `wifi-eth-16.defaults` |

@@ -4,6 +4,8 @@
 
 [manifest.json](manifest.json) lists images verified on hardware. Match the board, chip revision, flash capacity, and panel before flashing.
 
+[Candidate firmware](candidates/README.md) provides 18 locally built combined BINs for hardware evaluation. The [candidate manifest](candidates/manifest.json) maps all eight boards to the builds for their supported panels.
+
 | Board | Networking | Flash | Factory config |
 | --- | --- | ---: | --- |
 | [ESP32-P4-NANO](https://docs.waveshare.com/ESP32-P4-NANO) | Wi-Fi + Ethernet | 16 MB | `wifi-eth-16.defaults` |
