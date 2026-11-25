@@ -9,9 +9,9 @@
         "zh": "firmware/wifi-eth-16/README_ZH.md"
       },
       "files": [
-        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin"
+        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -22,9 +22,9 @@
         "zh": "firmware/wifi-eth-16/README_ZH.md"
       },
       "files": [
-        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin"
+        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -35,9 +35,9 @@
         "zh": "firmware/wifi-eth-16/README_ZH.md"
       },
       "files": [
-        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin",
-        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261118.bin"
+        "firmware/wifi-eth-16/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-16-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin",
+        "firmware/wifi-eth-16/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-16-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -48,9 +48,9 @@
         "zh": "firmware/wifi-32/README_ZH.md"
       },
       "files": [
-        "firmware/wifi-32/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/wifi-32/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin",
-        "firmware/wifi-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin"
+        "firmware/wifi-32/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/wifi-32/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin",
+        "firmware/wifi-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -61,9 +61,9 @@
         "zh": "firmware/eth-32/README_ZH.md"
       },
       "files": [
-        "firmware/eth-32/ESP32-P4-Platform-7-DSI-TOUCH-A-eth-32-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/eth-32/ESP32-P4-Platform-8-DSI-TOUCH-A-eth-32-rev3-x_Factory_20261118.bin",
-        "firmware/eth-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-eth-32-rev3-x_Factory_20261118.bin"
+        "firmware/eth-32/ESP32-P4-Platform-7-DSI-TOUCH-A-eth-32-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/eth-32/ESP32-P4-Platform-8-DSI-TOUCH-A-eth-32-rev3-x_Factory_20261125.bin",
+        "firmware/eth-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-eth-32-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -74,9 +74,9 @@
         "zh": "firmware/offline-32/README_ZH.md"
       },
       "files": [
-        "firmware/offline-32/ESP32-P4-Platform-7-DSI-TOUCH-A-offline-32-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/offline-32/ESP32-P4-Platform-8-DSI-TOUCH-A-offline-32-rev3-x_Factory_20261118.bin",
-        "firmware/offline-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-offline-32-rev3-x_Factory_20261118.bin"
+        "firmware/offline-32/ESP32-P4-Platform-7-DSI-TOUCH-A-offline-32-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/offline-32/ESP32-P4-Platform-8-DSI-TOUCH-A-offline-32-rev3-x_Factory_20261125.bin",
+        "firmware/offline-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-offline-32-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -87,9 +87,9 @@
         "zh": "firmware/wifi-eth-32/README_ZH.md"
       },
       "files": [
-        "firmware/wifi-eth-32/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/wifi-eth-32/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin",
-        "firmware/wifi-eth-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin"
+        "firmware/wifi-eth-32/ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/wifi-eth-32/ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin",
+        "firmware/wifi-eth-32/ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin"
       ]
     },
     {
@@ -100,9 +100,9 @@
         "zh": "firmware/core-dev-kit/README_ZH.md"
       },
       "files": [
-        "firmware/core-dev-kit/ESP32-P4-Platform-7-DSI-TOUCH-A-core-dev-kit-rev3-x_FactoryOnly_20261118.bin",
-        "firmware/core-dev-kit/ESP32-P4-Platform-8-DSI-TOUCH-A-core-dev-kit-rev3-x_Factory_20261118.bin",
-        "firmware/core-dev-kit/ESP32-P4-Platform-10.1-DSI-TOUCH-A-core-dev-kit-rev3-x_Factory_20261118.bin"
+        "firmware/core-dev-kit/ESP32-P4-Platform-7-DSI-TOUCH-A-core-dev-kit-rev3-x_FactoryOnly_20261125.bin",
+        "firmware/core-dev-kit/ESP32-P4-Platform-8-DSI-TOUCH-A-core-dev-kit-rev3-x_Factory_20261125.bin",
+        "firmware/core-dev-kit/ESP32-P4-Platform-10.1-DSI-TOUCH-A-core-dev-kit-rev3-x_Factory_20261125.bin"
       ]
     }
   ]

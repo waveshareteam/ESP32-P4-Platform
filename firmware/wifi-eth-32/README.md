@@ -14,9 +14,9 @@ Download the merged BIN matching the full model name of your attached display:
 
 | Display | Resolution | File |
 | --- | --- | --- |
-| 7-DSI-TOUCH-A | 720 × 1280 | [ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261118.bin](ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261118.bin) |
-| 8-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin](ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin) |
-| 10.1-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin](ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin) |
+| 7-DSI-TOUCH-A | 720 × 1280 | [ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261125.bin](ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261125.bin) |
+| 8-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin](ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin) |
+| 10.1-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin](ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin) |
 
 ## Flashing
 
@@ -40,20 +40,22 @@ Flashing or erasing overwrites existing applications, settings, and user data in
 ### 7-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-eth-32-rev3-x_FactoryOnly_20261125.bin
 ```
 
 ### 8-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin
 ```
 
 ### 10.1-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-eth-32-rev3-x_Factory_20261125.bin
 ```
+
+After flashing the `20261125` image, open the board’s USB-to-UART port at **115200 baud (8N1)** and reset the board to read bootloader and application logs.
 
 ## Related links
 
