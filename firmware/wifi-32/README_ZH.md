@@ -14,9 +14,9 @@
 
 | 屏幕 | 分辨率 | 文件 |
 | --- | --- | --- |
-| 7-DSI-TOUCH-A | 720 × 1280 | [ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261118.bin](ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261118.bin) |
-| 8-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin](ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin) |
-| 10.1-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin](ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin) |
+| 7-DSI-TOUCH-A | 720 × 1280 | [ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261125.bin](ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261125.bin) |
+| 8-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin](ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin) |
+| 10.1-DSI-TOUCH-A | 800 × 1280 | [ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin](ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin) |
 
 ## 烧录步骤
 
@@ -40,20 +40,22 @@
 ### 7-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-7-DSI-TOUCH-A-wifi-32-rev3-x_FactoryOnly_20261125.bin
 ```
 
 ### 8-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-8-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin
 ```
 
 ### 10.1-DSI-TOUCH-A
 
 ```bash
-esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261118.bin
+esptool --chip esp32p4 --port "$PORT" write-flash 0x0 ESP32-P4-Platform-10.1-DSI-TOUCH-A-wifi-32-rev3-x_Factory_20261125.bin
 ```
+
+烧录 `20261125` 版后，用 **115200（8N1）** 打开板载 USB 转串口，再复位查看二级引导和应用日志。
 
 ## 相关链接
 
