@@ -21,7 +21,7 @@ This directory provides prebuilt factory firmware and flashing instructions for 
 - **Match the full panel model**: Select the BIN whose filename contains your panel model. `7-DSI-TOUCH-A` uses 720 × 1280; `8-DSI-TOUCH-A` and `10.1-DSI-TOUCH-A` both use 800 × 1280 but have different panel initialization settings. See the [third-party notices](../docs/THIRD_PARTY.md) for Xiaozhi and WakeNet assets.
 - **Back up before flashing**: Flashing a combined BIN overwrites existing applications and settings in flash, so back up data as needed first. Flash all combined BINs at `0x0` using the files and commands in the "Firmware downloads" column above.
 
-The `20261125` images use **115200 baud (8N1)** on the board’s USB-to-UART port for bootloader and application logs. The retained `20261118` builds switch to `2000000` after the ROM banner.
+The `20261125` images use **115200 baud (8N1)** on the board’s USB-to-UART port for bootloader and application logs.
 
 ## Build from source
 
